@@ -55,7 +55,7 @@ const deleteUser = async (req, res) => {
 
 const registerUser = async (req, res) => {
   try {
-    const { first_name, last_name, email, password} =
+    const { first_name, last_name, email, password, role} =
       req.body;
     if (!first_name || !last_name || !email || !password) {
       return res.status(400).json("All fields are required");
@@ -69,7 +69,17 @@ const registerUser = async (req, res) => {
       last_name,
       email,
       password,
+      role,
     });
+    bcrypt.genSalt(saltRounds, function(err, salt) {
+    bcrypt.hash(password, salt, function(err, hash) {
+      if (err) {   
+        return res.status(500).json({ error: "Error hashing password" });
+      } else {
+        user.password = hash;
+        user.save();
+      }});
+});
     return res.status(201).json({
       _id: user._id,
       name: `${user.first_name} ${user.last_name}`,
@@ -80,9 +90,38 @@ const registerUser = async (req, res) => {
     return res.status(400).json({ error: err.message });
   }
 };
+
+const loginUser = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    if (!email || !password) {
+      return res.status(400).json("Email aur password zaroori hain");
+    } 
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({ message: "Invalid email or password" });
+    }
+    bcrypt.compare(password, user.password, function(err, result) {
+      if (err) {
+        return res.status(500).json({ error: "Error comparing passwords" });    
+      } else if (result) {
+        return res.status(200).json({
+          _id: user._id,
+          email: user.email,
+          role: user.role || "User",
+        });
+      } else {
+        return res.status(400).json({ message: "Invalid email or password" });
+      }
+    });
+  } catch (err) {
+    return res.status(400).json({ error: err.message });
+  } 
+};
 module.exports = {
-  userData,
+    userData,
   addUser,
   deleteUser,
   registerUser,
+  loginUser
 };

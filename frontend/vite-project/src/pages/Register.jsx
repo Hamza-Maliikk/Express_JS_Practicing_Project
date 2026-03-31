@@ -1,25 +1,28 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+
 
 const API_BASE = "http://localhost:8000/api";
-
 export default function Register({ onGoLogin }) {
   const [form, setForm] = useState({
     first_name: "",
     last_name: "",
     email: "",
     password: "",
-    role: "User"
+    role: ""
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [showPass, setShowPass] = useState(false);
-
+  
   const notify = (msg, isError = false) => {
     if (isError) { setError(msg); setTimeout(() => setError(""), 3000); }
     else { setSuccess(msg); setTimeout(() => setSuccess(""), 3000); }
   };
-
+  // navigation
+  const navigate = useNavigate();
+  
   const handleSubmit = async () => {
     if (!form.first_name.trim() || !form.email.trim() || !form.password.trim()) {
       notify("Sab zaroori fields bharein!", true); return;
@@ -38,7 +41,7 @@ export default function Register({ onGoLogin }) {
       const data = await res.json();
       if (res.ok) {
         notify("Account ban gaya! Login karein.");
-        setTimeout(() => onGoLogin?.(), 1500);
+        setTimeout(() => navigate('/'), 1500);
       } else {
         notify(data.message || res.status, true);
       }
@@ -46,6 +49,7 @@ export default function Register({ onGoLogin }) {
       notify("Server se connect nahi ho saka!", true);
     } finally {
       setLoading(false);
+      
     }
   };
 

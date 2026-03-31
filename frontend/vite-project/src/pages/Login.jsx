@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { Link } from "react-router";
+import {useNavigate} from "react-router-dom";
 
 const API_BASE = "http://localhost:8000/api";
 
-export default function Login({ onLogin }) {
+export default function Login() {
   const [form, setForm] = useState({ email: "", password: "" });
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [showPass, setShowPass] = useState(false);
@@ -17,20 +19,21 @@ export default function Login({ onLogin }) {
     }
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/login`, {
+      const res = await fetch(`${API_BASE}/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
       const data = await res.json();
       if (res.ok) {
-        onLogin(data); // token ya user data upar bhejo
+        console.log("Login successful:", data)
+        console.log("Navigating to dashboard...");
+        navigate('/dashboard');
       } else {
         setError(data.message || "Email ya password galat hai!");
-        setTimeout(() => setError(""), 3000);
+        setTimeout(() => setForm({ email: "", password: "" }), 3000);
       }
     } catch {
-      setError("Server se connect nahi ho saka!");
       setTimeout(() => setError(""), 3000);
     } finally {
       setLoading(false);
