@@ -14,8 +14,16 @@ const userSchema = new mongoose.Schema({
     required: true,
     unique: true
   },
+  password: {
+    type: String,
+    required: true
+  },
+  confirm_password: {
+    type: String,
+    required: true
+  },
   role: {
-    type: String,dasdas
+    type: String,
     enum: ["User", "Admin", "Editor"],
     default: "User"          // ← yeh ADD kiya
   }

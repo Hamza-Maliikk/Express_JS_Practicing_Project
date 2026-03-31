@@ -49,8 +49,41 @@ const deleteUser = async (req, res) => {
     return res.status(400).json("Error deleting user");
   }
 };
+
+const registerUser = async (req, res) => {
+  try {
+    const { first_name, last_name, email, password, confirm_password } =
+      req.body;
+    if (!first_name || !last_name || !email || !password || !confirm_password) {
+      return res.status(400).json("All fields are required");
+    }
+    if (password !== confirm_password) {
+      return res.status(400).json("Passwords do not match");
+    }
+    const existingUser = await User.find({ email });
+    if (existingUser.length > 0) {
+      return res.status(400).json("Email already exists");
+    }
+    const user = await User.create({
+      first_name,
+      last_name,
+      email,
+      password,
+      confirm_password,
+    });
+    return res.status(201).json({
+      _id: user._id,
+      name: `${user.first_name} ${user.last_name}`,
+      email: user.email,
+      role: user.role || "User",
+    });
+  } catch (err) {
+    return res.status(400).json({ error: err.message });
+  }
+};
 module.exports = {
   userData,
   addUser,
   deleteUser,
+  registerUser,
 };
