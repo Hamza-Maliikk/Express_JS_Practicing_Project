@@ -2,20 +2,18 @@ import { useState } from "react";
 
 const API_BASE = "http://localhost:8000/api";
 
-export default function Register({ onRegister, onGoLogin }) {
+export default function Register({ onGoLogin }) {
   const [form, setForm] = useState({
     first_name: "",
     last_name: "",
     email: "",
     password: "",
-    confirm_password: "",
     role: "User"
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [showPass, setShowPass] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
 
   const notify = (msg, isError = false) => {
     if (isError) { setError(msg); setTimeout(() => setError(""), 3000); }
@@ -25,9 +23,6 @@ export default function Register({ onRegister, onGoLogin }) {
   const handleSubmit = async () => {
     if (!form.first_name.trim() || !form.email.trim() || !form.password.trim()) {
       notify("Sab zaroori fields bharein!", true); return;
-    }
-    if (form.password !== form.confirm_password) {
-      notify("Dono passwords match nahi karte!", true); return;
     }
     if (form.password.length < 6) {
       notify("Password kam az kam 6 characters ka hona chahiye!", true); return;
@@ -45,7 +40,7 @@ export default function Register({ onRegister, onGoLogin }) {
         notify("Account ban gaya! Login karein.");
         setTimeout(() => onGoLogin?.(), 1500);
       } else {
-        notify(data.message || "Register nahi ho saka!", true);
+        notify(data.message || res.status, true);
       }
     } catch {
       notify("Server se connect nahi ho saka!", true);
@@ -447,30 +442,7 @@ export default function Register({ onRegister, onGoLogin }) {
                 </span>
               </div>
             )}
-          </div>
-
-          {/* Confirm Password */}
-          <div className="input-group">
-            <label>Password Dobara</label>
-            <div className="input-field">
-              <span className="input-icon">🔐</span>
-              <input
-                type={showConfirm ? "text" : "password"}
-                placeholder="••••••••"
-                value={form.confirm_password}
-                onChange={e => setForm({ ...form, confirm_password: e.target.value })}
-                onKeyDown={handleKey}
-                style={{
-                  borderColor: form.confirm_password
-                    ? form.password === form.confirm_password ? "#22c55e" : "#ef4444"
-                    : ""
-                }}
-              />
-              <button className="pass-toggle" onClick={() => setShowConfirm(!showConfirm)} type="button">
-                {showConfirm ? "Chhupao" : "Dikhao"}
-              </button>
-            </div>
-          </div>
+          </div>  
 
           {/* Submit */}
           <button className="btn-register" onClick={handleSubmit} disabled={loading}>

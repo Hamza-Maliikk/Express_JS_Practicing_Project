@@ -1,4 +1,7 @@
+const bcrypt = require('bcrypt');
+const saltRounds = 10;
 const User = require("../models/user");
+
 
 const userData = async (req, res) => {
   try {
@@ -52,24 +55,20 @@ const deleteUser = async (req, res) => {
 
 const registerUser = async (req, res) => {
   try {
-    const { first_name, last_name, email, password, confirm_password } =
+    const { first_name, last_name, email, password} =
       req.body;
-    if (!first_name || !last_name || !email || !password || !confirm_password) {
+    if (!first_name || !last_name || !email || !password) {
       return res.status(400).json("All fields are required");
-    }
-    if (password !== confirm_password) {
-      return res.status(400).json("Passwords do not match");
     }
     const existingUser = await User.find({ email });
     if (existingUser.length > 0) {
-      return res.status(400).json("Email already exists");
+      return res.status(400).json({message: "Email already exists"});
     }
     const user = await User.create({
       first_name,
       last_name,
       email,
       password,
-      confirm_password,
     });
     return res.status(201).json({
       _id: user._id,
