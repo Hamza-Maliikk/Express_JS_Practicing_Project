@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useState } from "react";
+import { useNavigate } from "react-router";
 import {
   LineChart,
   Line,
@@ -31,43 +32,7 @@ const barData = [
   { day: "Sun", visits: 25 },
 ];
 
-const recentUsers = [
-  {
-    name: "Ali Hassan",
-    email: "ali@example.com",
-    role: "Admin",
-    status: "Active",
-    joined: "2 hrs ago",
-  },
-  {
-    name: "Sara Khan",
-    email: "sara@example.com",
-    role: "Editor",
-    status: "Active",
-    joined: "5 hrs ago",
-  },
-  {
-    name: "Hamza Ali",
-    email: "hamza@example.com",
-    role: "User",
-    status: "Inactive",
-    joined: "1 day ago",
-  },
-  {
-    name: "Zara Malik",
-    email: "zara@example.com",
-    role: "User",
-    status: "Active",
-    joined: "2 days ago",
-  },
-  {
-    name: "Usman Raza",
-    email: "usman@example.com",
-    role: "Editor",
-    status: "Active",
-    joined: "3 days ago",
-  },
-];
+
 
 const navItems = ["Dashboard", "Users", "Analytics", "Settings"];
 
@@ -96,19 +61,19 @@ export default function Dashboard() {
   const [active, setActive] = useState("Dashboard");
   const [search, setSearch] = useState("");
   const [stats, setstats] = useState(null);
-
+  const navigator = useNavigate();
   useEffect(() => {
     const fetchData = async () => {
       try {
         const res = await fetch(API_BASE ,{
-            method: "GET",
-  headers: {
-    "Content-Type": "application/json",
-    "Authorization": `Bearer ${token}`
+        method: "GET",
+        headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
         }})
         if (res.status === 401) {
           console.log("Unauthorized access - redirecting to login");
-          window.location.href = "/";
+          navigator("/");
         }
         const data = await res.json();
         setstats(data);

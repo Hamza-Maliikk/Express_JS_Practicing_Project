@@ -31,9 +31,9 @@ export default function Login() {
       console.log("Response from server:", data);
 
       if (res.ok) {
+        navigate('/dashboard')
         dispatch(setToken(data.token)); // ✅ Redux store mein token save
         console.log("Login successful:", data)
-        navigate('/dashboard')
       } else {
         setError(data.message || "Email ya password galat hai!");
         setTimeout(() => setForm({ email: "", password: "" }), 3000);
