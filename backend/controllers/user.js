@@ -1,7 +1,8 @@
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
 const User = require("../models/user");
-
+const jwt = require("jsonwebtoken");
+const secret = "mysecretkey@1414";
 
 const userData = async (req, res) => {
   try {
@@ -90,7 +91,7 @@ const registerUser = async (req, res) => {
     return res.status(400).json({ error: err.message });
   }
 };
-
+// Login User
 const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -113,7 +114,10 @@ const loginUser = async (req, res) => {
       } else {
         return res.status(400).json({ message: "Invalid email or password" });
       }
+      
     });
+    const token = jwt.sign({ userId: user._id }, secret, { expiresIn: "1h" });
+    return res.status(200).json({ token });
   } catch (err) {
     return res.status(400).json({ error: err.message });
   } 
@@ -123,5 +127,6 @@ module.exports = {
   addUser,
   deleteUser,
   registerUser,
-  loginUser
+  loginUser,
+  secret
 };

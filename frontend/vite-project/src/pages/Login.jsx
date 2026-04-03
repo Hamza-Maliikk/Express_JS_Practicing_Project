@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { Link } from "react-router";
-import {useNavigate} from "react-router-dom";
+// import {useNavigate} from "react-router-dom";
 
 const API_BASE = "http://localhost:8000/api";
 
 export default function Login() {
   const [form, setForm] = useState({ email: "", password: "" });
-  const navigate = useNavigate();
+//   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [showPass, setShowPass] = useState(false);
@@ -27,8 +27,6 @@ export default function Login() {
       const data = await res.json();
       if (res.ok) {
         console.log("Login successful:", data)
-        console.log("Navigating to dashboard...");
-        navigate('/dashboard');
       } else {
         setError(data.message || "Email ya password galat hai!");
         setTimeout(() => setForm({ email: "", password: "" }), 3000);
