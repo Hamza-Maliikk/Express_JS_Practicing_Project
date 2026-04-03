@@ -95,29 +95,25 @@ const registerUser = async (req, res) => {
 const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
-    if (!email || !password) {
-      return res.status(400).json("Email aur password zaroori hain");
-    } 
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(400).json({ message: "Invalid email or password" });
     }
-    bcrypt.compare(password, user.password, function(err, result) {
-      if (err) {
-        return res.status(500).json({ error: "Error comparing passwords" });    
-      } else if (result) {
-        return res.status(200).json({
-          _id: user._id,
-          email: user.email,
-          role: user.role || "User",
-        });
-      } else {
-        return res.status(400).json({ message: "Invalid email or password" });
-      }
-      
+    const isMatch = await bcrypt.compare(password, user.password,) 
+    if(!isMatch) {
+      return res.status(400).json({ message: "Invalid email or password" });
+    }
+     const token = jwt.sign(
+      { userId: user._id },
+      secret,
+      { expiresIn: "1h" }
+    );
+    return res.status(200).json({
+      _id: user._id,
+      email: user.email,
+      role: user.role || "User",
+      token,
     });
-    const token = jwt.sign({ userId: user._id }, secret, { expiresIn: "1h" });
-    return res.status(200).json({ token });
   } catch (err) {
     return res.status(400).json({ error: err.message });
   } 

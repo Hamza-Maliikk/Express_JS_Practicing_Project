@@ -90,27 +90,34 @@ const avatarBg = (name) => {
   const colors = ["#818cf8", "#34d399", "#fb923c", "#f472b6", "#60a5fa"];
   return colors[name.charCodeAt(0) % colors.length];
 };
+const token = localStorage.getItem("token");
 const API_BASE = "http://localhost:8000/dashboard";
-
-
-
 export default function Dashboard() {
   const [active, setActive] = useState("Dashboard");
   const [search, setSearch] = useState("");
-  const [stats , setstats] = useState(null)
+  const [stats, setstats] = useState(null);
 
-useEffect(()=>{
+  useEffect(() => {
     const fetchData = async () => {
-        try {
-            const res = await fetch(API_BASE)
-            const data = await res.json()
-            setstats(data)
-            
-        }catch(error){
-            console.error("API error", error)
-        }}
-      fetchData()  
-},[])
+      try {
+        const res = await fetch(API_BASE ,{
+            method: "GET",
+  headers: {
+    "Content-Type": "application/json",
+    "Authorization": `Bearer ${token}`
+        }})
+        if (res.status === 401) {
+          console.log("Unauthorized access - redirecting to login");
+          window.location.href = "/";
+        }
+        const data = await res.json();
+        setstats(data);
+      } catch (error) {
+        console.error("API error", error);
+      }
+    };
+    fetchData();
+  }, []);
 
   const filtered = recentUsers.filter(
     (u) =>
@@ -415,13 +422,8 @@ useEffect(()=>{
         <main className="main">
           <div className="page-header">
             <div>
-                {/* {stats.map((data)=>{
-                    return <div key={data._id}>{data.name}</div>   
-                })
-
-                } */}
               <div className="page-title">
-                Good morning,
+                Good morning, {stats && stats[0]?.name}
               </div>
               <div className="page-date">
                 {new Date().toLocaleDateString("en-US", {

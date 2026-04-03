@@ -20,8 +20,8 @@ app.use(express.urlencoded({ extended: true }));
 app.get("/api/user/", userData);
 app.post("/api/user", addUser);
 app.post("/api/register", registerUser);
-app.post("/api/", loginUser)
-app.get("/dashboard",  userData )
+app.post("/", loginUser)
+app.get("/dashboard", authChecker, userData)
 //   users[user] = { ...users[user], ...req.body };
 //   fs.writeFile("./MOCK_DATA.json", JSON.stringify(users), (err, data) => {
 //     return res.json("User Edit successfully");

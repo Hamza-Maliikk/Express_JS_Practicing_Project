@@ -1,15 +1,18 @@
 import { useState } from "react";
 import { Link } from "react-router";
-// import {useNavigate} from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { setToken } from "/redux/slices/loginSlice/check";
+import {useNavigate} from "react-router-dom";
 
-const API_BASE = "http://localhost:8000/api";
+const API_BASE = "http://localhost:8000/";
 
 export default function Login() {
   const [form, setForm] = useState({ email: "", password: "" });
-//   const navigate = useNavigate();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [showPass, setShowPass] = useState(false);
+    const dispatch = useDispatch();
 
   const handleSubmit = async () => {
     if (!form.email.trim() || !form.password.trim()) {
@@ -19,14 +22,18 @@ export default function Login() {
     }
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/`, {
+      const res = await fetch(`${API_BASE}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
       const data = await res.json();
+      console.log("Response from server:", data);
+
       if (res.ok) {
+        dispatch(setToken(data.token)); // ✅ Redux store mein token save
         console.log("Login successful:", data)
+        navigate('/dashboard')
       } else {
         setError(data.message || "Email ya password galat hai!");
         setTimeout(() => setForm({ email: "", password: "" }), 3000);
