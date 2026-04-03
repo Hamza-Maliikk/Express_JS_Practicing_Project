@@ -36,25 +36,6 @@ const barData = [
 
 const navItems = ["Dashboard", "Users", "Analytics", "Settings"];
 
-const roleColor = (role) => {
-  if (role === "Admin")
-    return { bg: "#fef2f2", color: "#dc2626", border: "#fecaca" };
-  if (role === "Editor")
-    return { bg: "#fffbeb", color: "#d97706", border: "#fde68a" };
-  return { bg: "#f0fdf4", color: "#16a34a", border: "#bbf7d0" };
-};
-
-const statusColor = (s) =>
-  s === "Active"
-    ? { bg: "#f0fdf4", color: "#16a34a" }
-    : { bg: "#f8fafc", color: "#94a3b8" };
-
-const avatar = (name) => name.charAt(0).toUpperCase();
-
-const avatarBg = (name) => {
-  const colors = ["#818cf8", "#34d399", "#fb923c", "#f472b6", "#60a5fa"];
-  return colors[name.charCodeAt(0) % colors.length];
-};
 const token = localStorage.getItem("token");
 const API_BASE = "http://localhost:8000/dashboard";
 export default function Dashboard() {
@@ -84,11 +65,7 @@ export default function Dashboard() {
     fetchData();
   }, []);
 
-  const filtered = recentUsers.filter(
-    (u) =>
-      u.name.toLowerCase().includes(search.toLowerCase()) ||
-      u.email.toLowerCase().includes(search.toLowerCase()),
-  );
+  
 
   return (
     <>
@@ -541,59 +518,7 @@ export default function Dashboard() {
                 </tr>
               </thead>
               <tbody>
-                {filtered.length === 0 ? (
-                  <tr className="empty-row">
-                    <td colSpan={4}>No users found</td>
-                  </tr>
-                ) : (
-                  filtered.map((u) => {
-                    const rc = roleColor(u.role);
-                    const sc = statusColor(u.status);
-                    return (
-                      <tr key={u.email}>
-                        <td>
-                          <div className="user-cell">
-                            <div
-                              className="user-av"
-                              style={{ background: avatarBg(u.name) }}
-                            >
-                              {avatar(u.name)}
-                            </div>
-                            <div>
-                              <div className="user-name">{u.name}</div>
-                              <div className="user-email">{u.email}</div>
-                            </div>
-                          </div>
-                        </td>
-                        <td>
-                          <span
-                            className="badge"
-                            style={{
-                              background: rc.bg,
-                              color: rc.color,
-                              borderColor: rc.border,
-                            }}
-                          >
-                            {u.role}
-                          </span>
-                        </td>
-                        <td>
-                          <span
-                            className="badge"
-                            style={{
-                              background: sc.bg,
-                              color: sc.color,
-                              borderColor: sc.bg,
-                            }}
-                          >
-                            {u.status}
-                          </span>
-                        </td>
-                        <td style={{ color: "#9ca3af" }}>{u.joined}</td>
-                      </tr>
-                    );
-                  })
-                )}
+               
               </tbody>
             </table>
           </div>

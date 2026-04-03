@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router";
 import { useDispatch } from "react-redux";
-import { setToken } from "/redux/slices/loginSlice/check";
+import { setToken } from "../redux/slices/loginSlice/check";
 import {useNavigate} from "react-router-dom";
 
 const API_BASE = "http://localhost:8000/";
@@ -457,7 +457,7 @@ export default function Login() {
           >
             <span>
               {loading && <span className="spinner" />}
-              {loading ? "Login ho raha hai..." : "Login Karein →"}
+              {loading ? "Logging..." : "Login"}
             </span>
           </button>
 
