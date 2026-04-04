@@ -31,9 +31,11 @@ export default function Login() {
       console.log("Response from server:", data);
 
       if (res.ok) {
-        navigate('/dashboard')
-        dispatch(setToken(data.token)); // ✅ Redux store mein token save
-        console.log("Login successful:", data)
+        dispatch(setToken(data.token));
+        if (data.email) localStorage.setItem("userEmail", data.email);
+        if (data.role) localStorage.setItem("userRole", data.role);
+        navigate("/dashboard");
+        console.log("Login successful:", data);
       } else {
         setError(data.message || "Email ya password galat hai!");
         setTimeout(() => setForm({ email: "", password: "" }), 3000);
@@ -458,7 +460,7 @@ export default function Login() {
             <span>
               {loading && <span className="spinner" />}
               {loading ? "Logging..." : "Login"}
-            </span>a
+            </span>
           </button>
 
           <div className="divider"><span>ya</span></div>
@@ -466,7 +468,7 @@ export default function Login() {
           {/* Footer */}
           <div className="login-footer">
             Account nahi hai?{" "}
-            <Link to="/register"><a> Register karein</a></Link>
+            <Link to="/register">Register karein</Link>
           </div>
         </div>
 

@@ -12,6 +12,7 @@ const userData = async (req, res) => {
       name: `${user.first_name} ${user.last_name}`,
       email: user.email,
       role: user.role || "User",
+      createdAt: user.createdAt,
     }));
     return res.status(200).json(formattedUsers);
   } catch (err) {

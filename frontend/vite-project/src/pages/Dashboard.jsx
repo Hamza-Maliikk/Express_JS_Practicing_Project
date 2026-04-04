@@ -1,6 +1,5 @@
-import { useEffect } from "react";
-import { useState } from "react";
-import { useNavigate } from "react-router";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   LineChart,
   Line,
@@ -32,147 +31,142 @@ const barData = [
   { day: "Sun", visits: 25 },
 ];
 
-const navItems = ["Profile", "Experience/Education ", "Blog", "Logout"];
-
 const API_BASE = "http://localhost:8000/dashboard";
+
+function startOfToday() {
+  const d = new Date();
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
+function avatarHue(email) {
+  let h = 0;
+  for (let i = 0; i < (email || "").length; i += 1) h = (h + email.charCodeAt(i) * 13) % 360;
+  return h;
+}
+
 export default function Dashboard() {
-  const [active, setActive] = useState("Dashboard");
   const [search, setSearch] = useState("");
-  const [stats, setstats] = useState(null);
-  const navigator = useNavigate();
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const token = localStorage.getItem("token");
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
 
-        console.log("Token retrieved in Dashboard:", token);
-        const res = await fetch(API_BASE, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        if (res.status === 401) {
-          console.log("Unauthorized access - redirecting to login");
-          navigator("/");
-          return;
-        }
-        const data = await res.json();
-        setstats(data);
-      } catch (error) {
-        console.error("API error", error);
+  const loadUsers = useCallback(async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch(API_BASE, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (res.status === 401) {
+        navigate("/");
+        return;
       }
-    };
-    fetchData();
-  }, []);
+      if (!res.ok) {
+        const errBody = await res.json().catch(() => ({}));
+        setError(errBody.error || `Request failed (${res.status})`);
+        setUsers([]);
+        return;
+      }
+      const data = await res.json();
+      setUsers(Array.isArray(data) ? data : []);
+    } catch (e) {
+      console.error("Dashboard fetch error", e);
+      setError("Could not load users. Is the API running?");
+      setUsers([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [navigate]);
 
-  // logout function
-  const logOut = () => {
-    localStorage.removeItem("token");
-    navigator("/");
-  };
+  useEffect(() => {
+    loadUsers();
+  }, [loadUsers]);
+
+  const greetingName = useMemo(() => {
+    const email = localStorage.getItem("userEmail") || "";
+    if (email) return email.split("@")[0];
+    if (users[0]?.name) return users[0].name.split(" ")[0];
+    return "there";
+  }, [users]);
+
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return users;
+    return users.filter(
+      (u) =>
+        u.name?.toLowerCase().includes(q) ||
+        u.email?.toLowerCase().includes(q) ||
+        (u.role || "").toLowerCase().includes(q)
+    );
+  }, [users, search]);
+
+  const stats = useMemo(() => {
+    const total = users.length;
+    const admins = users.filter((u) => u.role === "Admin").length;
+    const editors = users.filter((u) => u.role === "Editor").length;
+    const t0 = startOfToday().getTime();
+    const newToday = users.filter((u) => {
+      if (!u.createdAt) return false;
+      return new Date(u.createdAt).getTime() >= t0;
+    }).length;
+    return { total, admins, editors, newToday };
+  }, [users]);
+
+  const statCards = [
+    {
+      label: "Total users",
+      value: loading ? "…" : String(stats.total),
+      change: "All accounts",
+      accent: "green",
+    },
+    {
+      label: "Admins",
+      value: loading ? "…" : String(stats.admins),
+      change: "Admin role",
+      accent: "blue",
+    },
+    {
+      label: "Editors",
+      value: loading ? "…" : String(stats.editors),
+      change: "Editor role",
+      accent: "amber",
+    },
+    {
+      label: "New today",
+      value: loading ? "…" : String(stats.newToday),
+      change: "Joined since midnight",
+      accent: "pink",
+    },
+  ];
 
   return (
     <>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:ital,wght@0,300;0,500;1,300&display=swap');
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        .dash-page * { box-sizing: border-box; }
 
-        .dash-root {
-          display: flex;
-          min-height: 100vh;
-          background: #f8f7f4;
+        .dash-page {
           font-family: 'DM Mono', monospace;
           color: #1a1a1a;
         }
 
-        /* Sidebar */
-        .sidebar {
-          width: 220px;
-          background: #1a1a1a;
-          display: flex;
-          flex-direction: column;
-          padding: 2rem 1.2rem;
-          flex-shrink: 0;
-        }
-        .sidebar-logo {
-          font-family: 'Fraunces', serif;
-          font-size: 1.3rem;
-          font-weight: 500;
-          color: #f8f7f4;
-          margin-bottom: 2.5rem;
-          letter-spacing: -0.02em;
-        }
-        .sidebar-logo span { color: #a3e635; }
-
-        .nav-item {
-          display: flex;
-          align-items: center;
-          gap: 0.6rem;
-          padding: 0.6rem 0.8rem;
-          border-radius: 8px;
-          font-size: 0.78rem;
-          color: #6b7280;
-          cursor: pointer;
-          transition: all 0.15s;
-          margin-bottom: 0.2rem;
-          letter-spacing: 0.02em;
-          border: none;
-          background: none;
-          width: 100%;
-          text-align: left;
-        }
-        .nav-item:hover { background: #2a2a2a; color: #e5e7eb; }
-        .nav-item.active { background: #a3e635; color: #1a1a1a; font-weight: 500; }
-
-        .nav-dot {
-          width: 6px; height: 6px;
-          border-radius: 50%;
-          background: currentColor;
-          opacity: 0.6;
-          flex-shrink: 0;
-        }
-        .nav-item.active .nav-dot { opacity: 1; }
-
-        .sidebar-bottom {
-          margin-top: auto;
-          border-top: 1px solid #2a2a2a;
-          padding-top: 1rem;
-        }
-        .sidebar-user {
-          display: flex;
-          align-items: center;
-          gap: 0.7rem;
-        }
-        .sidebar-avatar {
-          width: 32px; height: 32px;
-          border-radius: 50%;
-          background: #a3e635;
-          display: flex; align-items: center; justify-content: center;
-          font-size: 0.75rem;
-          font-weight: 500;
-          color: #1a1a1a;
-          flex-shrink: 0;
-        }
-        .sidebar-name { font-size: 0.75rem; color: #9ca3af; }
-        .sidebar-role { font-size: 0.65rem; color: #4b5563; }
-
-        /* Main */
-        .main {
-          flex: 1;
-          padding: 2rem 2.5rem;
-          overflow-x: hidden;
-        }
-
-        .page-header {
+        .dash-header {
           display: flex;
           align-items: flex-start;
           justify-content: space-between;
           margin-bottom: 2rem;
+          gap: 1rem;
+          flex-wrap: wrap;
         }
-        .page-title {
+        .dash-title {
           font-family: 'Fraunces', serif;
           font-size: 1.8rem;
           font-weight: 300;
@@ -180,10 +174,9 @@ export default function Dashboard() {
           letter-spacing: -0.03em;
           line-height: 1.1;
         }
-        .page-title em { font-style: italic; color: #6b7280; }
-        .page-date { font-size: 0.72rem; color: #9ca3af; margin-top: 0.3rem; }
+        .dash-date { font-size: 0.72rem; color: #9ca3af; margin-top: 0.3rem; }
 
-        .header-btn {
+        .dash-btn {
           background: #1a1a1a;
           color: #f8f7f4;
           border: none;
@@ -195,16 +188,16 @@ export default function Dashboard() {
           transition: background 0.15s;
           letter-spacing: 0.02em;
         }
-        .header-btn:hover { background: #2a2a2a; }
+        .dash-btn:hover { background: #2a2a2a; }
+        .dash-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
-        /* Stats grid */
-        .stats-grid {
+        .dash-stats {
           display: grid;
           grid-template-columns: repeat(4, 1fr);
           gap: 1rem;
           margin-bottom: 1.5rem;
         }
-        .stat-card {
+        .dash-stat {
           background: #fff;
           border: 1px solid #e5e7eb;
           border-radius: 12px;
@@ -212,36 +205,34 @@ export default function Dashboard() {
           position: relative;
           overflow: hidden;
         }
-        .stat-card::before {
+        .dash-stat::before {
           content: '';
           position: absolute;
           top: 0; left: 0; right: 0;
           height: 2px;
         }
-        .stat-card.green::before { background: #a3e635; }
-        .stat-card.blue::before  { background: #60a5fa; }
-        .stat-card.amber::before { background: #fb923c; }
-        .stat-card.pink::before  { background: #f472b6; }
+        .dash-stat.green::before { background: #a3e635; }
+        .dash-stat.blue::before  { background: #60a5fa; }
+        .dash-stat.amber::before { background: #fb923c; }
+        .dash-stat.pink::before  { background: #f472b6; }
 
-        .stat-label { font-size: 0.68rem; color: #9ca3af; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.5rem; }
-        .stat-value { font-size: 1.7rem; font-weight: 500; color: #1a1a1a; line-height: 1; margin-bottom: 0.3rem; }
-        .stat-change { font-size: 0.7rem; color: #16a34a; }
-        .stat-change.down { color: #dc2626; }
+        .dash-stat-label { font-size: 0.68rem; color: #9ca3af; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.5rem; }
+        .dash-stat-value { font-size: 1.7rem; font-weight: 500; color: #1a1a1a; line-height: 1; margin-bottom: 0.3rem; }
+        .dash-stat-change { font-size: 0.7rem; color: #6b7280; }
 
-        /* Charts row */
-        .charts-row {
+        .dash-charts {
           display: grid;
           grid-template-columns: 2fr 1fr;
           gap: 1rem;
           margin-bottom: 1.5rem;
         }
-        .chart-card {
+        .dash-card {
           background: #fff;
           border: 1px solid #e5e7eb;
           border-radius: 12px;
           padding: 1.4rem;
         }
-        .chart-title {
+        .dash-card-title {
           font-size: 0.72rem;
           color: #9ca3af;
           letter-spacing: 0.08em;
@@ -249,20 +240,15 @@ export default function Dashboard() {
           margin-bottom: 1.2rem;
         }
 
-        /* Table */
-        .table-card {
-          background: #fff;
-          border: 1px solid #e5e7eb;
-          border-radius: 12px;
-          padding: 1.4rem;
-        }
-        .table-header {
+        .dash-table-head {
           display: flex;
           align-items: center;
           justify-content: space-between;
           margin-bottom: 1.2rem;
+          gap: 1rem;
+          flex-wrap: wrap;
         }
-        .search-input {
+        .dash-search {
           background: #f8f7f4;
           border: 1px solid #e5e7eb;
           border-radius: 8px;
@@ -271,14 +257,15 @@ export default function Dashboard() {
           font-family: 'DM Mono', monospace;
           color: #1a1a1a;
           outline: none;
-          width: 200px;
+          width: min(220px, 100%);
           transition: border-color 0.15s;
         }
-        .search-input:focus { border-color: #a3e635; }
-        .search-input::placeholder { color: #9ca3af; }
+        .dash-search:focus { border-color: #a3e635; }
+        .dash-search::placeholder { color: #9ca3af; }
 
-        table { width: 100%; border-collapse: collapse; }
-        thead th {
+        .dash-table-wrap { overflow-x: auto; }
+        .dash-table { width: 100%; border-collapse: collapse; min-width: 520px; }
+        .dash-table thead th {
           font-size: 0.65rem;
           color: #9ca3af;
           letter-spacing: 0.1em;
@@ -288,9 +275,9 @@ export default function Dashboard() {
           border-bottom: 1px solid #f1f5f9;
           font-weight: 400;
         }
-        tbody tr { transition: background 0.1s; }
-        tbody tr:hover { background: #fafaf9; }
-        tbody td {
+        .dash-table tbody tr { transition: background 0.1s; }
+        .dash-table tbody tr:hover { background: #fafaf9; }
+        .dash-table tbody td {
           padding: 0.75rem 0.8rem;
           font-size: 0.78rem;
           color: #374151;
@@ -298,8 +285,8 @@ export default function Dashboard() {
           vertical-align: middle;
         }
 
-        .user-cell { display: flex; align-items: center; gap: 0.6rem; }
-        .user-av {
+        .dash-user-cell { display: flex; align-items: center; gap: 0.6rem; }
+        .dash-user-av {
           width: 30px; height: 30px;
           border-radius: 50%;
           display: flex; align-items: center; justify-content: center;
@@ -308,234 +295,207 @@ export default function Dashboard() {
           color: #fff;
           flex-shrink: 0;
         }
-        .user-name { font-size: 0.78rem; color: #1a1a1a; }
-        .user-email { font-size: 0.65rem; color: #9ca3af; }
+        .dash-user-name { font-size: 0.78rem; color: #1a1a1a; }
+        .dash-user-email { font-size: 0.65rem; color: #9ca3af; }
 
-        .badge {
+        .dash-badge {
           display: inline-block;
           padding: 0.15rem 0.6rem;
           border-radius: 100px;
           font-size: 0.65rem;
-          border: 1px solid;
+          border: 1px solid #e5e7eb;
           letter-spacing: 0.03em;
+          background: #fafaf9;
         }
 
-        .empty-row td {
+        .dash-empty td {
           text-align: center;
           padding: 2rem;
           color: #9ca3af;
           font-size: 0.78rem;
         }
 
+        .dash-banner {
+          background: #fef2f2;
+          border: 1px solid #fecaca;
+          color: #991b1b;
+          padding: 0.65rem 1rem;
+          border-radius: 8px;
+          font-size: 0.78rem;
+          margin-bottom: 1rem;
+        }
+
         @media (max-width: 900px) {
-          .stats-grid { grid-template-columns: repeat(2, 1fr); }
-          .charts-row { grid-template-columns: 1fr; }
-          .sidebar { width: 180px; }
-          .main { padding: 1.5rem; }
+          .dash-stats { grid-template-columns: repeat(2, 1fr); }
+          .dash-charts { grid-template-columns: 1fr; }
         }
       `}</style>
 
-      <div className="dash-root">
-        {/* Sidebar */}
-        <aside className="sidebar">
-          <div className="sidebar-logo">
-            usr<span>.</span>mgmt
-          </div>
-
-          <nav>
-            {navItems.map((item) => (
-              <button
-                key={item}
-                className={`nav-item 
-                ${active === item ? "active" : ""}   // agar ye item active hai to "active" class lao
-                ${item === "Logout" ? "logout-item" : ""}  // agar ye item "Logout" hai to "logout-item" class lao
-              `}
-                onClick={() => {
-                  if(item === "Logout") {
-                    logOut();
-                  } else {
-                    setActive(item);
-                  }
-            }
-            }              >
-                <span className="nav-dot" />
-                {item}
-              </button>
-            ))}
-          </nav>
-
-          <div className="sidebar-bottom">
-            <div className="sidebar-user">
-              <div className="sidebar-avatar">A</div>
-              <div>
-                <div className="sidebar-name">Admin</div>
-                <div className="sidebar-role">Super Admin</div>
-              </div>
+      <div className="dash-page">
+        <div className="dash-header">
+          <div>
+            <div className="dash-title">Hello, {greetingName}</div>
+            <div className="dash-date">
+              {new Date().toLocaleDateString("en-US", {
+                weekday: "long",
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })}
             </div>
           </div>
-        </aside>
+          <button type="button" className="dash-btn" onClick={loadUsers} disabled={loading}>
+            {loading ? "Refreshing…" : "Refresh data"}
+          </button>
+        </div>
 
-        {/* Main content */}
-        <main className="main">
-          <div className="page-header">
-            <div>
-              <div className="page-title">
-                Good morning, {stats && stats[0]?.name}
-              </div>
-              <div className="page-date">
-                {new Date().toLocaleDateString("en-US", {
-                  weekday: "long",
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                })}
-              </div>
+        {error && <div className="dash-banner">{error}</div>}
+
+        <div className="dash-stats">
+          {statCards.map((s) => (
+            <div key={s.label} className={`dash-stat ${s.accent}`}>
+              <div className="dash-stat-label">{s.label}</div>
+              <div className="dash-stat-value">{s.value}</div>
+              <div className="dash-stat-change">{s.change}</div>
             </div>
-            <button className="header-btn">+ Add User</button>
+          ))}
+        </div>
+
+        <div className="dash-charts">
+          <div className="dash-card">
+            <div className="dash-card-title">Illustrative user growth</div>
+            <ResponsiveContainer width="100%" height={180}>
+              <LineChart data={lineData}>
+                <XAxis
+                  dataKey="month"
+                  tick={{ fontSize: 10, fill: "#9ca3af", fontFamily: "DM Mono" }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <YAxis
+                  tick={{ fontSize: 10, fill: "#9ca3af", fontFamily: "DM Mono" }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <Tooltip
+                  contentStyle={{
+                    background: "#1a1a1a",
+                    border: "none",
+                    borderRadius: 8,
+                    fontSize: 11,
+                    fontFamily: "DM Mono",
+                    color: "#f8f7f4",
+                  }}
+                  cursor={{ stroke: "#e5e7eb" }}
+                />
+                <Line type="monotone" dataKey="users" stroke="#a3e635" strokeWidth={2} dot={false} />
+              </LineChart>
+            </ResponsiveContainer>
           </div>
 
-          {/* Stats */}
-          <div className="stats-grid">
-            {[
-              {
-                label: "Total Users",
-                value: "148",
-                change: "+12% this month",
-                accent: "green",
-              },
-              {
-                label: "Active Now",
-                value: "34",
-                change: "+5 from yesterday",
-                accent: "blue",
-              },
-              {
-                label: "Admins",
-                value: "6",
-                change: "No change",
-                accent: "amber",
-              },
-              {
-                label: "New Today",
-                value: "9",
-                change: "+3 from avg",
-                accent: "pink",
-              },
-            ].map((s) => (
-              <div key={s.label} className={`stat-card ${s.accent}`}>
-                <div className="stat-label">{s.label}</div>
-                <div className="stat-value">{s.value}</div>
-                <div className="stat-change">{s.change}</div>
-              </div>
-            ))}
+          <div className="dash-card">
+            <div className="dash-card-title">Illustrative weekly visits</div>
+            <ResponsiveContainer width="100%" height={180}>
+              <BarChart data={barData} barSize={14}>
+                <XAxis
+                  dataKey="day"
+                  tick={{ fontSize: 10, fill: "#9ca3af", fontFamily: "DM Mono" }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <YAxis hide />
+                <Tooltip
+                  contentStyle={{
+                    background: "#1a1a1a",
+                    border: "none",
+                    borderRadius: 8,
+                    fontSize: 11,
+                    fontFamily: "DM Mono",
+                    color: "#f8f7f4",
+                  }}
+                  cursor={{ fill: "#f8f7f4" }}
+                />
+                <Bar dataKey="visits" fill="#60a5fa" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        <div className="dash-card">
+          <div className="dash-table-head">
+            <div className="dash-card-title" style={{ margin: 0 }}>
+              Users ({filtered.length}
+              {search.trim() ? ` of ${users.length}` : ""})
+            </div>
+            <input
+              className="dash-search"
+              placeholder="Search name, email, role…"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              aria-label="Search users"
+            />
           </div>
 
-          {/* Charts */}
-          <div className="charts-row">
-            <div className="chart-card">
-              <div className="chart-title">User Growth — 2024</div>
-              <ResponsiveContainer width="100%" height={180}>
-                <LineChart data={lineData}>
-                  <XAxis
-                    dataKey="month"
-                    tick={{
-                      fontSize: 10,
-                      fill: "#9ca3af",
-                      fontFamily: "DM Mono",
-                    }}
-                    axisLine={false}
-                    tickLine={false}
-                  />
-                  <YAxis
-                    tick={{
-                      fontSize: 10,
-                      fill: "#9ca3af",
-                      fontFamily: "DM Mono",
-                    }}
-                    axisLine={false}
-                    tickLine={false}
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      background: "#1a1a1a",
-                      border: "none",
-                      borderRadius: 8,
-                      fontSize: 11,
-                      fontFamily: "DM Mono",
-                      color: "#f8f7f4",
-                    }}
-                    cursor={{ stroke: "#e5e7eb" }}
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="users"
-                    stroke="#a3e635"
-                    strokeWidth={2}
-                    dot={false}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-
-            <div className="chart-card">
-              <div className="chart-title">Weekly Visits</div>
-              <ResponsiveContainer width="100%" height={180}>
-                <BarChart data={barData} barSize={14}>
-                  <XAxis
-                    dataKey="day"
-                    tick={{
-                      fontSize: 10,
-                      fill: "#9ca3af",
-                      fontFamily: "DM Mono",
-                    }}
-                    axisLine={false}
-                    tickLine={false}
-                  />
-                  <YAxis hide />
-                  <Tooltip
-                    contentStyle={{
-                      background: "#1a1a1a",
-                      border: "none",
-                      borderRadius: 8,
-                      fontSize: 11,
-                      fontFamily: "DM Mono",
-                      color: "#f8f7f4",
-                    }}
-                    cursor={{ fill: "#f8f7f4" }}
-                  />
-                  <Bar dataKey="visits" fill="#60a5fa" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-
-          {/* Table */}
-          <div className="table-card">
-            <div className="table-header">
-              <div className="chart-title" style={{ margin: 0 }}>
-                Recent Users
-              </div>
-              <input
-                className="search-input"
-                placeholder="Search..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
-            </div>
-
-            <table>
+          <div className="dash-table-wrap">
+            <table className="dash-table">
               <thead>
                 <tr>
                   <th>User</th>
                   <th>Role</th>
-                  <th>Status</th>
                   <th>Joined</th>
                 </tr>
               </thead>
-              <tbody></tbody>
+              <tbody>
+                {loading && (
+                  <tr className="dash-empty">
+                    <td colSpan={3}>Loading users…</td>
+                  </tr>
+                )}
+                {!loading && filtered.length === 0 && (
+                  <tr className="dash-empty">
+                    <td colSpan={3}>
+                      {users.length === 0 ? "No users yet." : "No matches for your search."}
+                    </td>
+                  </tr>
+                )}
+                {!loading &&
+                  filtered.map((u) => {
+                    const hue = avatarHue(u.email);
+                    const letter = (u.name || u.email || "?")[0]?.toUpperCase() || "?";
+                    const joined = u.createdAt
+                      ? new Date(u.createdAt).toLocaleDateString(undefined, {
+                          year: "numeric",
+                          month: "short",
+                          day: "numeric",
+                        })
+                      : "—";
+                    return (
+                      <tr key={u._id}>
+                        <td>
+                          <div className="dash-user-cell">
+                            <div
+                              className="dash-user-av"
+                              style={{ background: `hsl(${hue} 45% 42%)` }}
+                            >
+                              {letter}
+                            </div>
+                            <div>
+                              <div className="dash-user-name">{u.name}</div>
+                              <div className="dash-user-email">{u.email}</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td>
+                          <span className="dash-badge">{u.role || "User"}</span>
+                        </td>
+                        <td>{joined}</td>
+                      </tr>
+                    );
+                  })}
+              </tbody>
             </table>
           </div>
-        </main>
+        </div>
       </div>
     </>
   );

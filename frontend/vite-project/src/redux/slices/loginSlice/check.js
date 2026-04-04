@@ -10,11 +10,15 @@ const authSlice = createSlice({
   reducers: {
     setToken: (state, action) => {
       state.token = action.payload;
-      localStorage.setItem("token", action.payload); // ✅ save bhi ho jayega
+      localStorage.setItem("token", action.payload);
+    },
+    clearToken: (state) => {
+      state.token = null;
+      localStorage.removeItem("token");
     },
   },
 });
 
-export const { setToken } = authSlice.actions;
+export const { setToken, clearToken } = authSlice.actions;
 export const selectToken = (state) => state.auth.token; 
 export default authSlice.reducer;
