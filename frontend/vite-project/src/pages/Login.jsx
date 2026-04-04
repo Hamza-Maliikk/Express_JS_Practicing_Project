@@ -458,7 +458,7 @@ export default function Login() {
             <span>
               {loading && <span className="spinner" />}
               {loading ? "Logging..." : "Login"}
-            </span>
+            </span>a
           </button>
 
           <div className="divider"><span>ya</span></div>

@@ -32,11 +32,8 @@ const barData = [
   { day: "Sun", visits: 25 },
 ];
 
+const navItems = ["Profile", "Experience/Education ", "Blog", "Logout"];
 
-
-const navItems = ["Dashboard", "Users", "Analytics", "Settings"];
-
-const token = localStorage.getItem("token");
 const API_BASE = "http://localhost:8000/dashboard";
 export default function Dashboard() {
   const [active, setActive] = useState("Dashboard");
@@ -46,15 +43,20 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await fetch(API_BASE ,{
-        method: "GET",
-        headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`
-        }})
+        const token = localStorage.getItem("token");
+
+        console.log("Token retrieved in Dashboard:", token);
+        const res = await fetch(API_BASE, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
         if (res.status === 401) {
           console.log("Unauthorized access - redirecting to login");
           navigator("/");
+          return;
         }
         const data = await res.json();
         setstats(data);
@@ -65,7 +67,11 @@ export default function Dashboard() {
     fetchData();
   }, []);
 
-  
+  // logout function
+  const logOut = () => {
+    localStorage.removeItem("token");
+    navigator("/");
+  };
 
   return (
     <>
@@ -340,9 +346,18 @@ export default function Dashboard() {
             {navItems.map((item) => (
               <button
                 key={item}
-                className={`nav-item ${active === item ? "active" : ""}`}
-                onClick={() => setActive(item)}
-              >
+                className={`nav-item 
+                ${active === item ? "active" : ""}   // agar ye item active hai to "active" class lao
+                ${item === "Logout" ? "logout-item" : ""}  // agar ye item "Logout" hai to "logout-item" class lao
+              `}
+                onClick={() => {
+                  if(item === "Logout") {
+                    logOut();
+                  } else {
+                    setActive(item);
+                  }
+            }
+            }              >
                 <span className="nav-dot" />
                 {item}
               </button>
@@ -517,9 +532,7 @@ export default function Dashboard() {
                   <th>Joined</th>
                 </tr>
               </thead>
-              <tbody>
-               
-              </tbody>
+              <tbody></tbody>
             </table>
           </div>
         </main>

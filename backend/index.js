@@ -21,7 +21,7 @@ app.get("/api/user/", userData);
 app.post("/api/user", addUser);
 app.post("/api/register", registerUser);
 app.post("/", loginUser)
-app.get("/dashboard", authChecker)
+app.get("/dashboard", authChecker, userData);
 //   users[user] = { ...users[user], ...req.body };
 //   fs.writeFile("./MOCK_DATA.json", JSON.stringify(users), (err, data) => {
 //     return res.json("User Edit successfully");
