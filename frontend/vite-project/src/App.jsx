@@ -5,6 +5,7 @@ import Dashboard from "./pages/Dashboard";
 import Education from "./pages/Education";
 import Blogs from "./pages/Blogs";
 import Layout from "./components/Layout";
+import Categories from "./pages/Categories";
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/education" element={<Education />} />
         <Route path="/blogs" element={<Blogs />} />
+        <Route path="/categories" element={<Categories />} />
       </Route>
     </Routes>
   );

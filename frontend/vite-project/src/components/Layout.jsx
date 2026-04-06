@@ -6,13 +6,16 @@ const nav = [
   { to: "/dashboard", label: "Dashboard" },
   { to: "/education", label: "Education" },
   { to: "/blogs", label: "Blogs" },
+  { to: "/categories", label: "Categories" },
 ];
 
 export default function Layout() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const email = typeof window !== "undefined" ? localStorage.getItem("userEmail") : "";
-  const role = typeof window !== "undefined" ? localStorage.getItem("userRole") : "";
+  const email =
+    typeof window !== "undefined" ? localStorage.getItem("userEmail") : "";
+  const role =
+    typeof window !== "undefined" ? localStorage.getItem("userRole") : "";
   const initial = (email && email[0]?.toUpperCase()) || "U";
 
   const logOut = () => {
@@ -152,7 +155,11 @@ export default function Layout() {
                 {label}
               </NavLink>
             ))}
-            <button type="button" className="app-nav-link app-logout" onClick={logOut}>
+            <button
+              type="button"
+              className="app-nav-link app-logout"
+              onClick={logOut}
+            >
               <span className="app-nav-dot" />
               Logout
             </button>

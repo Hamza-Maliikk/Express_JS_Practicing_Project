@@ -1,24 +1,28 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 
-const CATEGORIES = ["All", "React", "Node.js", "MongoDB", "JavaScript", "CSS", "Other"];
-
 const Blog = () => {
   const [blogs, setBlogs] = useState([]);
-  const [form, setForm] = useState({ title: "", content: "", tags: "", category: "React" });
+  const [form, setForm] = useState({ title: "", content: "", tags: "", category: "" });
   const [editId, setEditId] = useState(null);
   const [selected, setSelected] = useState(null);
   const [activeCategory, setActiveCategory] = useState("All");
   const [showForm, setShowForm] = useState(false);
+  const [categories, setCategories] = useState([]);
 
   useEffect(() => {
-    fetchBlogs();
+    const fetchData = async () => {
+      const res = await axios.get("http://localhost:8000/api/blogs");
+      setBlogs(res.data.blogs);
+      setCategories(res.data.categories);
+    };
+    fetchData();
   }, []);
 
-  const fetchBlogs = async () => {
-    const res = await axios.get("http://localhost:8000/api/blogs");
-    setBlogs(res.data);
-  };
+  // const fetchBlogs = async () => {
+  //   const res = await axios.get("http://localhost:8000/api/blogs");
+  //   setBlogs(res.data.blogs);
+  // };
 
   const handleSubmit = async () => {
     if (!form.title || !form.content) return alert("Title aur Content zaroor bharo!");
@@ -28,7 +32,7 @@ const Blog = () => {
     } else {
       await axios.post("http://localhost:8000/api/blogs", form);
     }
-    setForm({ title: "", content: "", tags: "", category: "React" });
+    setForm({ title: "", content: "", tags: "", category: "" });
     setShowForm(false);
     fetchBlogs();
   };
@@ -50,275 +54,188 @@ const Blog = () => {
     ? blogs
     : blogs.filter((b) => b.category === activeCategory);
 
-  // Single Post View
   if (selected) {
     return (
       <>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,500;1,400&family=DM+Mono:wght@400;500&display=swap');
-        .blog-shell { max-width: 900px; font-family: 'DM Mono', monospace; color: #1a1a1a; }
-        .blog-shell h1, .blog-shell h2 { font-family: 'Fraunces', serif; letter-spacing: -0.02em; }
-      `}</style>
-      <div className="blog-shell" style={{ padding: "0", maxWidth: "800px", margin: "0 auto" }}>
-        <button onClick={() => setSelected(null)} style={backBtn}>← Back</button>
-        <div style={{ marginTop: "20px" }}>
-          <span style={{ ...categoryBadge, backgroundColor: getCategoryColor(selected.category) }}>
-            {selected.category}
-          </span>
-          <h1 style={{ marginTop: "12px", fontSize: "28px" }}>{selected.title}</h1>
-          <div style={{ display: "flex", gap: "16px", color: "#888", fontSize: "13px", marginBottom: "24px" }}>
-            <span>📅 {new Date(selected.createdAt).toDateString()}</span>
-            <span>🏷️ {selected.tags}</span>
-          </div>
-          <div style={{ lineHeight: "1.9", color: "#333", fontSize: "16px", whiteSpace: "pre-wrap" }}>
-            {selected.content}
-          </div>
-          <div style={{ display: "flex", gap: "8px", marginTop: "30px" }}>
-            <button onClick={() => handleEdit(selected)} style={editBtn}>✏️ Edit</button>
-            <button onClick={() => { handleDelete(selected._id); setSelected(null); }} style={deleteBtn}>🗑️ Delete</button>
+        <style>{`
+          @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,500;1,400&family=DM+Mono:wght@400;500&display=swap');
+          .blog-shell { max-width: 900px; font-family: 'DM Mono', monospace; color: #1a1a1a; }
+          .blog-shell h1, .blog-shell h2 { font-family: 'Fraunces', serif; letter-spacing: -0.02em; }
+        `}</style>
+        <div className="blog-shell" style={{ padding: "0", maxWidth: "800px", margin: "0 auto" }}>
+          <button onClick={() => setSelected(null)} style={backBtn}>← Back</button>
+          <div style={{ marginTop: "20px" }}>
+            <span style={{ ...categoryBadge, backgroundColor: getCategoryColor(selected.category) }}>
+              {selected.category}
+            </span>
+            <h1 style={{ marginTop: "12px", fontSize: "28px" }}>{selected.title}</h1>
+            <div style={{ display: "flex", gap: "16px", color: "#888", fontSize: "13px", marginBottom: "24px" }}>
+              <span>📅 {new Date(selected.createdAt).toDateString()}</span>
+              <span>🏷️ {selected.tags}</span>
+            </div>
+            <div style={{ lineHeight: "1.9", color: "#333", fontSize: "16px", whiteSpace: "pre-wrap" }}>
+              {selected.content}
+            </div>
+            <div style={{ display: "flex", gap: "8px", marginTop: "30px" }}>
+              <button onClick={() => handleEdit(selected)} style={editBtn}>✏️ Edit</button>
+              <button onClick={() => { handleDelete(selected._id); setSelected(null); }} style={deleteBtn}>🗑️ Delete</button>
+            </div>
           </div>
         </div>
-      </div>
       </>
     );
   }
 
   return (
     <>
-    <style>{`
-      @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,500;1,400&family=DM+Mono:wght@400;500&display=swap');
-      .blog-shell { max-width: 900px; font-family: 'DM Mono', monospace; color: #1a1a1a; }
-      .blog-shell h2 { font-family: 'Fraunces', serif; letter-spacing: -0.02em; }
-    `}</style>
-    <div className="blog-shell" style={{ padding: "0", maxWidth: "900px", margin: "0 auto" }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,500;1,400&family=DM+Mono:wght@400;500&display=swap');
+        .blog-shell { max-width: 900px; font-family: 'DM Mono', monospace; color: #1a1a1a; }
+        .blog-shell h2 { font-family: 'Fraunces', serif; letter-spacing: -0.02em; }
+      `}</style>
+      <div className="blog-shell" style={{ padding: "0", maxWidth: "900px", margin: "0 auto" }}>
 
-      {/* Header */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
-        <div>
-          <h2 style={{ margin: 0, fontSize: "24px" }}>📝 Blog Posts</h2>
-          <p style={{ margin: "4px 0 0", color: "#888", fontSize: "13px" }}>{blogs.length} posts total</p>
+        {/* Header */}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
+          <div>
+            <h2 style={{ margin: 0, fontSize: "24px" }}>📝 Blog Posts</h2>
+            <p style={{ margin: "4px 0 0", color: "#888", fontSize: "13px" }}>{blogs.length} posts total</p>
+          </div>
+          <button onClick={() => { setShowForm(!showForm); setEditId(null); setForm({ title: "", content: "", tags: "", category: "" }); }} style={btnStyle}>
+            {showForm ? "✕ Cancel" : "+ New Post"}
+          </button>
         </div>
-        <button onClick={() => { setShowForm(!showForm); setEditId(null); setForm({ title: "", content: "", tags: "", category: "React" }); }} style={btnStyle}>
-          {showForm ? "✕ Cancel" : "+ New Post"}
-        </button>
-      </div>
 
-      {/* Form */}
-      {showForm && (
-        <div style={formCard}>
-          <h3 style={{ margin: "0 0 16px" }}>{editId ? "✏️ Post Edit Karo" : "🚀 Naya Post Likho"}</h3>
-          <input
-            placeholder="Title"
-            value={form.title}
-            onChange={(e) => setForm({ ...form, title: e.target.value })}
-            style={{ ...inputStyle, marginBottom: "10px" }}
-          />
-          <textarea
-            placeholder="Content likhoo..."
-            value={form.content}
-            onChange={(e) => setForm({ ...form, content: e.target.value })}
-            rows={6}
-            style={{ ...inputStyle, resize: "vertical", marginBottom: "10px" }}
-          />
-          <div style={{ display: "flex", gap: "10px", marginBottom: "10px" }}>
+        {/* Form */}
+        {showForm && (
+          <div style={formCard}>
+            <h3 style={{ margin: "0 0 16px" }}>{editId ? "✏️ Post Edit Karo" : "🚀 Naya Post Likho"}</h3>
             <input
-              placeholder="Tags (e.g. react, hooks)"
-              value={form.tags}
-              onChange={(e) => setForm({ ...form, tags: e.target.value })}
-              style={{ ...inputStyle, flex: 1 }}
+              placeholder="Title"
+              value={form.title}
+              onChange={(e) => setForm({ ...form, title: e.target.value })}
+              style={{ ...inputStyle, marginBottom: "10px" }}
             />
-            <select
-              value={form.category}
-              onChange={(e) => setForm({ ...form, category: e.target.value })}
-              style={{ ...inputStyle, width: "160px" }}
+            <textarea
+              placeholder="Content likhoo..."
+              value={form.content}
+              onChange={(e) => setForm({ ...form, content: e.target.value })}
+              rows={6}
+              style={{ ...inputStyle, resize: "vertical", marginBottom: "10px" }}
+            />
+            <div style={{ display: "flex", gap: "10px", marginBottom: "10px" }}>
+              <input
+                placeholder="Tags (e.g. react, hooks)"
+                value={form.tags}
+                onChange={(e) => setForm({ ...form, tags: e.target.value })}
+                style={{ ...inputStyle, flex: 1 }}
+              />
+              <select
+                value={form.category}
+                onChange={(e) => setForm({ ...form, category: e.target.value })}
+                style={{ ...inputStyle, width: "160px" }}
+              >
+                {categories.map((cat) => (
+                  <option key={cat._id} value={cat.category}>{cat.category}</option>
+                ))}
+              </select>
+            </div>
+            <button onClick={handleSubmit} style={publishBtn}>
+              {editId ? "✏️ Update Post" : "🚀 Publish"}
+            </button>
+          </div>
+        )}
+
+        {/* Category Filter */}
+        <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginBottom: "24px" }}>
+          {["All", ...categories.map((c) => c.category)].map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setActiveCategory(cat)}
+              style={{
+                padding: "6px 16px",
+                borderRadius: "20px",
+                border: "none",
+                cursor: "pointer",
+                fontSize: "13px",
+                backgroundColor: activeCategory === cat ? "#1a1a1a" : "#f0f0f0",
+                color: activeCategory === cat ? "white" : "#555",
+                fontWeight: activeCategory === cat ? "bold" : "normal",
+              }}
             >
-              {CATEGORIES.filter(c => c !== "All").map(cat => (
-                <option key={cat} value={cat}>{cat}</option>
-              ))}
-            </select>
-          </div>
-          <button onClick={handleSubmit} style={publishBtn}>
-            {editId ? "✏️ Update Post" : "🚀 Publish"}
-          </button>
-        </div>
-      )}
-
-      {/* Category Filter */}
-      <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginBottom: "24px" }}>
-        {CATEGORIES.map(cat => (
-          <button
-            key={cat}
-            onClick={() => setActiveCategory(cat)}
-            style={{
-              padding: "6px 16px",
-              borderRadius: "20px",
-              border: "none",
-              cursor: "pointer",
-              fontSize: "13px",
-              backgroundColor: activeCategory === cat ? "#1a1a1a" : "#f0f0f0",
-              color: activeCategory === cat ? "white" : "#555",
-              fontWeight: activeCategory === cat ? "bold" : "normal",
-            }}
-          >
-            {cat}
-            {cat !== "All" && (
-              <span style={{ marginLeft: "6px", opacity: 0.7 }}>
-                ({blogs.filter(b => b.category === cat).length})
-              </span>
-            )}
-          </button>
-        ))}
-      </div>
-
-      {/* Blog Cards */}
-      {filteredBlogs.length === 0 && (
-        <div style={{ textAlign: "center", padding: "60px", color: "#aaa" }}>
-          <p style={{ fontSize: "40px" }}>✍️</p>
-          <p>Is category mein koi post nahi - pehla likho!</p>
-        </div>
-      )}
-
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
-        {filteredBlogs.map((blog) => (
-          <div key={blog._id} style={cardStyle}>
-            <div onClick={() => setSelected(blog)} style={{ cursor: "pointer" }}>
-              <span style={{ ...categoryBadge, backgroundColor: getCategoryColor(blog.category) }}>
-                {blog.category}
-              </span>
-              <h3 style={{ margin: "10px 0 6px", fontSize: "16px" }}>{blog.title}</h3>
-              <p style={{ color: "#666", fontSize: "13px", margin: "0 0 12px", lineHeight: "1.5" }}>
-                {blog.content.substring(0, 80)}...
-              </p>
-              <small style={{ color: "#aaa", fontSize: "12px" }}>
-                📅 {new Date(blog.createdAt).toDateString()}
-              </small>
-              {blog.tags && (
-                <div style={{ marginTop: "8px" }}>
-                  {blog.tags.split(",").map((tag, i) => (
-                    <span key={i} style={tagBadge}>#{tag.trim()}</span>
-                  ))}
-                </div>
+              {cat}
+              {cat !== "All" && (
+                <span style={{ marginLeft: "6px", opacity: 0.7 }}>
+                  ({blogs.filter((b) => b.category === cat).length})
+                </span>
               )}
-            </div>
-            <div style={{ display: "flex", gap: "6px", marginTop: "12px", borderTop: "1px solid #f0f0f0", paddingTop: "10px" }}>
-              <button onClick={() => handleEdit(blog)} style={editBtn}>✏️ Edit</button>
-              <button onClick={() => handleDelete(blog._id)} style={deleteBtn}>🗑️ Delete</button>
-            </div>
+            </button>
+          ))}
+        </div>
+
+        {/* Blog Cards */}
+        {filteredBlogs.length === 0 && (
+          <div style={{ textAlign: "center", padding: "60px", color: "#aaa" }}>
+            <p style={{ fontSize: "40px" }}>✍️</p>
+            <p>Is category mein koi post nahi - pehla likho!</p>
           </div>
-        ))}
+        )}
+
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+          {filteredBlogs.map((blog) => (
+            <div key={blog._id} style={cardStyle}>
+              <div onClick={() => setSelected(blog)} style={{ cursor: "pointer" }}>
+                <span style={{ ...categoryBadge, backgroundColor: getCategoryColor(blog.category) }}>
+                  {blog.category}
+                </span>
+                <h3 style={{ margin: "10px 0 6px", fontSize: "16px" }}>{blog.title}</h3>
+                <p style={{ color: "#666", fontSize: "13px", margin: "0 0 12px", lineHeight: "1.5" }}>
+                  {blog.content.substring(0, 80)}...
+                </p>
+                <small style={{ color: "#aaa", fontSize: "12px" }}>
+                  📅 {new Date(blog.createdAt).toDateString()}
+                </small>
+                {blog.tags && (
+                  <div style={{ marginTop: "8px" }}>
+                    {blog.tags.split(",").map((tag, i) => (
+                      <span key={i} style={tagBadge}>#{tag.trim()}</span>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <div style={{ display: "flex", gap: "6px", marginTop: "12px", borderTop: "1px solid #f0f0f0", paddingTop: "10px" }}>
+                <button onClick={() => handleEdit(blog)} style={editBtn}>✏️ Edit</button>
+                <button onClick={() => handleDelete(blog._id)} style={deleteBtn}>🗑️ Delete</button>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
-    </div>
     </>
   );
 };
 
-// Category Colors
 const getCategoryColor = (cat) => {
   const colors = {
-    "React": "#61dafb33",
+    React: "#61dafb33",
     "Node.js": "#68a06333",
-    "MongoDB": "#4db33d33",
-    "JavaScript": "#f7df1e33",
-    "CSS": "#264de433",
-    "Other": "#88888833",
+    MongoDB: "#4db33d33",
+    JavaScript: "#f7df1e33",
+    CSS: "#264de433",
+    Other: "#88888833",
   };
   return colors[cat] || "#88888833";
 };
 
-// Styles
-const inputStyle = {
-  padding: "10px 14px",
-  borderRadius: "8px",
-  border: "1px solid #ddd",
-  fontSize: "14px",
-  width: "100%",
-  boxSizing: "border-box",
-};
-
-const btnStyle = {
-  padding: "10px 20px",
-  backgroundColor: "#1a1a1a",
-  color: "white",
-  border: "none",
-  borderRadius: "8px",
-  cursor: "pointer",
-  fontSize: "14px",
-};
-
-const publishBtn = {
-  padding: "10px 24px",
-  backgroundColor: "#4CAF50",
-  color: "white",
-  border: "none",
-  borderRadius: "8px",
-  cursor: "pointer",
-  fontSize: "14px",
-  width: "100%",
-};
-
-const editBtn = {
-  padding: "5px 12px",
-  backgroundColor: "#2196F3",
-  color: "white",
-  border: "none",
-  borderRadius: "6px",
-  cursor: "pointer",
-  fontSize: "12px",
-};
-
-const deleteBtn = {
-  padding: "5px 12px",
-  backgroundColor: "#f44336",
-  color: "white",
-  border: "none",
-  borderRadius: "6px",
-  cursor: "pointer",
-  fontSize: "12px",
-};
-
-const backBtn = {
-  padding: "8px 16px",
-  backgroundColor: "#555",
-  color: "white",
-  border: "none",
-  borderRadius: "6px",
-  cursor: "pointer",
-};
-
-const formCard = {
-  backgroundColor: "white",
-  padding: "24px",
-  borderRadius: "12px",
-  marginBottom: "24px",
-  boxShadow: "0 2px 12px rgba(0,0,0,0.08)",
-};
-
-const cardStyle = {
-  backgroundColor: "white",
-  padding: "16px",
-  borderRadius: "12px",
-  boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
-  display: "flex",
-  flexDirection: "column",
-  justifyContent: "space-between",
-};
-
-const categoryBadge = {
-  display: "inline-block",
-  padding: "3px 10px",
-  borderRadius: "20px",
-  fontSize: "11px",
-  fontWeight: "bold",
-};
-
-const tagBadge = {
-  display: "inline-block",
-  padding: "2px 8px",
-  backgroundColor: "#f0f0f0",
-  borderRadius: "4px",
-  fontSize: "11px",
-  marginRight: "4px",
-  color: "#555",
-};
+const inputStyle = { padding: "10px 14px", borderRadius: "8px", border: "1px solid #ddd", fontSize: "14px", width: "100%", boxSizing: "border-box" };
+const btnStyle = { padding: "10px 20px", backgroundColor: "#1a1a1a", color: "white", border: "none", borderRadius: "8px", cursor: "pointer", fontSize: "14px" };
+const publishBtn = { padding: "10px 24px", backgroundColor: "#4CAF50", color: "white", border: "none", borderRadius: "8px", cursor: "pointer", fontSize: "14px", width: "100%" };
+const editBtn = { padding: "5px 12px", backgroundColor: "#2196F3", color: "white", border: "none", borderRadius: "6px", cursor: "pointer", fontSize: "12px" };
+const deleteBtn = { padding: "5px 12px", backgroundColor: "#f44336", color: "white", border: "none", borderRadius: "6px", cursor: "pointer", fontSize: "12px" };
+const backBtn = { padding: "8px 16px", backgroundColor: "#555", color: "white", border: "none", borderRadius: "6px", cursor: "pointer" };
+const formCard = { backgroundColor: "white", padding: "24px", borderRadius: "12px", marginBottom: "24px", boxShadow: "0 2px 12px rgba(0,0,0,0.08)" };
+const cardStyle = { backgroundColor: "white", padding: "16px", borderRadius: "12px", boxShadow: "0 2px 8px rgba(0,0,0,0.06)", display: "flex", flexDirection: "column", justifyContent: "space-between" };
+const categoryBadge = { display: "inline-block", padding: "3px 10px", borderRadius: "20px", fontSize: "11px", fontWeight: "bold" };
+const tagBadge = { display: "inline-block", padding: "2px 8px", backgroundColor: "#f0f0f0", borderRadius: "4px", fontSize: "11px", marginRight: "4px", color: "#555" };
 
 export default Blog;

@@ -6,6 +6,7 @@ const { AddEducation, getEducation, updateEducation, deleteEducation } = require
 const app = express();
 const cors = require("cors");  
 const { getBlogs, AddBlog, updateBlog, deleteBlog } = require("./controllers/blog");
+const { getCategories, AddCategory, updateCategory, deleteCategory } = require("./controllers/categories");
 const port = 8000;
 
 //connection
@@ -30,8 +31,11 @@ app.get("/dashboard", authChecker, userData);
 //     return res.json("User Edit successfully");
 //   });
 // });
-
-app.delete("/api/user/:id", deleteUser);
+// categries routes
+app.get("/api/categories", getCategories)
+app.post("/api/categories", AddCategory)
+app.put("/api/categories/:id", updateCategory)
+app.delete("/api/categories/:id", deleteCategory)
 // blog routes
 app.get("/api/blogs", getBlogs)
 app.post("/api/blogs", AddBlog)

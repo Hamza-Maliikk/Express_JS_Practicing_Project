@@ -1,12 +1,34 @@
 const Blog = require("../models/blog");
+const Category = require("../models/categories");
 
 // GET - sab blogs fetch karo
 const getBlogs = async (req, res) => {
   try {
-    const data = await Blog.find().sort({ createdAt: -1 });
-    res.json(data);
+    const result = await Blog.aggregate([
+      { $sort: { createdAt: -1 } },
+      {
+        $group: {
+          _id: null,
+          blogs: { $push: "$$ROOT" },
+          categories: { $addToSet: "$category" } // blogs se hi unique categories nikalo
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          blogs: 1,
+          categories: 1
+        }
+      }
+    ]);
+
+    res.json({
+      blogs: result[0]?.blogs || [],
+      categories: result[0]?.categories || []
+    });
   } catch (err) {
-    res.status(500).json({ message: "Error fetching blogs", error: err });
+    console.log("ERROR:", err);
+    res.status(500).json({ message: "Error fetching blogs", error: err.message });
   }
 };
 
