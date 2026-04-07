@@ -1,35 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-} from "recharts";
 
-const lineData = [
-  { month: "Jan", users: 40 },
-  { month: "Feb", users: 65 },
-  { month: "Mar", users: 58 },
-  { month: "Apr", users: 90 },
-  { month: "May", users: 120 },
-  { month: "Jun", users: 105 },
-  { month: "Jul", users: 148 },
-];
-
-const barData = [
-  { day: "Mon", visits: 30 },
-  { day: "Tue", visits: 55 },
-  { day: "Wed", visits: 40 },
-  { day: "Thu", visits: 70 },
-  { day: "Fri", visits: 90 },
-  { day: "Sat", visits: 45 },
-  { day: "Sun", visits: 25 },
-];
 
 const API_BASE = "http://localhost:8000/dashboard";
 
@@ -37,12 +8,6 @@ function startOfToday() {
   const d = new Date();
   d.setHours(0, 0, 0, 0);
   return d;
-}
-
-function avatarHue(email) {
-  let h = 0;
-  for (let i = 0; i < (email || "").length; i += 1) h = (h + email.charCodeAt(i) * 13) % 360;
-  return h;
 }
 
 export default function Dashboard() {
@@ -96,16 +61,7 @@ export default function Dashboard() {
     return "there";
   }, [users]);
 
-  const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    if (!q) return users;
-    return users.filter(
-      (u) =>
-        u.name?.toLowerCase().includes(q) ||
-        u.email?.toLowerCase().includes(q) ||
-        (u.role || "").toLowerCase().includes(q)
-    );
-  }, [users, search]);
+
 
   const stats = useMemo(() => {
     const total = users.length;
@@ -118,33 +74,6 @@ export default function Dashboard() {
     }).length;
     return { total, admins, editors, newToday };
   }, [users]);
-
-  const statCards = [
-    {
-      label: "Total users",
-      value: loading ? "…" : String(stats.total),
-      change: "All accounts",
-      accent: "green",
-    },
-    {
-      label: "Admins",
-      value: loading ? "…" : String(stats.admins),
-      change: "Admin role",
-      accent: "blue",
-    },
-    {
-      label: "Editors",
-      value: loading ? "…" : String(stats.editors),
-      change: "Editor role",
-      accent: "amber",
-    },
-    {
-      label: "New today",
-      value: loading ? "…" : String(stats.newToday),
-      change: "Joined since midnight",
-      accent: "pink",
-    },
-  ];
 
   return (
     <>
@@ -344,158 +273,9 @@ export default function Dashboard() {
               })}
             </div>
           </div>
-          <button type="button" className="dash-btn" onClick={loadUsers} disabled={loading}>
-            {loading ? "Refreshing…" : "Refresh data"}
-          </button>
         </div>
 
         {error && <div className="dash-banner">{error}</div>}
-
-        <div className="dash-stats">
-          {statCards.map((s) => (
-            <div key={s.label} className={`dash-stat ${s.accent}`}>
-              <div className="dash-stat-label">{s.label}</div>
-              <div className="dash-stat-value">{s.value}</div>
-              <div className="dash-stat-change">{s.change}</div>
-            </div>
-          ))}
-        </div>
-
-        <div className="dash-charts">
-          <div className="dash-card">
-            <div className="dash-card-title">Illustrative user growth</div>
-            <ResponsiveContainer width="100%" height={180}>
-              <LineChart data={lineData}>
-                <XAxis
-                  dataKey="month"
-                  tick={{ fontSize: 10, fill: "#9ca3af", fontFamily: "DM Mono" }}
-                  axisLine={false}
-                  tickLine={false}
-                />
-                <YAxis
-                  tick={{ fontSize: 10, fill: "#9ca3af", fontFamily: "DM Mono" }}
-                  axisLine={false}
-                  tickLine={false}
-                />
-                <Tooltip
-                  contentStyle={{
-                    background: "#1a1a1a",
-                    border: "none",
-                    borderRadius: 8,
-                    fontSize: 11,
-                    fontFamily: "DM Mono",
-                    color: "#f8f7f4",
-                  }}
-                  cursor={{ stroke: "#e5e7eb" }}
-                />
-                <Line type="monotone" dataKey="users" stroke="#a3e635" strokeWidth={2} dot={false} />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-
-          <div className="dash-card">
-            <div className="dash-card-title">Illustrative weekly visits</div>
-            <ResponsiveContainer width="100%" height={180}>
-              <BarChart data={barData} barSize={14}>
-                <XAxis
-                  dataKey="day"
-                  tick={{ fontSize: 10, fill: "#9ca3af", fontFamily: "DM Mono" }}
-                  axisLine={false}
-                  tickLine={false}
-                />
-                <YAxis hide />
-                <Tooltip
-                  contentStyle={{
-                    background: "#1a1a1a",
-                    border: "none",
-                    borderRadius: 8,
-                    fontSize: 11,
-                    fontFamily: "DM Mono",
-                    color: "#f8f7f4",
-                  }}
-                  cursor={{ fill: "#f8f7f4" }}
-                />
-                <Bar dataKey="visits" fill="#60a5fa" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        <div className="dash-card">
-          <div className="dash-table-head">
-            <div className="dash-card-title" style={{ margin: 0 }}>
-              Users ({filtered.length}
-              {search.trim() ? ` of ${users.length}` : ""})
-            </div>
-            <input
-              className="dash-search"
-              placeholder="Search name, email, role…"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              aria-label="Search users"
-            />
-          </div>
-
-          <div className="dash-table-wrap">
-            <table className="dash-table">
-              <thead>
-                <tr>
-                  <th>User</th>
-                  <th>Role</th>
-                  <th>Joined</th>
-                </tr>
-              </thead>
-              <tbody>
-                {loading && (
-                  <tr className="dash-empty">
-                    <td colSpan={3}>Loading users…</td>
-                  </tr>
-                )}
-                {!loading && filtered.length === 0 && (
-                  <tr className="dash-empty">
-                    <td colSpan={3}>
-                      {users.length === 0 ? "No users yet." : "No matches for your search."}
-                    </td>
-                  </tr>
-                )}
-                {!loading &&
-                  filtered.map((u) => {
-                    const hue = avatarHue(u.email);
-                    const letter = (u.name || u.email || "?")[0]?.toUpperCase() || "?";
-                    const joined = u.createdAt
-                      ? new Date(u.createdAt).toLocaleDateString(undefined, {
-                          year: "numeric",
-                          month: "short",
-                          day: "numeric",
-                        })
-                      : "—";
-                    return (
-                      <tr key={u._id}>
-                        <td>
-                          <div className="dash-user-cell">
-                            <div
-                              className="dash-user-av"
-                              style={{ background: `hsl(${hue} 45% 42%)` }}
-                            >
-                              {letter}
-                            </div>
-                            <div>
-                              <div className="dash-user-name">{u.name}</div>
-                              <div className="dash-user-email">{u.email}</div>
-                            </div>
-                          </div>
-                        </td>
-                        <td>
-                          <span className="dash-badge">{u.role || "User"}</span>
-                        </td>
-                        <td>{joined}</td>
-                      </tr>
-                    );
-                  })}
-              </tbody>
-            </table>
-          </div>
-        </div>
       </div>
     </>
   );

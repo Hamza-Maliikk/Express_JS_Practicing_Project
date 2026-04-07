@@ -1,12 +1,13 @@
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { clearToken } from "../redux/slices/loginSlice/check";
+import { LogOut } from 'lucide-react';
 
 const nav = [
-  { to: "/dashboard", label: "Dashboard" },
-  { to: "/education", label: "Education" },
-  { to: "/blogs", label: "Blogs" },
-  { to: "/categories", label: "Categories" },
+  { to: "/portfolio", label: "Portfolio", icon: "◉" },
+  { to: "/education", label: "Education", icon: "▣" },
+  { to: "/blogs", label: "Blogs", icon: "✎" },
+  { to: "/categories", label: "Categories", icon: "◈" },
 ];
 
 export default function Layout() {
@@ -28,19 +29,19 @@ export default function Layout() {
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:ital,wght@0,300;0,500;1,300&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=Fraunces:ital,wght@0,300;0,500;1,300&display=swap');
 
         .app-shell {
           display: flex;
           min-height: 100vh;
-          background: #f8f7f4;
-          font-family: 'DM Mono', monospace;
-          color: #1a1a1a;
+          background: #0b0b0b;
+          font-family: 'Poppins', sans-serif;
+          color: #e5e5e5;
         }
 
         .app-sidebar {
           width: 220px;
-          background: #1a1a1a;
+          background: #141414;
           display: flex;
           flex-direction: column;
           padding: 2rem 1.2rem;
@@ -50,11 +51,11 @@ export default function Layout() {
           font-family: 'Fraunces', serif;
           font-size: 1.3rem;
           font-weight: 500;
-          color: #f8f7f4;
+          color: #f1f1f1;
           margin-bottom: 2.5rem;
           letter-spacing: -0.02em;
         }
-        .app-sidebar-logo span { color: #a3e635; }
+        .app-sidebar-logo span { color: #a3a3a3; }
 
         .app-nav-link {
           display: flex;
@@ -63,7 +64,7 @@ export default function Layout() {
           padding: 0.6rem 0.8rem;
           border-radius: 8px;
           font-size: 0.78rem;
-          color: #6b7280;
+          color: #9a9a9a;
           text-decoration: none;
           transition: background 0.15s, color 0.15s;
           margin-bottom: 0.2rem;
@@ -75,17 +76,19 @@ export default function Layout() {
           cursor: pointer;
           box-sizing: border-box;
         }
-        .app-nav-link:hover { background: #2a2a2a; color: #e5e7eb; }
-        .app-nav-link.active { background: #a3e635; color: #1a1a1a; font-weight: 500; }
+        .app-nav-link:hover { background: #242424; color: #f0f0f0; }
+        .app-nav-link.active { background: #e5e5e5; color: #111111; font-weight: 500; }
 
-        .app-nav-dot {
-          width: 6px; height: 6px;
-          border-radius: 50%;
-          background: currentColor;
-          opacity: 0.6;
+        .app-nav-icon {
+          width: 20px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 16px;
+          opacity: 0.8;
           flex-shrink: 0;
         }
-        .app-nav-link.active .app-nav-dot { opacity: 1; }
+        .app-nav-link.active .app-nav-icon { opacity: 1; }
 
         .app-sidebar-bottom {
           margin-top: auto;
@@ -100,28 +103,28 @@ export default function Layout() {
         .app-sidebar-avatar {
           width: 32px; height: 32px;
           border-radius: 50%;
-          background: #a3e635;
+          background: #d4d4d4;
           display: flex; align-items: center; justify-content: center;
           font-size: 0.75rem;
           font-weight: 500;
-          color: #1a1a1a;
+          color: #111111;
           flex-shrink: 0;
         }
         .app-sidebar-name {
           font-size: 0.75rem;
-          color: #9ca3af;
+          color: #b9b9b9;
           overflow: hidden;
           text-overflow: ellipsis;
           white-space: nowrap;
           max-width: 120px;
         }
-        .app-sidebar-role { font-size: 0.65rem; color: #4b5563; }
+        .app-sidebar-role { font-size: 0.65rem; color: #858585; }
 
         .app-logout {
           margin-top: 0.75rem;
-          color: #9ca3af;
+          color: #b9b9b9;
         }
-        .app-logout:hover { color: #fca5a5; background: #2a2020; }
+        .app-logout:hover { color: #f1f1f1; background: #242424; }
 
         .app-main {
           flex: 1;
@@ -139,19 +142,19 @@ export default function Layout() {
       <div className="app-shell">
         <aside className="app-sidebar">
           <div className="app-sidebar-logo">
-            usr<span>.</span>mgmt
+            My<span>.</span>Portfolio
           </div>
           <nav>
-            {nav.map(({ to, label }) => (
+            {nav.map(({ to, label, icon }) => (
               <NavLink
                 key={to}
                 to={to}
                 className={({ isActive }) =>
                   `app-nav-link${isActive ? " active" : ""}`
                 }
-                end={to === "/dashboard"}
+                end={to === "/portfolio"}
               >
-                <span className="app-nav-dot" />
+                <span className="app-nav-icon">{icon}</span>
                 {label}
               </NavLink>
             ))}
@@ -160,7 +163,8 @@ export default function Layout() {
               className="app-nav-link app-logout"
               onClick={logOut}
             >
-              <span className="app-nav-dot" />
+              <span ></span>
+              <LogOut className="app-nav-icon" />
               Logout
             </button>
           </nav>

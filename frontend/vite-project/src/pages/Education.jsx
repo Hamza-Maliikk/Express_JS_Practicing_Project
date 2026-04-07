@@ -3,7 +3,8 @@ import axios from "axios";
 
 const Education = () => {
   const [educations, setEducations] = useState([]);
-  const [form, setForm] = useState({ degree: "", institute: "", year: "", grade: "" });
+  const emptyRow = { degree: "", institute: "", year: "", grade: "" };
+  const [rows, setRows] = useState([{ ...emptyRow }]);
   const [editId, setEditId] = useState(null);
 
   // Fetch all
@@ -16,21 +17,57 @@ const Education = () => {
   useEffect(() => {
     fetchEducation();
   }, []);
+
+  const updateRow = (idx, key, value) => {
+    setRows((prev) => prev.map((row, i) => (i === idx ? { ...row, [key]: value } : row)));
+  };
+
+  const addRow = () => {
+    setRows((prev) => [...prev, { ...emptyRow }]);
+  };
+
+  const removeRow = (idx) => {
+    setRows((prev) => prev.filter((_, i) => i !== idx));
+  };
+
   // Add or Update
   const handleSubmit = async () => {
+    const cleanedRows = rows
+      .map((row) => ({
+        degree: row.degree.trim(),
+        institute: row.institute.trim(),
+        year: row.year.trim(),
+        grade: row.grade.trim(),
+      }))
+      .filter((row) => row.degree || row.institute || row.year || row.grade);
+
+    if (!cleanedRows.length) {
+      alert("At least one education entry add karo.");
+      return;
+    }
+
     if (editId) {
-      await axios.put(`http://localhost:8000/api/education/${editId}`, form);
+      await axios.put(`http://localhost:8000/api/education/${editId}`, cleanedRows[0]);
       setEditId(null);
     } else {
-      await axios.post("http://localhost:8000/api/education", form);
+      await Promise.all(
+        cleanedRows.map((row) => axios.post("http://localhost:8000/api/education", row))
+      );
     }
-    setForm({ degree: "", institute: "", year: "", grade: "" });
+    setRows([{ ...emptyRow }]);
     fetchEducation();
   };
 
   // Edit
   const handleEdit = (edu) => {
-    setForm({ degree: edu.degree, institute: edu.institute, year: edu.year, grade: edu.grade });
+    setRows([
+      {
+        degree: edu.degree || "",
+        institute: edu.institute || "",
+        year: edu.year || "",
+        grade: edu.grade || "",
+      },
+    ]);
     setEditId(edu._id);
   };
 
@@ -57,34 +94,51 @@ const Education = () => {
       <h2>Education</h2>
 
       {/* Form */}
-      <div style={{ display: "flex", gap: "10px", marginBottom: "20px", flexWrap: "wrap" }}>
-        <input
-          placeholder="Degree"
-          value={form.degree}
-          onChange={(e) => setForm({ ...form, degree: e.target.value })}
-          style={inputStyle}
-        />
-        <input
-          placeholder="Institute"
-          value={form.institute}
-          onChange={(e) => setForm({ ...form, institute: e.target.value })}
-          style={inputStyle}
-        />
-        <input
-          placeholder="Year"
-          value={form.year}
-          onChange={(e) => setForm({ ...form, year: e.target.value })}
-          style={inputStyle}
-        />
-        <input
-          placeholder="Grade"
-          value={form.grade}
-          onChange={(e) => setForm({ ...form, grade: e.target.value })}
-          style={inputStyle}
-        />
-        <button onClick={handleSubmit} style={btnStyle}>
-          {editId ? "Update" : "Add"}
-        </button>
+      <div style={formWrapStyle}>
+        {rows.map((row, idx) => (
+          <div key={idx} style={rowStyle}>
+            <input
+              placeholder="e.g. BS Computer Science"
+              value={row.degree}
+              onChange={(e) => updateRow(idx, "degree", e.target.value)}
+              style={inputStyle}
+            />
+            <input
+              placeholder="e.g. COMSATS University"
+              value={row.institute}
+              onChange={(e) => updateRow(idx, "institute", e.target.value)}
+              style={inputStyle}
+            />
+            <input
+              placeholder="Year (2021-2025)"
+              value={row.year}
+              onChange={(e) => updateRow(idx, "year", e.target.value)}
+              style={inputStyle}
+            />
+            <input
+              placeholder="Grade / CGPA"
+              value={row.grade}
+              onChange={(e) => updateRow(idx, "grade", e.target.value)}
+              style={inputStyle}
+            />
+            {!editId && rows.length > 1 && (
+              <button onClick={() => removeRow(idx)} style={deleteBtn}>
+                Remove
+              </button>
+            )}
+          </div>
+        ))}
+
+        <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+          {!editId && (
+            <button onClick={addRow} style={editBtn}>
+              + Add More
+            </button>
+          )}
+          <button onClick={handleSubmit} style={btnStyle}>
+            {editId ? "Update" : "Save All"}
+          </button>
+        </div>
       </div>
 
       {/* List */}
@@ -108,10 +162,30 @@ const Education = () => {
 
 // Styles
 const inputStyle = {
-  padding: "8px 12px",
-  borderRadius: "6px",
-  border: "1px solid #ccc",
+  padding: "10px 12px",
+  borderRadius: "10px",
+  border: "1px solid #d4d4d4",
   fontSize: "14px",
+  minWidth: "180px",
+  flex: "1 1 180px",
+  backgroundColor: "#fafafa",
+  color: "#1f2937",
+  outline: "none",
+};
+
+const formWrapStyle = {
+  marginBottom: "20px",
+  backgroundColor: "#ffffff",
+  border: "1px solid #ececec",
+  borderRadius: "12px",
+  padding: "12px",
+};
+
+const rowStyle = {
+  display: "flex",
+  gap: "10px",
+  marginBottom: "10px",
+  flexWrap: "wrap",
 };
 
 const btnStyle = {

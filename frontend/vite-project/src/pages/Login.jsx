@@ -34,7 +34,7 @@ export default function Login() {
         dispatch(setToken(data.token));
         if (data.email) localStorage.setItem("userEmail", data.email);
         if (data.role) localStorage.setItem("userRole", data.role);
-        navigate("/dashboard");
+        navigate("/portfolio");
         console.log("Login successful:", data);
       } else {
         setError(data.message || "Email ya password galat hai!");
