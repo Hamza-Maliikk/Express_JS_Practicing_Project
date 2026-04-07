@@ -8,10 +8,11 @@ const cors = require("cors");
 const { getBlogs, AddBlog, updateBlog, deleteBlog } = require("./controllers/blog");
 const { getCategories, AddCategory, updateCategory, deleteCategory } = require("./controllers/categories");
 const { upload } = require("./middleware/multer");
+require("dotenv").config();
 const port = 8000;
 
 //connection
-connectToDatabase('mongodb://127.0.0.1:27017/https-reqest');
+connectToDatabase(process.env.MONGO_URI);
 
 // middleware
 app.use(express.json());

@@ -2,7 +2,7 @@ const bcrypt = require('bcrypt');
 const saltRounds = 10;
 const User = require("../models/user");
 const jwt = require("jsonwebtoken");
-const secret = "mysecretkey@1414";
+const secret = process.env.JWT_SECRET;
 
 const userData = async (req, res) => {
   try {
