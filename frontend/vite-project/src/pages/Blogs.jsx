@@ -11,18 +11,46 @@ const Blog = () => {
   const [categories, setCategories] = useState([]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      const res = await axios.get("http://localhost:8000/api/blogs");
-      setBlogs(res.data.blogs);
-      setCategories(res.data.categories);
-    };
     fetchData();
   }, []);
 
-  // const fetchBlogs = async () => {
-  //   const res = await axios.get("http://localhost:8000/api/blogs");
-  //   setBlogs(res.data.blogs);
-  // };
+  const fetchData = async () => {
+    try {
+      const res = await axios.get("http://localhost:8000/api/blogs");
+      const payload = res.data;
+
+      // Support both shapes:
+      // 1) { blogs: [...], categories: [...] }
+      // 2) [ ...blogs ]
+      const blogsList = Array.isArray(payload) ? payload : payload?.blogs || [];
+      const categoryList = Array.isArray(payload?.categories)
+        ? payload.categories
+        : [...new Set(blogsList.map((b) => b.category).filter(Boolean))];
+
+      const dedupedCategories = [
+        ...new Map(
+          categoryList
+            .map((cat) => String(cat || "").trim())
+            .filter(Boolean)
+            .map((cat) => [cat.toLowerCase(), cat])
+        ).values(),
+      ];
+
+      setBlogs(blogsList);
+      setCategories(dedupedCategories);
+
+      setForm((prev) => {
+        if (!prev.category && dedupedCategories.length) {
+          return { ...prev, category: dedupedCategories[0] };
+        }
+        return prev;
+      });
+    } catch (error) {
+      console.error("Error fetching blogs:", error);
+      setBlogs([]);
+      setCategories([]);
+    }
+  };
 
   const handleSubmit = async () => {
     if (!form.title || !form.content) return alert("Title aur Content zaroor bharo!");
@@ -34,7 +62,7 @@ const Blog = () => {
     }
     setForm({ title: "", content: "", tags: "", category: "" });
     setShowForm(false);
-    fetchBlogs();
+    fetchData();
   };
 
   const handleEdit = (blog) => {
@@ -47,7 +75,7 @@ const Blog = () => {
   const handleDelete = async (id) => {
     if (!window.confirm("Delete karna hai?")) return;
     await axios.delete(`http://localhost:8000/api/blogs/${id}`);
-    fetchBlogs();
+    fetchData();
   };
 
   const filteredBlogs = activeCategory === "All"
@@ -101,7 +129,19 @@ const Blog = () => {
             <h2 style={{ margin: 0, fontSize: "24px" }}>📝 Blog Posts</h2>
             <p style={{ margin: "4px 0 0", color: "#888", fontSize: "13px" }}>{blogs.length} posts total</p>
           </div>
-          <button onClick={() => { setShowForm(!showForm); setEditId(null); setForm({ title: "", content: "", tags: "", category: "" }); }} style={btnStyle}>
+          <button
+            onClick={() => {
+              setShowForm(!showForm);
+              setEditId(null);
+              setForm({
+                title: "",
+                content: "",
+                tags: "",
+                category: categories[0] || "",
+              });
+            }}
+            style={btnStyle}
+          >
             {showForm ? "✕ Cancel" : "+ New Post"}
           </button>
         </div>
@@ -130,13 +170,14 @@ const Blog = () => {
                 onChange={(e) => setForm({ ...form, tags: e.target.value })}
                 style={{ ...inputStyle, flex: 1 }}
               />
+              {/* ✅ Fix 3: categories ab strings hain, .category nahi */}
               <select
                 value={form.category}
                 onChange={(e) => setForm({ ...form, category: e.target.value })}
                 style={{ ...inputStyle, width: "160px" }}
               >
-                {categories.map((cat) => (
-                  <option key={cat._id} value={cat.category}>{cat.category}</option>
+                {categories.map((cat, i) => (
+                  <option key={i} value={cat}>{cat}</option>
                 ))}
               </select>
             </div>
@@ -148,7 +189,8 @@ const Blog = () => {
 
         {/* Category Filter */}
         <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginBottom: "24px" }}>
-          {["All", ...categories.map((c) => c.category)].map((cat) => (
+          {/* ✅ Fix 3: .map(c => c.category) hata diya */}
+          {["All", ...categories].map((cat) => (
             <button
               key={cat}
               onClick={() => setActiveCategory(cat)}
@@ -220,8 +262,8 @@ const getCategoryColor = (cat) => {
     React: "#61dafb33",
     "Node.js": "#68a06333",
     MongoDB: "#4db33d33",
-    JavaScript: "#f7df1e33",
-    CSS: "#264de433",
+      "JavaScript": "#f7df1e33",
+      CSS: "#264de433",
     Other: "#88888833",
   };
   return colors[cat] || "#88888833";

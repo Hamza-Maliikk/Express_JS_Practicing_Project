@@ -1,30 +1,30 @@
 const Blog = require("../models/blog");
 const Category = require("../models/categories");
 
+const normalizeCategoryName = (value = "") => value.trim().replace(/\s+/g, " ");
+
 // GET - sab blogs fetch karo
 const getBlogs = async (req, res) => {
   try {
-    const result = await Blog.aggregate([
-      { $sort: { createdAt: -1 } },
-      {
-        $group: {
-          _id: null,
-          blogs: { $push: "$$ROOT" },
-          categories: { $addToSet: "$category" } // blogs se hi unique categories nikalo
-        }
-      },
-      {
-        $project: {
-          _id: 0,
-          blogs: 1,
-          categories: 1
-        }
-      }
-    ]);
+    const blogs = await Blog.find().sort({ createdAt: -1 });
+    const dbCategories = await Category.find().select("category -_id");
+    const uniqueCategories = [
+      ...new Set(
+        dbCategories
+          .map((c) => normalizeCategoryName(c.category))
+          .filter(Boolean)
+          .map((c) => c.toLowerCase())
+      ),
+    ].map((lower) => {
+      const original = dbCategories.find(
+        (c) => normalizeCategoryName(c.category).toLowerCase() === lower
+      );
+      return normalizeCategoryName(original?.category || lower);
+    });
 
     res.json({
-      blogs: result[0]?.blogs || [],
-      categories: result[0]?.categories || []
+      blogs,
+      categories: uniqueCategories,
     });
   } catch (err) {
     console.log("ERROR:", err);
@@ -34,15 +34,17 @@ const getBlogs = async (req, res) => {
 
 // POST - naya blog add karo
 const AddBlog = async (req, res) => {
-  const { title, content, category } = req.body;
+  const title = req.body?.title?.trim();
+  const content = req.body?.content?.trim();
+  const category = normalizeCategoryName(req.body?.category || "");
   if (!title || !content || !category) {
     return res.status(400).json("Title, Content aur Category zaroor bharo!");
   }
   try {
-    const saved = await Blog.create(req.body);
+    const saved = await Blog.create({ ...req.body, title, content, category });
     res.status(201).json(saved);
   } catch (err) {
-    res.status(500).json({ message: "Error adding blog", error: err });
+    res.status(500).json({ message: "Error adding blog", error: err.message });
   }
 };
 

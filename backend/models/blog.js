@@ -13,7 +13,7 @@ const blogSchema = new mongoose.Schema(
     category: {
       type: String,
       required: true,
-      enum: [],
+      trim: true,
       default: "Other",
     },
     tags: {

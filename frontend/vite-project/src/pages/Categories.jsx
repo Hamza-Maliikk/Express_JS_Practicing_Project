@@ -17,6 +17,7 @@ const Categories = () => {
     setLoading(true);
     try {
       const res = await axios.get("http://localhost:8000/api/categories");
+      console.log("Categories fetched:", res.data);
       setCategories(res.data);
     } catch (err) {
       console.error("Categories fetch nahi hoi:", err);
@@ -172,6 +173,9 @@ const Categories = () => {
                 <h3 style={{ margin: "0 0 6px", fontSize: "16px", fontFamily: "'Fraunces', serif" }}>
                   {cat.category}
                 </h3>
+                <p style={{ margin: "0 0 8px", color: "#888", fontSize: "12px" }}>
+                  {cat.blogCount || 0} {(cat.blogCount || 0) === 1 ? "blog" : "blogs"}
+                </p>
                 <p style={{ color: "#666", fontSize: "13px", margin: "0 0 12px", lineHeight: "1.5" }}>
                   {cat.description
                     ? cat.description.substring(0, 80) + (cat.description.length > 80 ? "..." : "")
