@@ -3,12 +3,19 @@ import axios from "axios";
 
 const Blog = () => {
   const [blogs, setBlogs] = useState([]);
-  const [form, setForm] = useState({ title: "", content: "", tags: "", category: "" });
+  const [form, setForm] = useState({
+    title: "",
+    content: "",
+    tags: "",
+    category: "",
+  });
   const [editId, setEditId] = useState(null);
   const [selected, setSelected] = useState(null);
   const [activeCategory, setActiveCategory] = useState("All");
   const [showForm, setShowForm] = useState(false);
   const [categories, setCategories] = useState([]);
+  const [file, setFile] = useState(null);
+  const [currentImage, setCurrentImage] = useState("");
 
   useEffect(() => {
     fetchData();
@@ -32,7 +39,7 @@ const Blog = () => {
           categoryList
             .map((cat) => String(cat || "").trim())
             .filter(Boolean)
-            .map((cat) => [cat.toLowerCase(), cat])
+            .map((cat) => [cat.toLowerCase(), cat]),
         ).values(),
       ];
 
@@ -53,21 +60,59 @@ const Blog = () => {
   };
 
   const handleSubmit = async () => {
-    if (!form.title || !form.content) return alert("Title aur Content zaroor bharo!");
-    if (editId) {
-      await axios.put(`http://localhost:8000/api/blogs/${editId}`, form);
-      setEditId(null);
-    } else {
-      await axios.post("http://localhost:8000/api/blogs", form);
+    if (!form.title || !form.content) {
+      return alert("Title aur Content zaroor bharo!");
     }
-    setForm({ title: "", content: "", tags: "", category: "" });
-    setShowForm(false);
-    fetchData();
+    const formData = new FormData();
+    formData.append("title", form.title);
+    formData.append("content", form.content);
+    formData.append("tags", form.tags || "");
+    formData.append("category", form.category || "");
+    if (file) {
+      formData.append("image", file);
+    }
+
+    try {
+      if (editId) {
+        if (file) {
+          await axios.put(`http://localhost:8000/api/blogs/${editId}`, formData, {
+            headers: { "Content-Type": "multipart/form-data" },
+          });
+        } else {
+          await axios.put(`http://localhost:8000/api/blogs/${editId}`, {
+            title: form.title,
+            content: form.content,
+            tags: form.tags,
+            category: form.category,
+          });
+        }
+        setEditId(null);
+      } else {
+        await axios.post("http://localhost:8000/api/blogs", formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+      }
+
+      setForm({ title: "", content: "", tags: "", category: "" });
+      setFile(null); // reset file
+      setCurrentImage("");
+      setShowForm(false);
+      fetchData();
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const handleEdit = (blog) => {
-    setForm({ title: blog.title, content: blog.content, tags: blog.tags, category: blog.category });
+    setForm({
+      title: blog.title,
+      content: blog.content,
+      tags: blog.tags,
+      category: blog.category,
+    });
     setEditId(blog._id);
+    setCurrentImage(blog.image || "");
+    setFile(null);
     setSelected(null);
     setShowForm(true);
   };
@@ -78,9 +123,10 @@ const Blog = () => {
     fetchData();
   };
 
-  const filteredBlogs = activeCategory === "All"
-    ? blogs
-    : blogs.filter((b) => b.category === activeCategory);
+  const filteredBlogs =
+    activeCategory === "All"
+      ? blogs
+      : blogs.filter((b) => b.category === activeCategory);
 
   if (selected) {
     return (
@@ -90,23 +136,74 @@ const Blog = () => {
           .blog-shell { max-width: 900px; font-family: 'DM Mono', monospace; color: #1a1a1a; }
           .blog-shell h1, .blog-shell h2 { font-family: 'Fraunces', serif; letter-spacing: -0.02em; }
         `}</style>
-        <div className="blog-shell" style={{ padding: "0", maxWidth: "800px", margin: "0 auto" }}>
-          <button onClick={() => setSelected(null)} style={backBtn}>← Back</button>
+        <div
+          className="blog-shell"
+          style={{ padding: "0", maxWidth: "800px", margin: "0 auto" }}
+        >
+          <button onClick={() => setSelected(null)} style={backBtn}>
+            ← Back
+          </button>
           <div style={{ marginTop: "20px" }}>
-            <span style={{ ...categoryBadge, backgroundColor: getCategoryColor(selected.category) }}>
+            <span
+              style={{
+                ...categoryBadge,
+                backgroundColor: getCategoryColor(selected.category),
+              }}
+            >
               {selected.category}
             </span>
-            <h1 style={{ marginTop: "12px", fontSize: "28px" }}>{selected.title}</h1>
-            <div style={{ display: "flex", gap: "16px", color: "#888", fontSize: "13px", marginBottom: "24px" }}>
+            <h1 style={{ marginTop: "12px", fontSize: "28px" }}>
+              {selected.title}
+            </h1>
+            {selected.image && (
+              <img
+                src={selected.image}
+                alt="blog"
+                style={{
+                  width: "100%",
+                  maxHeight: "300px",
+                  objectFit: "cover",
+                  borderRadius: "10px",
+                  marginTop: "10px",
+                  marginBottom: "20px",
+                }}
+              />
+            )}
+            <div
+              style={{
+                display: "flex",
+                gap: "16px",
+                color: "#888",
+                fontSize: "13px",
+                marginBottom: "24px",
+              }}
+            >
               <span>📅 {new Date(selected.createdAt).toDateString()}</span>
               <span>🏷️ {selected.tags}</span>
             </div>
-            <div style={{ lineHeight: "1.9", color: "#333", fontSize: "16px", whiteSpace: "pre-wrap" }}>
+            <div
+              style={{
+                lineHeight: "1.9",
+                color: "#333",
+                fontSize: "16px",
+                whiteSpace: "pre-wrap",
+              }}
+            >
               {selected.content}
             </div>
             <div style={{ display: "flex", gap: "8px", marginTop: "30px" }}>
-              <button onClick={() => handleEdit(selected)} style={editBtn}>✏️ Edit</button>
-              <button onClick={() => { handleDelete(selected._id); setSelected(null); }} style={deleteBtn}>🗑️ Delete</button>
+              <button onClick={() => handleEdit(selected)} style={editBtn}>
+                ✏️ Edit
+              </button>
+              <button
+                onClick={() => {
+                  handleDelete(selected._id);
+                  setSelected(null);
+                }}
+                style={deleteBtn}
+              >
+                🗑️ Delete
+              </button>
             </div>
           </div>
         </div>
@@ -121,18 +218,31 @@ const Blog = () => {
         .blog-shell { max-width: 900px; font-family: 'DM Mono', monospace; color: #1a1a1a; }
         .blog-shell h2 { font-family: 'Fraunces', serif; letter-spacing: -0.02em; }
       `}</style>
-      <div className="blog-shell" style={{ padding: "0", maxWidth: "900px", margin: "0 auto" }}>
-
+      <div
+        className="blog-shell"
+        style={{ padding: "0", maxWidth: "900px", margin: "0 auto" }}
+      >
         {/* Header */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: "24px",
+          }}
+        >
           <div>
             <h2 style={{ margin: 0, fontSize: "24px" }}>📝 Blog Posts</h2>
-            <p style={{ margin: "4px 0 0", color: "#888", fontSize: "13px" }}>{blogs.length} posts total</p>
+            <p style={{ margin: "4px 0 0", color: "#888", fontSize: "13px" }}>
+              {blogs.length} posts total
+            </p>
           </div>
           <button
             onClick={() => {
               setShowForm(!showForm);
               setEditId(null);
+              setCurrentImage("");
+              setFile(null);
               setForm({
                 title: "",
                 content: "",
@@ -149,7 +259,9 @@ const Blog = () => {
         {/* Form */}
         {showForm && (
           <div style={formCard}>
-            <h3 style={{ margin: "0 0 16px" }}>{editId ? "✏️ Post Edit Karo" : "🚀 Naya Post Likho"}</h3>
+            <h3 style={{ margin: "0 0 16px" }}>
+              {editId ? "✏️ Post Edit Karo" : "🚀 Naya Post Likho"}
+            </h3>
             <input
               placeholder="Title"
               value={form.title}
@@ -161,8 +273,41 @@ const Blog = () => {
               value={form.content}
               onChange={(e) => setForm({ ...form, content: e.target.value })}
               rows={6}
-              style={{ ...inputStyle, resize: "vertical", marginBottom: "10px" }}
+              style={{
+                ...inputStyle,
+                resize: "vertical",
+                marginBottom: "10px",
+              }}
             />
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => setFile(e.target.files[0])}
+              style={{ marginBottom: "10px" }}
+            />
+            {editId && currentImage && !file && (
+              <div style={{ marginBottom: "10px" }}>
+                <small style={{ color: "#777", display: "block", marginBottom: "6px" }}>
+                  Current image
+                </small>
+                <img
+                  src={currentImage}
+                  alt="current blog"
+                  style={{
+                    width: "100%",
+                    maxHeight: "180px",
+                    objectFit: "cover",
+                    borderRadius: "10px",
+                    border: "1px solid #eee",
+                  }}
+                />
+              </div>
+            )}
+            {file && (
+              <small style={{ color: "#555", display: "block", marginBottom: "10px" }}>
+                New image selected: {file.name}
+              </small>
+            )}
             <div style={{ display: "flex", gap: "10px", marginBottom: "10px" }}>
               <input
                 placeholder="Tags (e.g. react, hooks)"
@@ -177,7 +322,9 @@ const Blog = () => {
                 style={{ ...inputStyle, width: "160px" }}
               >
                 {categories.map((cat, i) => (
-                  <option key={i} value={cat}>{cat}</option>
+                  <option key={i} value={cat}>
+                    {cat}
+                  </option>
                 ))}
               </select>
             </div>
@@ -188,7 +335,14 @@ const Blog = () => {
         )}
 
         {/* Category Filter */}
-        <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginBottom: "24px" }}>
+        <div
+          style={{
+            display: "flex",
+            gap: "8px",
+            flexWrap: "wrap",
+            marginBottom: "24px",
+          }}
+        >
           {/* ✅ Fix 3: .map(c => c.category) hata diya */}
           {["All", ...categories].map((cat) => (
             <button
@@ -216,6 +370,7 @@ const Blog = () => {
         </div>
 
         {/* Blog Cards */}
+
         {filteredBlogs.length === 0 && (
           <div style={{ textAlign: "center", padding: "60px", color: "#aaa" }}>
             <p style={{ fontSize: "40px" }}>✍️</p>
@@ -223,15 +378,52 @@ const Blog = () => {
           </div>
         )}
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: "16px",
+          }}
+        >
           {filteredBlogs.map((blog) => (
             <div key={blog._id} style={cardStyle}>
-              <div onClick={() => setSelected(blog)} style={{ cursor: "pointer" }}>
-                <span style={{ ...categoryBadge, backgroundColor: getCategoryColor(blog.category) }}>
+              {blog.image && (
+                <img
+                  src={blog.image}
+                  alt="blog"
+                  style={{
+                    width: "100%",
+                    height: "160px",
+                    objectFit: "cover",
+                    borderRadius: "10px",
+                    marginBottom: "10px",
+                  }}
+                />
+              )}
+
+              <div
+                onClick={() => setSelected(blog)}
+                style={{ cursor: "pointer" }}
+              >
+                <span
+                  style={{
+                    ...categoryBadge,
+                    backgroundColor: getCategoryColor(blog.category),
+                  }}
+                >
                   {blog.category}
                 </span>
-                <h3 style={{ margin: "10px 0 6px", fontSize: "16px" }}>{blog.title}</h3>
-                <p style={{ color: "#666", fontSize: "13px", margin: "0 0 12px", lineHeight: "1.5" }}>
+                <h3 style={{ margin: "10px 0 6px", fontSize: "16px" }}>
+                  {blog.title}
+                </h3>
+                <p
+                  style={{
+                    color: "#666",
+                    fontSize: "13px",
+                    margin: "0 0 12px",
+                    lineHeight: "1.5",
+                  }}
+                >
                   {blog.content.substring(0, 80)}...
                 </p>
                 <small style={{ color: "#aaa", fontSize: "12px" }}>
@@ -240,14 +432,31 @@ const Blog = () => {
                 {blog.tags && (
                   <div style={{ marginTop: "8px" }}>
                     {blog.tags.split(",").map((tag, i) => (
-                      <span key={i} style={tagBadge}>#{tag.trim()}</span>
+                      <span key={i} style={tagBadge}>
+                        #{tag.trim()}
+                      </span>
                     ))}
                   </div>
                 )}
               </div>
-              <div style={{ display: "flex", gap: "6px", marginTop: "12px", borderTop: "1px solid #f0f0f0", paddingTop: "10px" }}>
-                <button onClick={() => handleEdit(blog)} style={editBtn}>✏️ Edit</button>
-                <button onClick={() => handleDelete(blog._id)} style={deleteBtn}>🗑️ Delete</button>
+              <div
+                style={{
+                  display: "flex",
+                  gap: "6px",
+                  marginTop: "12px",
+                  borderTop: "1px solid #f0f0f0",
+                  paddingTop: "10px",
+                }}
+              >
+                <button onClick={() => handleEdit(blog)} style={editBtn}>
+                  ✏️ Edit
+                </button>
+                <button
+                  onClick={() => handleDelete(blog._id)}
+                  style={deleteBtn}
+                >
+                  🗑️ Delete
+                </button>
               </div>
             </div>
           ))}
@@ -262,22 +471,97 @@ const getCategoryColor = (cat) => {
     React: "#61dafb33",
     "Node.js": "#68a06333",
     MongoDB: "#4db33d33",
-      "JavaScript": "#f7df1e33",
-      CSS: "#264de433",
+    JavaScript: "#f7df1e33",
+    CSS: "#264de433",
     Other: "#88888833",
   };
   return colors[cat] || "#88888833";
 };
 
-const inputStyle = { padding: "10px 14px", borderRadius: "8px", border: "1px solid #ddd", fontSize: "14px", width: "100%", boxSizing: "border-box" };
-const btnStyle = { padding: "10px 20px", backgroundColor: "#1a1a1a", color: "white", border: "none", borderRadius: "8px", cursor: "pointer", fontSize: "14px" };
-const publishBtn = { padding: "10px 24px", backgroundColor: "#4CAF50", color: "white", border: "none", borderRadius: "8px", cursor: "pointer", fontSize: "14px", width: "100%" };
-const editBtn = { padding: "5px 12px", backgroundColor: "#2196F3", color: "white", border: "none", borderRadius: "6px", cursor: "pointer", fontSize: "12px" };
-const deleteBtn = { padding: "5px 12px", backgroundColor: "#f44336", color: "white", border: "none", borderRadius: "6px", cursor: "pointer", fontSize: "12px" };
-const backBtn = { padding: "8px 16px", backgroundColor: "#555", color: "white", border: "none", borderRadius: "6px", cursor: "pointer" };
-const formCard = { backgroundColor: "white", padding: "24px", borderRadius: "12px", marginBottom: "24px", boxShadow: "0 2px 12px rgba(0,0,0,0.08)" };
-const cardStyle = { backgroundColor: "white", padding: "16px", borderRadius: "12px", boxShadow: "0 2px 8px rgba(0,0,0,0.06)", display: "flex", flexDirection: "column", justifyContent: "space-between" };
-const categoryBadge = { display: "inline-block", padding: "3px 10px", borderRadius: "20px", fontSize: "11px", fontWeight: "bold" };
-const tagBadge = { display: "inline-block", padding: "2px 8px", backgroundColor: "#f0f0f0", borderRadius: "4px", fontSize: "11px", marginRight: "4px", color: "#555" };
+const inputStyle = {
+  padding: "10px 14px",
+  borderRadius: "8px",
+  border: "1px solid #ddd",
+  fontSize: "14px",
+  width: "100%",
+  boxSizing: "border-box",
+};
+const btnStyle = {
+  padding: "10px 20px",
+  backgroundColor: "#1a1a1a",
+  color: "white",
+  border: "none",
+  borderRadius: "8px",
+  cursor: "pointer",
+  fontSize: "14px",
+};
+const publishBtn = {
+  padding: "10px 24px",
+  backgroundColor: "#4CAF50",
+  color: "white",
+  border: "none",
+  borderRadius: "8px",
+  cursor: "pointer",
+  fontSize: "14px",
+  width: "100%",
+};
+const editBtn = {
+  padding: "5px 12px",
+  backgroundColor: "#2196F3",
+  color: "white",
+  border: "none",
+  borderRadius: "6px",
+  cursor: "pointer",
+  fontSize: "12px",
+};
+const deleteBtn = {
+  padding: "5px 12px",
+  backgroundColor: "#f44336",
+  color: "white",
+  border: "none",
+  borderRadius: "6px",
+  cursor: "pointer",
+  fontSize: "12px",
+};
+const backBtn = {
+  padding: "8px 16px",
+  backgroundColor: "#555",
+  color: "white",
+  border: "none",
+  borderRadius: "6px",
+  cursor: "pointer",
+};
+const formCard = {
+  backgroundColor: "white",
+  padding: "24px",
+  borderRadius: "12px",
+  marginBottom: "24px",
+  boxShadow: "0 2px 12px rgba(0,0,0,0.08)",
+};
+const cardStyle = {
+  backgroundColor: "white",
+  padding: "16px",
+  borderRadius: "12px",
+  boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+  display: "flex",
+  flexDirection: "column",
+  justifyContent: "space-between",
+};
+const categoryBadge = {
+  display: "inline-block",
+  padding: "3px 10px",
+  borderRadius: "20px",
+  fontSize: "11px",
+  fontWeight: "bold",
+};
+const tagBadge = {
+  display: "inline-block",
+  padding: "2px 8px",
+  backgroundColor: "#f0f0f0",
+  borderRadius: "4px",
+  fontSize: "11px",
+  marginRight: "4px",
+  color: "#555",
+};
 
 export default Blog;
