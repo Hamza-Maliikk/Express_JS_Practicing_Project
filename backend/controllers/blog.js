@@ -1,4 +1,6 @@
 const Blog = require("../models/blog");
+const cloudinary = require("../cloudinary/cloudinary");
+const fs = require("fs");
 const Category = require("../models/categories");
 
 const normalizeCategoryName = (value = "") => value.trim().replace(/\s+/g, " ");
@@ -41,7 +43,24 @@ const AddBlog = async (req, res) => {
     return res.status(400).json("Title, Content aur Category zaroor bharo!");
   }
   try {
-    const saved = await Blog.create({ ...req.body, title, content, category });
+    let imageUrl = "";
+
+    if (req.file) {
+      const result = await cloudinary.uploader.upload(req.file.path);
+
+      imageUrl = result.secure_url;
+
+      fs.unlinkSync(req.file.path);
+    }
+
+    const saved = await Blog.create({
+      ...req.body,
+      title,
+      content,
+      category,
+      image: imageUrl,
+    });
+
     res.status(201).json(saved);
   } catch (err) {
     res.status(500).json({ message: "Error adding blog", error: err.message });
@@ -51,15 +70,26 @@ const AddBlog = async (req, res) => {
 // PUT - blog update karo
 const updateBlog = async (req, res) => {
   try {
+    const payload = { ...req.body };
+    if (payload.title) payload.title = payload.title.trim();
+    if (payload.content) payload.content = payload.content.trim();
+    if (payload.category) payload.category = normalizeCategoryName(payload.category);
+
+    if (req.file) {
+      const result = await cloudinary.uploader.upload(req.file.path);
+      payload.image = result.secure_url;
+      fs.unlinkSync(req.file.path);
+    }
+
     const updated = await Blog.findByIdAndUpdate(
       req.params.id,
-      req.body,
+      payload,
       { new: true }
     );
     if (!updated) return res.status(404).json("Blog nahi mila!");
     res.json(updated);
   } catch (err) {
-    res.status(500).json({ message: "Error updating blog", error: err });
+    res.status(500).json({ message: "Error updating blog", error: err.message });
   }
 };
 

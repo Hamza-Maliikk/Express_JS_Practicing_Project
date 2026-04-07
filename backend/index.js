@@ -7,6 +7,7 @@ const app = express();
 const cors = require("cors");  
 const { getBlogs, AddBlog, updateBlog, deleteBlog } = require("./controllers/blog");
 const { getCategories, AddCategory, updateCategory, deleteCategory } = require("./controllers/categories");
+const { upload } = require("./middleware/multer");
 const port = 8000;
 
 //connection
@@ -38,8 +39,8 @@ app.put("/api/categories/:id", updateCategory)
 app.delete("/api/categories/:id", deleteCategory)
 // blog routes
 app.get("/api/blogs", getBlogs)
-app.post("/api/blogs", AddBlog)
-app.put("/api/blogs/:id", updateBlog)
+app.post("/api/blogs",upload.single('image'), AddBlog)
+app.put("/api/blogs/:id", upload.single('image'), updateBlog)
 app.delete("/api/blogs/:id", deleteBlog)
 // education routes
 app.get("/api/education",  getEducation)
