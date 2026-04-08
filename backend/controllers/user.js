@@ -2,7 +2,7 @@ const bcrypt = require('bcrypt');
 const saltRounds = 10;
 const User = require("../models/user");
 const jwt = require("jsonwebtoken");
-const secret = process.env.JWT_SECRET;
+const secret = process.env.JWT_SECRET || "dev_secret_change_me";
 
 const userData = async (req, res) => {
   try {
@@ -113,6 +113,7 @@ const loginUser = async (req, res) => {
       _id: user._id,
       email: user.email,
       role: user.role || "User",
+      isAdmin: (user.role || "").toLowerCase().includes("admin"),
       token,
     });
   } catch (err) {

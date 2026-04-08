@@ -10,9 +10,10 @@ import Categories from "./pages/Categories";
 function App() {
   return (
     <Routes>
-      <Route path="/" element={<Login />} />
+      <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route element={<Layout />}>
+        <Route path="/" element={<Portfolio />} />
         <Route path="/portfolio" element={<Portfolio />} />
         <Route path="/education" element={<Education />} />
         <Route path="/blogs" element={<Blogs />} />

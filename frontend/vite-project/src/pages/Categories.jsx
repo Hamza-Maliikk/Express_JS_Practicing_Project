@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 
 const Categories = () => {
+  const canCrud = Boolean(localStorage.getItem("token"));
   const [categories, setCategories] = useState([]);
   const [form, setForm] = useState({ category: "", description: "" });
   const [editId, setEditId] = useState(null);
@@ -83,12 +84,14 @@ const Categories = () => {
             <div style={{ lineHeight: "1.9", color: "#333", fontSize: "16px" }}>
               {selected.description || "Koi description nahi."}
             </div>
-            <div style={{ display: "flex", gap: "8px", marginTop: "30px" }}>
-              <button onClick={() => handleEdit(selected)} style={editBtn}>✏️ Edit</button>
-              <button onClick={() => { handleDelete(selected._id); setSelected(null); }} style={deleteBtn}>
-                🗑️ Delete
-              </button>
-            </div>
+            {canCrud && (
+              <div style={{ display: "flex", gap: "8px", marginTop: "30px" }}>
+                <button onClick={() => handleEdit(selected)} style={editBtn}>✏️ Edit</button>
+                <button onClick={() => { handleDelete(selected._id); setSelected(null); }} style={deleteBtn}>
+                  🗑️ Delete
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </>
@@ -113,20 +116,22 @@ const Categories = () => {
               {categories.length} categories total
             </p>
           </div>
-          <button
-            onClick={() => {
-              setShowForm(!showForm);
-              setEditId(null);
-              setForm({ category: "", description: "" });
-            }}
-            style={btnStyle}
-          >
-            {showForm ? "✕ Cancel" : "+ New Category"}
-          </button>
+          {canCrud && (
+            <button
+              onClick={() => {
+                setShowForm(!showForm);
+                setEditId(null);
+                setForm({ category: "", description: "" });
+              }}
+              style={btnStyle}
+            >
+              {showForm ? "✕ Cancel" : "+ New Category"}
+            </button>
+          )}
         </div>
 
         {/* Form */}
-        {showForm && (
+        {canCrud && showForm && (
           <div style={formCard}>
             <h3 style={{ margin: "0 0 16px", fontFamily: "'Fraunces', serif" }}>
               {editId ? "✏️ Category Edit Karo" : "🚀 Nai Category Banao"}
@@ -185,10 +190,12 @@ const Categories = () => {
                   📅 {new Date(cat.createdAt).toDateString()}
                 </small>
               </div>
-              <div style={{ display: "flex", gap: "6px", marginTop: "12px", borderTop: "1px solid #f0f0f0", paddingTop: "10px" }}>
-                <button onClick={() => handleEdit(cat)} style={editBtn}>✏️ Edit</button>
-                <button onClick={() => handleDelete(cat._id)} style={deleteBtn}>🗑️ Delete</button>
-              </div>
+              {canCrud && (
+                <div style={{ display: "flex", gap: "6px", marginTop: "12px", borderTop: "1px solid #f0f0f0", paddingTop: "10px" }}>
+                  <button onClick={() => handleEdit(cat)} style={editBtn}>✏️ Edit</button>
+                  <button onClick={() => handleDelete(cat._id)} style={deleteBtn}>🗑️ Delete</button>
+                </div>
+              )}
             </div>
           ))}
         </div>

@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { Link } from "react-router";
+import { Link } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { setToken } from "../redux/slices/loginSlice/check";
 import {useNavigate} from "react-router-dom";
 
-const API_BASE = "http://localhost:8000/";
+const API_BASE = "http://localhost:8000/api/login";
 
 export default function Login() {
   const [form, setForm] = useState({ email: "", password: "" });
@@ -22,7 +22,7 @@ export default function Login() {
     }
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}`, {
+      const res = await fetch(API_BASE, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
@@ -34,6 +34,9 @@ export default function Login() {
         dispatch(setToken(data.token));
         if (data.email) localStorage.setItem("userEmail", data.email);
         if (data.role) localStorage.setItem("userRole", data.role);
+        const roleText = String(data.role || "").toLowerCase();
+        const isAdmin = Boolean(data.isAdmin) || roleText.includes("admin");
+        localStorage.setItem("isAdmin", String(isAdmin));
         navigate("/portfolio");
         console.log("Login successful:", data);
       } else {

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 
 const Education = () => {
+  const canCrud = Boolean(localStorage.getItem("token"));
   const [educations, setEducations] = useState([]);
   const emptyRow = { degree: "", institute: "", year: "", grade: "" };
   const [rows, setRows] = useState([{ ...emptyRow }]);
@@ -94,52 +95,54 @@ const Education = () => {
       <h2>Education</h2>
 
       {/* Form */}
-      <div style={formWrapStyle}>
-        {rows.map((row, idx) => (
-          <div key={idx} style={rowStyle}>
-            <input
-              placeholder="e.g. BS Computer Science"
-              value={row.degree}
-              onChange={(e) => updateRow(idx, "degree", e.target.value)}
-              style={inputStyle}
-            />
-            <input
-              placeholder="e.g. COMSATS University"
-              value={row.institute}
-              onChange={(e) => updateRow(idx, "institute", e.target.value)}
-              style={inputStyle}
-            />
-            <input
-              placeholder="Year (2021-2025)"
-              value={row.year}
-              onChange={(e) => updateRow(idx, "year", e.target.value)}
-              style={inputStyle}
-            />
-            <input
-              placeholder="Grade / CGPA"
-              value={row.grade}
-              onChange={(e) => updateRow(idx, "grade", e.target.value)}
-              style={inputStyle}
-            />
-            {!editId && rows.length > 1 && (
-              <button onClick={() => removeRow(idx)} style={deleteBtn}>
-                Remove
+      {canCrud && (
+        <div style={formWrapStyle}>
+          {rows.map((row, idx) => (
+            <div key={idx} style={rowStyle}>
+              <input
+                placeholder="e.g. BS Computer Science"
+                value={row.degree}
+                onChange={(e) => updateRow(idx, "degree", e.target.value)}
+                style={inputStyle}
+              />
+              <input
+                placeholder="e.g. COMSATS University"
+                value={row.institute}
+                onChange={(e) => updateRow(idx, "institute", e.target.value)}
+                style={inputStyle}
+              />
+              <input
+                placeholder="Year (2021-2025)"
+                value={row.year}
+                onChange={(e) => updateRow(idx, "year", e.target.value)}
+                style={inputStyle}
+              />
+              <input
+                placeholder="Grade / CGPA"
+                value={row.grade}
+                onChange={(e) => updateRow(idx, "grade", e.target.value)}
+                style={inputStyle}
+              />
+              {!editId && rows.length > 1 && (
+                <button onClick={() => removeRow(idx)} style={deleteBtn}>
+                  Remove
+                </button>
+              )}
+            </div>
+          ))}
+
+          <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+            {!editId && (
+              <button onClick={addRow} style={editBtn}>
+                + Add More
               </button>
             )}
-          </div>
-        ))}
-
-        <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-          {!editId && (
-            <button onClick={addRow} style={editBtn}>
-              + Add More
+            <button onClick={handleSubmit} style={btnStyle}>
+              {editId ? "Update" : "Save All"}
             </button>
-          )}
-          <button onClick={handleSubmit} style={btnStyle}>
-            {editId ? "Update" : "Save All"}
-          </button>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* List */}
       {educations.map((edu) => (
@@ -149,10 +152,12 @@ const Education = () => {
             <p style={{ margin: "4px 0", color: "#666" }}>{edu.institute}</p>
             <small>{edu.year} • {edu.grade}</small>
           </div>
-          <div style={{ display: "flex", gap: "8px" }}>
-            <button onClick={() => handleEdit(edu)} style={editBtn}>Edit</button>
-            <button onClick={() => handleDelete(edu._id)} style={deleteBtn}>Delete</button>
-          </div>
+          {canCrud && (
+            <div style={{ display: "flex", gap: "8px" }}>
+              <button onClick={() => handleEdit(edu)} style={editBtn}>Edit</button>
+              <button onClick={() => handleDelete(edu._id)} style={deleteBtn}>Delete</button>
+            </div>
+          )}
         </div>
       ))}
       </div>

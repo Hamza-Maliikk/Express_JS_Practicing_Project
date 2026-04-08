@@ -25,7 +25,8 @@ app.post("/api/user", addUser);
 
 // Login user
 app.post("/api/register", registerUser);
-app.post("/", loginUser)
+app.post("/api/login", loginUser)
+app.post("/", loginUser) // backward compatibility with existing frontend
 app.get("/dashboard", authChecker, userData);
 
 //   users[user] = { ...users[user], ...req.body };

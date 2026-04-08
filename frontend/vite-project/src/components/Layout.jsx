@@ -13,6 +13,8 @@ const nav = [
 export default function Layout() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const isAdmin = localStorage.getItem("isAdmin") === "true";
+  const isLoggedIn = Boolean(localStorage.getItem("token"));
   const email =
     typeof window !== "undefined" ? localStorage.getItem("userEmail") : "";
   const role =
@@ -23,6 +25,7 @@ export default function Layout() {
     dispatch(clearToken());
     localStorage.removeItem("userEmail");
     localStorage.removeItem("userRole");
+    localStorage.removeItem("isAdmin");
     navigate("/");
   };
 
@@ -158,15 +161,16 @@ export default function Layout() {
                 {label}
               </NavLink>
             ))}
-            <button
-              type="button"
-              className="app-nav-link app-logout"
-              onClick={logOut}
-            >
-              <span ></span>
-              <LogOut className="app-nav-icon" />
-              Logout
-            </button>
+            {isLoggedIn && (
+              <button
+                type="button"
+                className="app-nav-link app-logout"
+                onClick={logOut}
+              >
+                <LogOut className="app-nav-icon" />
+                Logout
+              </button>
+            )}
           </nav>
           <div className="app-sidebar-bottom">
             <div className="app-sidebar-user">

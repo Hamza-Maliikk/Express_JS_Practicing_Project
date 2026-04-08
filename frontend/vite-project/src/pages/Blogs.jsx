@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 
 const Blog = () => {
+  const canCrud = Boolean(localStorage.getItem("token"));
   const [blogs, setBlogs] = useState([]);
   const [form, setForm] = useState({
     title: "",
@@ -191,20 +192,22 @@ const Blog = () => {
             >
               {selected.content}
             </div>
-            <div style={{ display: "flex", gap: "8px", marginTop: "30px" }}>
-              <button onClick={() => handleEdit(selected)} style={editBtn}>
-                ✏️ Edit
-              </button>
-              <button
-                onClick={() => {
-                  handleDelete(selected._id);
-                  setSelected(null);
-                }}
-                style={deleteBtn}
-              >
-                🗑️ Delete
-              </button>
-            </div>
+            {canCrud && (
+              <div style={{ display: "flex", gap: "8px", marginTop: "30px" }}>
+                <button onClick={() => handleEdit(selected)} style={editBtn}>
+                  ✏️ Edit
+                </button>
+                <button
+                  onClick={() => {
+                    handleDelete(selected._id);
+                    setSelected(null);
+                  }}
+                  style={deleteBtn}
+                >
+                  🗑️ Delete
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </>
@@ -237,27 +240,29 @@ const Blog = () => {
               {blogs.length} posts total
             </p>
           </div>
-          <button
-            onClick={() => {
-              setShowForm(!showForm);
-              setEditId(null);
-              setCurrentImage("");
-              setFile(null);
-              setForm({
-                title: "",
-                content: "",
-                tags: "",
-                category: categories[0] || "",
-              });
-            }}
-            style={btnStyle}
-          >
-            {showForm ? "✕ Cancel" : "+ New Post"}
-          </button>
+          {canCrud && (
+            <button
+              onClick={() => {
+                setShowForm(!showForm);
+                setEditId(null);
+                setCurrentImage("");
+                setFile(null);
+                setForm({
+                  title: "",
+                  content: "",
+                  tags: "",
+                  category: categories[0] || "",
+                });
+              }}
+              style={btnStyle}
+            >
+              {showForm ? "✕ Cancel" : "+ New Post"}
+            </button>
+          )}
         </div>
 
         {/* Form */}
-        {showForm && (
+        {canCrud && showForm && (
           <div style={formCard}>
             <h3 style={{ margin: "0 0 16px" }}>
               {editId ? "✏️ Post Edit Karo" : "🚀 Naya Post Likho"}
@@ -439,25 +444,27 @@ const Blog = () => {
                   </div>
                 )}
               </div>
-              <div
-                style={{
-                  display: "flex",
-                  gap: "6px",
-                  marginTop: "12px",
-                  borderTop: "1px solid #f0f0f0",
-                  paddingTop: "10px",
-                }}
-              >
-                <button onClick={() => handleEdit(blog)} style={editBtn}>
-                  ✏️ Edit
-                </button>
-                <button
-                  onClick={() => handleDelete(blog._id)}
-                  style={deleteBtn}
+              {canCrud && (
+                <div
+                  style={{
+                    display: "flex",
+                    gap: "6px",
+                    marginTop: "12px",
+                    borderTop: "1px solid #f0f0f0",
+                    paddingTop: "10px",
+                  }}
                 >
-                  🗑️ Delete
-                </button>
-              </div>
+                  <button onClick={() => handleEdit(blog)} style={editBtn}>
+                    ✏️ Edit
+                  </button>
+                  <button
+                    onClick={() => handleDelete(blog._id)}
+                    style={deleteBtn}
+                  >
+                    🗑️ Delete
+                  </button>
+                </div>
+              )}
             </div>
           ))}
         </div>
