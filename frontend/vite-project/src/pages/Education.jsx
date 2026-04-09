@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router";
 
 const Education = () => {
   const canCrud = Boolean(localStorage.getItem("token"));
@@ -7,7 +8,7 @@ const Education = () => {
   const emptyRow = { degree: "", institute: "", year: "", grade: "" };
   const [rows, setRows] = useState([{ ...emptyRow }]);
   const [editId, setEditId] = useState(null);
-
+  const navigate = useNavigate();``
   // Fetch all
 
 

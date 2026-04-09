@@ -5,15 +5,31 @@ import Portfolio from "./pages/Portfolio";
 import Education from "./pages/Education";
 import Blogs from "./pages/Blogs";
 import Layout from "./components/Layout";
+import HomeLayout from "./components/HomeLayout";
 import Home from "./pages/Home";
 import Categories from "./pages/Categories";
+import About from "./pages/About";
+import Projects from "./pages/Projects";
+import Skills from "./pages/Skills";
+import Contact from "./pages/Contact";
 
 function App() {
   return (
     <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="/login" element={<Login />} /> 
+      {/* Public pages — all share Navbar + Footer via HomeLayout */}
+      <Route element={<HomeLayout />}>
+        <Route path="/" element={<Home />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/projects" element={<Projects />} />
+        <Route path="/skills" element={<Skills />} />
+        <Route path="/contact" element={<Contact />} />
+      </Route>
+
+      {/* Auth pages — no shared layout */}
+      <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+
+      {/* Admin / dashboard pages — sidebar layout */}
       <Route element={<Layout />}>
         <Route path="/portfolio" element={<Portfolio />} />
         <Route path="/education" element={<Education />} />

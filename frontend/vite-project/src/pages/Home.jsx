@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router";
+import { useState } from "react";
 import Profile from "../assets/hamza picture blue background.jpeg";
 
-const NAV_LINKS = ["Home", "About", "Project", "Skills", "Contact"];
+
+const NAV_LINKS = ["Home", "About", "Project", "Skills"];
 
 const PROJECTS = [
   {
@@ -218,9 +218,6 @@ function ProjectCard({ project }) {
 }
 
 export default function KineticPortfolio() {
-  const navigate = useNavigate();
-  const [activeNav, setActiveNav] = useState("Gallery");
-  const [scrolled, setScrolled] = useState(false);
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -228,11 +225,6 @@ export default function KineticPortfolio() {
     message: "",
   });
 
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 50);
-    window.addEventListener("scroll", onScroll);
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
 
   return (
     <div
@@ -244,6 +236,7 @@ export default function KineticPortfolio() {
       }}
     >
       <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap');
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         html { scroll-behavior: smooth; }
@@ -351,58 +344,7 @@ export default function KineticPortfolio() {
         }
       `}</style>
 
-      {/* ── NAVBAR ── */}
-      <header
-        style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          right: 0,
-          zIndex: 200,
-          height: 60,
-          background: scrolled ? "rgba(255,255,255,.93)" : "transparent",
-          backdropFilter: scrolled ? "blur(14px)" : "none",
-          borderBottom: scrolled ? ".5px solid #e8e4de" : "none",
-          transition: "background .3s, border-color .3s",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          padding: "0 48px",
-        }}
-      >
-        <span
-          style={{
-            fontFamily: "'DM Sans', sans-serif",
-            fontSize: 12,
-            fontWeight: 500,
-            letterSpacing: ".1em",
-            textTransform: "uppercase",
-            color: "#111",
-          }}
-        >
-          My Porttfolio
-        </span>
-        <nav className="mob-hide" style={{ display: "flex", gap: 36 }}>
-          {NAV_LINKS.map((n) => (
-            <span
-              key={n}
-              className={`nav-item${activeNav === n ? " active" : ""}`}
-              onClick={() => setActiveNav(n)}
-            >
-              {n}
-            </span>
-          ))}
-        </nav>
-        <div style={{ display: "flex", gap: 16 }}>
-          <button
-            className="btn-outline mob-hide"
-            onClick={() => navigate("/login")}
-          >
-            Admin Login
-          </button>
-          <button className="btn-primary">Start Project</button>
-        </div>
-      </header>
+      {/* Navbar is rendered by HomeLayout */}
 
       {/* ── HERO ── */}
       <section
@@ -412,16 +354,23 @@ export default function KineticPortfolio() {
         <p
           className="fu fu1"
           style={{
+            display: "inline-block",
+            padding: "6px 14px",
             fontFamily: "'DM Sans', sans-serif",
-            fontSize: 10.5,
-            fontWeight: 500,
-            letterSpacing: ".12em",
+            fontSize: "12px",
+            fontWeight: 600,
+            letterSpacing: ".1em",
             textTransform: "uppercase",
-            color: "#1d4ed8",
-            marginBottom: 20,
+            color: "#fff",
+            background: "linear-gradient(135deg, #2563eb, #4f46e5)",
+            borderRadius: "999px",
+            boxShadow: "0 4px 14px rgba(37, 99, 235, 0.4)",
+            marginBottom: "20px",
+            transition: "all 0.3s ease",
+            cursor: "default",
           }}
         >
-          Digital Curator &amp; Designer
+          Full Stack Developer
         </p>
 
         <div
@@ -438,29 +387,25 @@ export default function KineticPortfolio() {
             <h1
               className="hero-h1 fu fu2"
               style={{
-                fontFamily: "'Playfair Display', serif",
-                fontSize: 66,
+                fontFamily: "'Poppins', serif",
+                fontSize: 52,
                 fontWeight: 900,
-                lineHeight: 1.04,
+                lineHeight: 1.05,
                 letterSpacing: "-.025em",
                 color: "#080808",
                 marginBottom: 24,
               }}
             >
-              I create
+              I build full-stack apps that work
               <br />
-              product
+              end-to-end —
               <br />
-              design and
-              <br />
-              brand
-              <br />
-              experience
+              not just the parts that look good in a demo.
             </h1>
             <p
               className="fu fu3"
               style={{
-                fontFamily: "'DM Sans', sans-serif",
+                fontFamily: "'Poppins', sans-serif",
                 fontSize: 14,
                 color: "#666",
                 lineHeight: 1.75,
@@ -468,13 +413,18 @@ export default function KineticPortfolio() {
                 marginBottom: 36,
               }}
             >
-              An editorial-driven approach to digital products, focusing on
-              intentional asymmetry and the quiet authority of high-end
-              minimalism.
+              From pixel-perfect interfaces to rock-solid APIs and databases — I
+              engineer complete digital products that are fast, scalable, and
+              actually enjoyable to use
             </p>
-            <button className="btn-outline fu fu4">
-              ↓ &nbsp;Explore Selected Works
-            </button>
+            <div className="flex gap-5">
+              <button className="btn-outline fu fu4">
+                ↓ &nbsp;Download Resume
+              </button>
+              <button className="btn-outline fu fu4">
+                ↓ &nbsp;Get in touch
+              </button>
+            </div>
           </div>
 
           {/* right – photo */}
@@ -880,46 +830,7 @@ export default function KineticPortfolio() {
         </div>
       </section>
 
-      {/* ── FOOTER ── */}
-      <footer
-        style={{
-          borderTop: ".5px solid #e8e4de",
-          padding: "22px 48px",
-          background: "#fff",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
-        <span
-          style={{
-            fontFamily: "'DM Sans', sans-serif",
-            fontSize: 12,
-            color: "#aaa",
-          }}
-        >
-          © 2024 The Kinetic Gallery. All rights reserved.
-        </span>
-        <div style={{ display: "flex", gap: 24 }}>
-          {["LinkedIn", "Behance", "Instagram", "Dribbble"].map((l) => (
-            <a
-              key={l}
-              href="#"
-              style={{
-                fontFamily: "'DM Sans', sans-serif",
-                fontSize: 12,
-                color: "#999",
-                textDecoration: "none",
-                transition: "color .2s",
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = "#111")}
-              onMouseLeave={(e) => (e.currentTarget.style.color = "#999")}
-            >
-              {l}
-            </a>
-          ))}
-        </div>
-      </footer>
+      {/* Footer is rendered by HomeLayout */}
     </div>
   );
 }
