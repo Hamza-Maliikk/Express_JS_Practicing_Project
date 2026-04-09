@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Send, Mail, MapPin, Phone } from "lucide-react";
-
+const EMAILJS_SERVICE_ID  = import.meta.env.VITE_EMAILJS_SERVICE_ID;
+const EMAILJS_TEMPLATE_ID = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
+const EMAILJS_PUBLIC_KEY  = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
 export default function Contact() {
   const [form, setForm] = useState({ name: "", email: "", message: "" });
   const [sent, setSent] = useState(false);
@@ -246,9 +248,9 @@ export default function Contact() {
           {/* Info */}
           <div className="contact-info">
             {[
-              { icon: Mail, label: "Email", value: "hamza@example.com" },
-              { icon: Phone, label: "Phone", value: "+92 300 0000000" },
-              { icon: MapPin, label: "Location", value: "Pakistan" },
+              { icon: Mail, label: "Email", value: "hamzamalik123450@gmail.com" },
+              { icon: Phone, label: "Phone", value: "+92 343 2702342" },
+              { icon: MapPin, label: "Location", value: "Karachi, Pakistan" },
             ].map(({ icon: Icon, label, value }) => (
               <div key={label} className="contact-info-card">
                 <div className="contact-info-icon">

@@ -121,6 +121,22 @@ body {
   margin: 0;
 }
 
+/* ── Global light / dark mode ──────────────────────────────────────────── */
+html.dark-mode body {
+  background: #0f0f0f;
+  color: #e5e5e5;
+}
+html.dark-mode .hn-footer {
+  background: #0f0f0f !important;
+  border-top-color: rgba(255,255,255,0.08) !important;
+}
+html.dark-mode .hn-footer-copy  { color: #555 !important; }
+html.dark-mode .hn-footer-link  { color: #555 !important; }
+html.dark-mode .hn-footer-link:hover { color: #ddd !important; }
+/* Home.jsx section backgrounds */
+html.dark-mode section[style] { filter: none; }
+/* ─────────────────────────────────────────────────────────────────────── */
+
 #root {
   width: 100%;
   max-width: 100%;

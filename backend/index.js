@@ -23,6 +23,11 @@ app.use(express.urlencoded({ extended: true }));
 app.get("/api/user/", userData);
 app.post("/api/user", addUser);
 
+// portfolio about
+app.get("/api/about", getAbout);
+app.post("/api/about", AddAbout);
+app.put("/api/about/:id", updateAbout);
+
 // Login user
 app.post("/api/register", registerUser);
 app.post("/api/login", loginUser)
