@@ -8,6 +8,7 @@ const cors = require("cors");
 const { getBlogs, AddBlog, updateBlog, deleteBlog } = require("./controllers/blog");
 const { getCategories, AddCategory, updateCategory, deleteCategory } = require("./controllers/categories");
 const { upload } = require("./middleware/multer");
+const { AddAbout, getAbout, updateAbout } = require("./controllers/about");
 require("dotenv").config();
 const port = 8000;
 
@@ -33,6 +34,8 @@ app.post("/api/register", registerUser);
 app.post("/api/login", loginUser)
 app.post("/", loginUser) // backward compatibility with existing frontend
 app.get("/dashboard", authChecker, userData);
+
+
 
 //   users[user] = { ...users[user], ...req.body };
 //   fs.writeFile("./MOCK_DATA.json", JSON.stringify(users), (err, data) => {
