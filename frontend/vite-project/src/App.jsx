@@ -12,6 +12,7 @@ import About from "./pages/About";
 import Projects from "./pages/Projects";
 import Skills from "./pages/Skills";
 import Contact from "./pages/Contact";
+import Work from "./pages/Work";
 
 function App() {
   return (
@@ -35,6 +36,7 @@ function App() {
         <Route path="/education" element={<Education />} />
         <Route path="/blogs" element={<Blogs />} />
         <Route path="/categories" element={<Categories />} />
+        <Route path="/work" element={<Work />} />
       </Route>
     </Routes>
   );

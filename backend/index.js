@@ -9,6 +9,7 @@ const { getBlogs, AddBlog, updateBlog, deleteBlog } = require("./controllers/blo
 const { getCategories, AddCategory, updateCategory, deleteCategory } = require("./controllers/categories");
 const { upload } = require("./middleware/multer");
 const { AddAbout, getAbout, updateAbout, deleteSkill } = require("./controllers/about");
+const { getProjects, AddProject, updateProject, deleteProject } = require("./controllers/work");
 require("dotenv").config();
 const port = 8000;
 
@@ -28,8 +29,13 @@ app.post("/api/user", addUser);
 app.get("/api/about", getAbout);
 app.post("/api/about", AddAbout);
 app.put("/api/about/:id", updateAbout);
-app.delete("/api/about/skill/:skill", deleteSkill); 
+app.delete("/api/about/skill/:skill", deleteSkill);
 
+// Work projects
+app.get("/api/projects", getProjects);
+app.post("/api/projects", AddProject);
+app.put("/api/projects/:id", updateProject);
+app.delete("/api/projects/:id", deleteProject);
 // Login user
 app.post("/api/register", registerUser);
 app.post("/api/login", loginUser)
