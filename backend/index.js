@@ -8,7 +8,7 @@ const cors = require("cors");
 const { getBlogs, AddBlog, updateBlog, deleteBlog } = require("./controllers/blog");
 const { getCategories, AddCategory, updateCategory, deleteCategory } = require("./controllers/categories");
 const { upload } = require("./middleware/multer");
-const { AddAbout, getAbout, updateAbout } = require("./controllers/about");
+const { AddAbout, getAbout, updateAbout, deleteSkill } = require("./controllers/about");
 require("dotenv").config();
 const port = 8000;
 
@@ -28,6 +28,7 @@ app.post("/api/user", addUser);
 app.get("/api/about", getAbout);
 app.post("/api/about", AddAbout);
 app.put("/api/about/:id", updateAbout);
+app.delete("/api/about/skill/:skill", deleteSkill); 
 
 // Login user
 app.post("/api/register", registerUser);

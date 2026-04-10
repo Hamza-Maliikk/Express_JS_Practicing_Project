@@ -3,7 +3,6 @@ import { useMemo, useState, useEffect } from "react";
 const API = "http://localhost:8000";
 
 const DEFAULT_ABOUT = "I am a full-stack web developer focused on building clean, reliable, and user-friendly applications.";
-const DEFAULT_SKILLS = ["React", "JavaScript", "Node.js", "Express.js", "MongoDB", "Redux Toolkit", "REST APIs", "Git/GitHub"];
 
 export default function Portfolio() {
   const canCrud = Boolean(localStorage.getItem("token"));
@@ -19,7 +18,7 @@ export default function Portfolio() {
   const [aboutDraft, setAboutDraft]     = useState("");
   const [editingAbout, setEditingAbout] = useState(false);
   const [loading, setLoading]           = useState(false);
-  const [skills, setSkills]             = useState(DEFAULT_SKILLS);
+  const [skills, setSkills]             = useState([]); // ✅ DEFAULT_SKILLS hataya, DB se aayengi
   const [newSkill, setNewSkill]         = useState("");
 
   // ── GET ──
@@ -28,11 +27,14 @@ export default function Portfolio() {
       try {
         const res  = await fetch(`${API}/api/about`);
         const data = await res.json();
-        console.log("About data:", data);
         if (data && data.intro) {
           setAbout(data.intro);
           setAboutDraft(data.intro);
           setAboutId(data._id);
+        }
+        // ✅ Skills bhi DB se load karo
+        if (data && data.skills && data.skills.length > 0) {
+          setSkills(data.skills);
         }
       } catch (err) {
         console.error("About fetch error:", err);
@@ -41,34 +43,24 @@ export default function Portfolio() {
     fetchAbout();
   }, []);
 
-  // ── POST ya PUT ──
+  // ── About Save (PUT) ──
   const saveAbout = async () => {
     const next = aboutDraft.trim();
     if (!next) return;
     setLoading(true);
-
     try {
-      let res;
-
-      if (aboutId) {
-        // record exist karta hai → PUT
-        res = await fetch(`${API}/api/about/${aboutId}`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-          body: JSON.stringify({ intro: next }),
-        });
-      }
-
+      const res = await fetch(`${API}/api/about/${aboutId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify({ intro: next, skills }), // ✅ skills bhi bhejo
+      });
       const data = await res.json();
-      console.log("Save response:", data);
-
       setAbout(data.data.intro);
-      setAboutId(data.data._id); // id save karo future requests ke liye
+      setAboutId(data.data._id);
       setEditingAbout(false);
-
     } catch (err) {
       console.error("About save error:", err);
     } finally {
@@ -76,15 +68,47 @@ export default function Portfolio() {
     }
   };
 
-  const addSkill = () => {
-    const value = newSkill.trim();
-    if (!value) return;
-    setSkills([...skills, value]);
-    setNewSkill("");
+  // ✅ Skills DB mein save karne ka helper
+  const saveSkillsToDB = async (updatedSkills) => {
+    if (!aboutId) return;
+    try {
+      await fetch(`${API}/api/about/${aboutId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify({ intro: about, skills: updatedSkills }),
+      });
+    } catch (err) {
+      console.error("Skills save error:", err);
+    }
   };
 
-  const removeSkill = (idx) => {
-    setSkills(skills.filter((_, i) => i !== idx));
+  // ✅ Skill add — destructure karke DB mein save
+  const addSkill = async () => {
+    const value = newSkill.trim();
+    if (!value) return;
+    const updatedSkills = [...skills, value];
+    setSkills(updatedSkills);
+    setNewSkill("");
+    await saveSkillsToDB(updatedSkills);
+  };
+
+  // ✅ Skill delete — DB se bhi hata do
+  const removeSkill = async (idx) => {
+    const skillToDelete = skills[idx];
+    try {
+      await fetch(`${API}/api/about/skill/${skillToDelete}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+      setSkills(skills.filter((_, i) => i !== idx));
+    } catch (err) {
+      console.error("Skill delete error:", err);
+    }
   };
 
   return (
@@ -146,14 +170,16 @@ export default function Portfolio() {
           <article className="portfolio-card">
             <h3>My Skills</h3>
             <div className="skills-wrap">
-              {skills.map((skill, idx) => (
+              {skills.length > 0 ? skills.map((skill, idx) => (
                 <span className="skill-chip" key={`${skill}-${idx}`}>
                   {skill}
                   {canCrud && (
                     <button className="btn" onClick={() => removeSkill(idx)}>x</button>
                   )}
                 </span>
-              ))}
+              )) : (
+                <p style={{ color: "#666", fontSize: "0.85rem" }}>No skills added yet.</p>
+              )}
             </div>
             {canCrud && (
               <div className="inline">
@@ -162,6 +188,7 @@ export default function Portfolio() {
                   placeholder="Add skill"
                   value={newSkill}
                   onChange={(e) => setNewSkill(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && addSkill()}
                 />
                 <button className="btn" onClick={addSkill}>Add Skill</button>
               </div>

@@ -1,3 +1,4 @@
+import { Moon, Sun } from "lucide-react";
 import { useState, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 
@@ -263,7 +264,7 @@ export default function Navbar() {
 
       <header className={`hn-navbar${scrolled ? " scrolled" : ""}`}>
         {/* Logo */}
-        <NavLink to="/" className="hn-logo">My Portfolio</NavLink>
+        <NavLink to="/" className="">My Portfolio</NavLink>
 
         {/* Desktop nav */}
         <nav className="hn-nav">
@@ -281,14 +282,13 @@ export default function Navbar() {
 
         {/* Actions */}
         <div className="hn-actions">
-          {/* 🌙 / ☀️  Theme toggle — left of Admin Login */}
           <button
             className="hn-theme-btn"
             onClick={toggleTheme}
             aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
             title={isDark ? "Light mode" : "Dark mode"}
           >
-            {isDark ? "☀️" : "🌙"}
+            {isDark ? <Sun /> : <Moon />}
           </button>
 
           <button
