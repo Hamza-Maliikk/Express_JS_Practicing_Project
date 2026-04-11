@@ -1,8 +1,8 @@
-import { useState } from "react";
+import {  useState } from "react";
 import { Send, Mail, MapPin, Phone } from "lucide-react";
-const EMAILJS_SERVICE_ID  = import.meta.env.VITE_EMAILJS_SERVICE_ID;
+const EMAILJS_SERVICE_ID = import.meta.env.VITE_EMAILJS_SERVICE_ID;
 const EMAILJS_TEMPLATE_ID = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
-const EMAILJS_PUBLIC_KEY  = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
+const EMAILJS_PUBLIC_KEY = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
 export default function Contact() {
   const [form, setForm] = useState({ name: "", email: "", message: "" });
   const [sent, setSent] = useState(false);
@@ -12,9 +12,19 @@ export default function Contact() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    setSent(true);
-    setForm({ name: "", email: "", message: "" });
-    setTimeout(() => setSent(false), 4000);
+    const API = "http://localhost:8000/api/contact";
+    fetch(API, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(form),
+    })
+      .then((res) => res.json())
+      .then(() => {
+        setSent(true);
+        setForm({ name: "", email: "", message: "" });
+        setTimeout(() => setSent(false), 4000);
+      })
+      .catch((err) => console.error("Error sending contact message:", err));
   };
 
   return (
@@ -24,9 +34,10 @@ export default function Contact() {
 
         .contact-page {
           font-family: 'Poppins', sans-serif;
-          background: #080810;
+          background: var(--bg);
           min-height: 100vh;
           padding: 5rem 1.5rem 4rem;
+          transition: background 0.3s ease;
         }
 
         .contact-hero {
@@ -51,9 +62,10 @@ export default function Contact() {
         .contact-title {
           font-size: clamp(2rem, 5vw, 3rem);
           font-weight: 700;
-          color: #ffffff;
+          color: var(--text-h);
           letter-spacing: -0.03em;
           margin: 0 0 1rem;
+          transition: color 0.3s ease;
         }
 
         .contact-title span {
@@ -63,11 +75,13 @@ export default function Contact() {
         }
 
         .contact-subtitle {
-          color: #6b6b85;
+          color: var(--text);
           font-size: 1rem;
           max-width: 480px;
           margin: 0 auto;
           line-height: 1.7;
+          opacity: 0.8;
+          transition: color 0.3s ease;
         }
 
         .contact-wrap {
@@ -87,25 +101,27 @@ export default function Contact() {
         }
 
         .contact-info-card {
-          background: rgba(255,255,255,0.03);
-          border: 1px solid rgba(255,255,255,0.07);
+          background: var(--card-bg);
+          border: 1px solid var(--border);
           border-radius: 14px;
           padding: 1.25rem 1.5rem;
           display: flex;
           align-items: center;
           gap: 1rem;
-          transition: border-color 0.3s;
+          transition: all 0.3s ease;
+          box-shadow: var(--shadow);
         }
 
         .contact-info-card:hover {
           border-color: rgba(139,92,246,0.3);
+          transform: translateY(-2px);
         }
 
         .contact-info-icon {
           width: 42px;
           height: 42px;
           border-radius: 10px;
-          background: rgba(139,92,246,0.12);
+          background: rgba(139, 92, 246, 0.12);
           display: flex;
           align-items: center;
           justify-content: center;
@@ -115,25 +131,32 @@ export default function Contact() {
 
         .contact-info-label {
           font-size: 0.7rem;
-          color: #6b6b85;
+          color: var(--text);
           text-transform: uppercase;
           letter-spacing: 0.08em;
           font-weight: 600;
           margin-bottom: 0.2rem;
+          opacity: 0.7;
         }
 
         .contact-info-value {
           font-size: 0.875rem;
+          color: #8b5cf6;
+          font-weight: 600;
+        }
+
+        html.dark-mode .contact-info-value {
           color: #c4b5fd;
-          font-weight: 500;
         }
 
         /* Form */
         .contact-form-card {
-          background: rgba(255,255,255,0.03);
-          border: 1px solid rgba(255,255,255,0.07);
+          background: var(--card-bg);
+          border: 1px solid var(--border);
           border-radius: 16px;
           padding: 2rem;
+          box-shadow: var(--shadow);
+          transition: background 0.3s ease, border-color 0.3s ease;
         }
 
         .contact-form {
@@ -157,17 +180,18 @@ export default function Contact() {
         .contact-label {
           font-size: 0.78rem;
           font-weight: 500;
-          color: #9ca3af;
+          color: var(--text);
           letter-spacing: 0.04em;
+          opacity: 0.8;
         }
 
         .contact-input,
         .contact-textarea {
-          background: rgba(255,255,255,0.04);
-          border: 1px solid rgba(255,255,255,0.08);
+          background: var(--bg);
+          border: 1px solid var(--border);
           border-radius: 10px;
           padding: 0.75rem 1rem;
-          color: #f3f4f6;
+          color: var(--text-h);
           font-family: 'Poppins', sans-serif;
           font-size: 0.875rem;
           outline: none;
@@ -240,7 +264,8 @@ export default function Contact() {
             Contact <span>Me</span>
           </h1>
           <p className="contact-subtitle">
-            Have a project in mind or just want to say hi? I'd love to hear from you.
+            Have a project in mind or just want to say hi? I'd love to hear from
+            you.
           </p>
         </div>
 
@@ -248,7 +273,11 @@ export default function Contact() {
           {/* Info */}
           <div className="contact-info">
             {[
-              { icon: Mail, label: "Email", value: "hamzamalik123450@gmail.com" },
+              {
+                icon: Mail,
+                label: "Email",
+                value: "hamzamalik123450@gmail.com",
+              },
               { icon: Phone, label: "Phone", value: "+92 343 2702342" },
               { icon: MapPin, label: "Location", value: "Karachi, Pakistan" },
             ].map(({ icon: Icon, label, value }) => (
@@ -312,7 +341,11 @@ export default function Contact() {
                     required
                   />
                 </div>
-                <button id="contact-submit" type="submit" className="contact-submit">
+                <button
+                  id="contact-submit"
+                  type="submit"
+                  className="contact-submit"
+                >
                   <Send size={16} />
                   Send Message
                 </button>
