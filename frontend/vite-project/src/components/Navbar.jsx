@@ -7,7 +7,7 @@ const NAV_LINKS = [
   { to: "/about", label: "About" },
   { to: "/projects", label: "Project" },
   { to: "/skills", label: "Skills" },
-  { to: "/contact", label: "Contact" },
+  { to: "/blog", label: "Blogs" },
 ];
 
 // ── Dark mode helper ──────────────────────────────────────────────────────────

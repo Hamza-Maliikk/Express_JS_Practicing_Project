@@ -3,7 +3,6 @@ import Profile from "../assets/hamza picture blue background.jpeg";
 
 
 const NAV_LINKS = ["Home", "About", "Project", "Skills"];
-
 const PROJECTS = [
   {
     id: 1,
