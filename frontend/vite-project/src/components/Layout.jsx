@@ -8,6 +8,7 @@ const nav = [
   { to: "/education", label: "Education", icon: "▣" },
   { to: "/blogs", label: "Blogs", icon: "✎" },
   { to: "/categories", label: "Categories", icon: "◈" },
+  { to: "/details", label: "mydetails", icon: "◈" },
   { to: "/work", label: "Work", icon: "◈" },
 ];
 

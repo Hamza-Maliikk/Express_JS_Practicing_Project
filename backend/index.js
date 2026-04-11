@@ -11,6 +11,7 @@ const { upload } = require("./middleware/multer");
 const { AddAbout, getAbout, updateAbout, deleteSkill } = require("./controllers/about");
 const { getProjects, AddProject, updateProject, deleteProject } = require("./controllers/work");
 const { getContact, AddContact } = require("./controllers/contact");
+const { getDetails, AddDetails, UpdateDetails, deleteDetails } = require("./controllers/details");
 require("dotenv").config();
 const port = 8000;
 
@@ -69,6 +70,11 @@ app.delete("/api/education/:id",  deleteEducation)
 // contact
 app.get("/api/contact", getContact)
 app.post("/api/contact", AddContact)
+// details
+app.get("/api/details", getDetails)
+app.post("/api/details", AddDetails)
+app.put("/api/details/:id", UpdateDetails)
+app.delete("/api/details/:id", deleteDetails)
 
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`);

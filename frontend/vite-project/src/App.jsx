@@ -14,6 +14,7 @@ import Skills from "./pages/Skills";
 import Contact from "./pages/Contact";
 import Work from "./pages/Work";
 import HomeBlogs from "./pages/HomeBlogs";
+import Details from "./pages/Details";
 
 function App() {
   return (
@@ -39,6 +40,7 @@ function App() {
         <Route path="/blogs" element={<Blogs />} />
         <Route path="/categories" element={<Categories />} />
         <Route path="/work" element={<Work />} />
+        <Route path="/details" element={<Details />} />
       </Route>
     </Routes>
   );
