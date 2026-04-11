@@ -52,28 +52,13 @@ export default function Navbar() {
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap');
 
-        /* ── Global dark-mode overrides ── */
-        html.dark-mode {
-          --hn-bg-scroll:   rgba(15, 15, 15, 0.92);
-          --hn-border:      rgba(255,255,255,0.08);
-          --hn-logo-color:  #f0f0f0;
-          --hn-link-color:  #aaa;
-          --hn-link-active: #fff;
-          --hn-mob-bg:      rgba(15,15,15,0.97);
-          --hn-mob-border:  rgba(255,255,255,0.06);
-          --hn-mob-divider: rgba(255,255,255,0.06);
-          --hn-outline-color: #ccc;
-          --hn-outline-border: rgba(255,255,255,0.2);
-          --hn-outline-hover-bg: rgba(255,255,255,0.06);
-          --hn-outline-hover-border: rgba(255,255,255,0.4);
-          --hn-ham-color:   #eee;
-        }
-        html.light-mode, html:not(.dark-mode) {
-          --hn-bg-scroll:   rgba(255,255,255,0.93);
-          --hn-border:      #e8e4de;
+        /* ── Theme variables handled globally in index.css ── */
+        :root {
           --hn-logo-color:  #111;
           --hn-link-color:  #555;
           --hn-link-active: #111;
+          --hn-bg-scroll:   rgba(255,255,255,0.93);
+          --hn-border:      #e8e4de;
           --hn-mob-bg:      rgba(255,255,255,0.97);
           --hn-mob-border:  #e8e4de;
           --hn-mob-divider: #f0ece6;
@@ -82,6 +67,22 @@ export default function Navbar() {
           --hn-outline-hover-bg: #f8f8f6;
           --hn-outline-hover-border: #555;
           --hn-ham-color:   #111;
+        }
+
+        html.dark-mode {
+          --hn-logo-color:  #f0f0f0;
+          --hn-link-color:  #aaa;
+          --hn-link-active: #fff;
+          --hn-bg-scroll:   rgba(15, 15, 15, 0.92);
+          --hn-border:      rgba(255,255,255,0.08);
+          --hn-mob-bg:      rgba(15,15,15,0.97);
+          --hn-mob-border:  rgba(255,255,255,0.06);
+          --hn-mob-divider: rgba(255,255,255,0.06);
+          --hn-outline-color: #ccc;
+          --hn-outline-border: rgba(255,255,255,0.2);
+          --hn-outline-hover-bg: rgba(255,255,255,0.06);
+          --hn-outline-hover-border: rgba(255,255,255,0.4);
+          --hn-ham-color:   #eee;
         }
 
         .hn-navbar {

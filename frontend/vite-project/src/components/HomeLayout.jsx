@@ -10,7 +10,8 @@ export default function HomeLayout() {
           display: flex;
           flex-direction: column;
           min-height: 100vh;
-          background: #fff;
+          background: var(--bg);
+          color: var(--text);
         }
 
         .home-layout-main {

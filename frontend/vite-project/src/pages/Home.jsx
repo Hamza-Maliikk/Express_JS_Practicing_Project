@@ -229,8 +229,8 @@ export default function KineticPortfolio() {
     <div
       style={{
         fontFamily: "'DM Sans', sans-serif",
-        background: "#fff",
-        color: "#111",
+        background: "var(--bg)",
+        color: "var(--text)",
         overflowX: "hidden",
       }}
     >
@@ -239,7 +239,7 @@ export default function KineticPortfolio() {
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap');
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         html { scroll-behavior: smooth; }
-        body { background: #fff; }
+        body { background: var(--bg); }
 
         .nav-item {
           font-family: 'DM Sans', sans-serif;
@@ -253,7 +253,7 @@ export default function KineticPortfolio() {
           transition: color .2s, border-color .2s;
           letter-spacing: .01em;
         }
-        .nav-item:hover, .nav-item.active { color: #111; border-bottom-color: #111; }
+        .nav-item:hover, .nav-item.active { color: var(--text-h); border-bottom-color: var(--text-h); }
 
         .btn-primary {
           background: #1d4ed8;
@@ -273,8 +273,8 @@ export default function KineticPortfolio() {
 
         .btn-outline {
           background: transparent;
-          color: #111;
-          border: 1px solid #bbb;
+          color: var(--text-h);
+          border: 1px solid var(--border);
           padding: 10px 20px;
           border-radius: 5px;
           font-family: 'DM Sans', sans-serif;
@@ -287,8 +287,8 @@ export default function KineticPortfolio() {
         .btn-outline:hover { border-color: #555; background: #f8f8f6; }
 
         .skill-card {
-          background: #fff;
-          border: .5px solid #e4e0da;
+          background: var(--card-bg);
+          border: .5px solid var(--border);
           border-radius: 4px;
           padding: 24px 20px;
           transition: box-shadow .3s, transform .3s;
@@ -302,8 +302,8 @@ export default function KineticPortfolio() {
           border-radius: 4px;
           font-family: 'DM Sans', sans-serif;
           font-size: 13px;
-          color: #111;
-          background: #fafaf8;
+          color: var(--text-h);
+          background: var(--card-bg);
           outline: none;
           transition: border-color .2s;
         }
@@ -391,7 +391,7 @@ export default function KineticPortfolio() {
                 fontWeight: 900,
                 lineHeight: 1.05,
                 letterSpacing: "-.025em",
-                color: "#080808",
+                color: "var(--text-h)",
                 marginBottom: 24,
               }}
             >
@@ -406,7 +406,7 @@ export default function KineticPortfolio() {
               style={{
                 fontFamily: "'Poppins', sans-serif",
                 fontSize: 14,
-                color: "#666",
+                color: "var(--text)",
                 lineHeight: 1.75,
                 maxWidth: 370,
                 marginBottom: 36,
@@ -469,7 +469,7 @@ export default function KineticPortfolio() {
                 fontFamily: "'Playfair Display', serif",
                 fontSize: 34,
                 fontWeight: 700,
-                color: "#080808",
+                color: "var(--text-h)",
                 marginBottom: 8,
               }}
             >
@@ -479,7 +479,7 @@ export default function KineticPortfolio() {
               style={{
                 fontFamily: "'DM Sans', sans-serif",
                 fontSize: 13,
-                color: "#888",
+                color: "var(--text)",
               }}
             >
               A curated collection of projects where strategy meets aesthetic
@@ -538,7 +538,7 @@ export default function KineticPortfolio() {
       </section>
 
       {/* ── EXPERTISE ── */}
-      <section style={{ background: "#f7f5f2", padding: "88px 48px" }}>
+      <section style={{ background: "var(--card-bg)", padding: "88px 48px" }}>
         <div
           className="exp-inner"
           style={{
@@ -557,7 +557,7 @@ export default function KineticPortfolio() {
                 fontSize: 38,
                 fontWeight: 800,
                 lineHeight: 1.1,
-                color: "#080808",
+                color: "var(--text-h)",
                 marginBottom: 20,
               }}
             >
@@ -569,7 +569,7 @@ export default function KineticPortfolio() {
               style={{
                 fontFamily: "'DM Sans', sans-serif",
                 fontSize: 14,
-                color: "#666",
+                color: "var(--text)",
                 lineHeight: 1.8,
                 marginBottom: 36,
               }}
@@ -602,7 +602,7 @@ export default function KineticPortfolio() {
                     style={{
                       fontFamily: "'DM Sans', sans-serif",
                       fontSize: 14,
-                      color: "#333",
+                      color: "var(--text)",
                     }}
                   >
                     {item}
@@ -632,7 +632,7 @@ export default function KineticPortfolio() {
                     fontFamily: "'Playfair Display', serif",
                     fontSize: 16,
                     fontWeight: 700,
-                    color: "#080808",
+                    color: "var(--text-h)",
                     marginBottom: 10,
                   }}
                 >
@@ -642,7 +642,7 @@ export default function KineticPortfolio() {
                   style={{
                     fontFamily: "'DM Sans', sans-serif",
                     fontSize: 13,
-                    color: "#777",
+                    color: "var(--text)",
                     lineHeight: 1.72,
                   }}
                 >
@@ -702,132 +702,7 @@ export default function KineticPortfolio() {
         </div>
       </section>
 
-      {/* ── CONTACT ── */}
-      <section style={{ padding: "96px 48px", background: "#fff" }}>
-        <div
-          className="contact-inner"
-          style={{ maxWidth: 1160, margin: "0 auto", display: "flex", gap: 80 }}
-        >
-          {/* left */}
-          <div style={{ flex: "0 0 360px" }}>
-            <h2
-              style={{
-                fontFamily: "'Playfair Display', serif",
-                fontSize: 52,
-                fontWeight: 900,
-                lineHeight: 1.05,
-                color: "#080808",
-                marginBottom: 20,
-              }}
-            >
-              Let's build
-              <br />
-              something
-              <br />
-              iconic.
-            </h2>
-            <p
-              style={{
-                fontFamily: "'DM Sans', sans-serif",
-                fontSize: 14,
-                color: "#888",
-                lineHeight: 1.75,
-                marginBottom: 40,
-              }}
-            >
-              Available for select freelance projects and creative
-              collaborations.
-            </p>
-
-            {[
-              {
-                label: "Contact Details",
-                lines: ["hello@kineticgallery.design", "+1 (555) 0123 456?"],
-              },
-              { label: "Location", lines: ["Brooklyn, New York"] },
-            ].map(({ label, lines }) => (
-              <div key={label} style={{ marginBottom: 24 }}>
-                <span className="label-sm">{label}</span>
-                {lines.map((l) => (
-                  <p
-                    key={l}
-                    style={{
-                      fontFamily: "'DM Sans', sans-serif",
-                      fontSize: 14,
-                      color: "#444",
-                      lineHeight: 1.6,
-                    }}
-                  >
-                    {l}
-                  </p>
-                ))}
-              </div>
-            ))}
-          </div>
-
-          {/* right – form */}
-          <div style={{ flex: 1 }}>
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gap: 16,
-                marginBottom: 16,
-              }}
-            >
-              <div>
-                <label className="label-sm">Name</label>
-                <input
-                  className="form-field"
-                  placeholder="John Doe"
-                  value={form.name}
-                  onChange={(e) => setForm({ ...form, name: e.target.value })}
-                />
-              </div>
-              <div>
-                <label className="label-sm">Email</label>
-                <input
-                  className="form-field"
-                  type="email"
-                  placeholder="you@example.com"
-                  value={form.email}
-                  onChange={(e) => setForm({ ...form, email: e.target.value })}
-                />
-              </div>
-            </div>
-            <div style={{ marginBottom: 16 }}>
-              <label className="label-sm">Subject</label>
-              <select
-                className="form-field"
-                value={form.subject}
-                onChange={(e) => setForm({ ...form, subject: e.target.value })}
-              >
-                <option>Project Inquiry</option>
-                <option>Collaboration</option>
-                <option>Speaking</option>
-                <option>Other</option>
-              </select>
-            </div>
-            <div style={{ marginBottom: 24 }}>
-              <label className="label-sm">Message</label>
-              <textarea
-                className="form-field"
-                rows={5}
-                placeholder="Tell me about your vision..."
-                style={{ resize: "vertical" }}
-                value={form.message}
-                onChange={(e) => setForm({ ...form, message: e.target.value })}
-              />
-            </div>
-            <button
-              className="btn-primary"
-              style={{ fontSize: 14, padding: "13px 28px" }}
-            >
-              Send Message &nbsp;→
-            </button>
-          </div>
-        </div>
-      </section>
+   
 
       {/* Footer is rendered by HomeLayout */}
     </div>

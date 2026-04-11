@@ -27,9 +27,10 @@ export default function Projects() {
 
         .proj-page {
           font-family: 'Poppins', sans-serif;
-          background: #080810;
+          background: var(--bg);
           min-height: 100vh;
           padding: 5rem 1.5rem 4rem;
+          transition: background 0.3s ease;
         }
 
         .proj-hero {
@@ -54,9 +55,10 @@ export default function Projects() {
         .proj-title {
           font-size: clamp(2rem, 5vw, 3rem);
           font-weight: 700;
-          color: #ffffff;
+          color: var(--text-h);
           letter-spacing: -0.03em;
           margin: 0 0 1rem;
+          transition: color 0.3s ease;
         }
 
         .proj-title span {
@@ -66,11 +68,13 @@ export default function Projects() {
         }
 
         .proj-subtitle {
-          color: #6b6b85;
+          color: var(--text);
           font-size: 1rem;
           max-width: 500px;
           margin: 0 auto;
           line-height: 1.7;
+          opacity: 0.8;
+          transition: color 0.3s ease;
         }
 
         .proj-grid {
@@ -82,13 +86,14 @@ export default function Projects() {
         }
 
         .proj-card {
-          background: rgba(255,255,255,0.03);
-          border: 1px solid rgba(255,255,255,0.07);
+          background: var(--card-bg);
+          border: 1px solid var(--border);
           border-radius: 16px;
           padding: 2rem;
-          transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
           position: relative;
           overflow: hidden;
+          box-shadow: var(--shadow);
         }
 
         .proj-card::before {
@@ -106,6 +111,10 @@ export default function Projects() {
         .proj-card:hover {
           transform: translateY(-6px);
           border-color: rgba(139,92,246,0.25);
+          box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        html.dark-mode .proj-card:hover {
           box-shadow: 0 20px 40px rgba(0,0,0,0.4);
         }
 
@@ -114,15 +123,18 @@ export default function Projects() {
         .proj-card-title {
           font-size: 1.15rem;
           font-weight: 600;
-          color: #f3f4f6;
+          color: var(--text-h);
           margin: 0 0 0.75rem;
+          transition: color 0.3s ease;
         }
 
         .proj-card-desc {
           font-size: 0.85rem;
-          color: #6b6b85;
+          color: var(--text);
           line-height: 1.7;
           margin-bottom: 1.5rem;
+          opacity: 0.8;
+          transition: color 0.3s ease;
         }
 
         .proj-tags {

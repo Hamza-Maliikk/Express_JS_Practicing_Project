@@ -129,7 +129,7 @@ export default function HomeBlogs() {
                     src={featured.image}
                     alt={featured.title}
                     style={styles.featuredImg}
-                    onError={(e) => { e.currentTarget.parentElement.style.display = "none"; }}
+                    loading="lazy"
                   />
                 </div>
               )}
@@ -181,7 +181,7 @@ export default function HomeBlogs() {
                           src={blog.image}
                           alt={blog.title}
                           style={styles.cardImg}
-                          onError={(e) => { e.currentTarget.parentElement.style.display = "none"; }}
+                          loading="lazy"
                         />
                       </div>
                     ) : (
@@ -242,7 +242,7 @@ const styles = {
   },
   heading: {
     fontSize: "clamp(36px, 5vw, 56px)", fontWeight: 700,
-    lineHeight: 1.05, margin: 0, color: "#111", fontFamily: "'Georgia', serif",
+    lineHeight: 1.05, margin: 0, color: "var(--text-h)", fontFamily: "'Georgia', serif",
   },
   headingAccent: { fontStyle: "italic", color: "#6235c1" },
   subtext: {
@@ -267,9 +267,9 @@ const styles = {
     borderRadius: "16px", marginBottom: "24px",
     cursor: "pointer", overflow: "hidden",
     transition: "border-color 0.2s ease, transform 0.2s ease",
-    background: "#fff",
+    background: "var(--card-bg)",
   },
-  featuredHover: { borderColor: "#c4b5f4", transform: "translateY(-2px)" },
+  featuredHover: { borderColor: "var(--accent)", transform: "translateY(-2px)" },
   featuredAccent: {
     position: "absolute", top: 0, left: 0,
     width: "4px", height: "100%", borderRadius: "16px 0 0 16px", zIndex: 1,
@@ -290,7 +290,7 @@ const styles = {
   },
   featuredTitle: {
     fontSize: "clamp(20px, 3vw, 28px)", fontWeight: 700,
-    color: "#111", margin: "0 0 12px", lineHeight: 1.25,
+    color: "var(--text-h)", margin: "0 0 12px", lineHeight: 1.25,
     fontFamily: "'Georgia', serif",
   },
   featuredExcerpt: {
@@ -315,9 +315,9 @@ const styles = {
     position: "relative", border: "1.5px solid #e8e8e8",
     borderRadius: "14px", cursor: "pointer", overflow: "hidden",
     transition: "border-color 0.2s ease, transform 0.2s ease",
-    background: "#fff", display: "flex", flexDirection: "column",
+    background: "var(--card-bg)", display: "flex", flexDirection: "column",
   },
-  cardHover: { borderColor: "#c4b5f4", transform: "translateY(-3px)" },
+  cardHover: { borderColor: "var(--accent)", transform: "translateY(-3px)" },
 
   /* card image */
   cardImgWrap: {
@@ -342,7 +342,7 @@ const styles = {
     width: "8px", height: "8px", borderRadius: "50%",
   },
   cardTitle: {
-    fontSize: "17px", fontWeight: 700, color: "#111",
+    fontSize: "17px", fontWeight: 700, color: "var(--text-h)",
     margin: "0 0 10px", lineHeight: 1.35, fontFamily: "'Georgia', serif",
   },
   cardExcerpt: {
@@ -377,8 +377,8 @@ const styles = {
   ctaLine: { flex: 1, height: "1px", background: "#e8e8e8" },
   ctaBtn: {
     padding: "12px 28px", borderRadius: "99px",
-    border: "1.5px solid #111", background: "transparent",
-    color: "#111", fontSize: "13px", fontWeight: 600,
+    border: "1.5px solid var(--text-h)", background: "transparent",
+    color: "var(--text-h)", fontSize: "13px", fontWeight: 600,
     cursor: "pointer", fontFamily: "'Courier New', monospace",
     letterSpacing: "0.05em", whiteSpace: "nowrap",
     transition: "background 0.18s ease, color 0.18s ease",

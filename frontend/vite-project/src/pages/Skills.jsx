@@ -29,18 +29,24 @@ export default function Skills() {
     <>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
-        .skills-page { font-family: 'Poppins', sans-serif; background: #080810; min-height: 100vh; padding: 5rem 1.5rem 4rem; }
+        .skills-page { 
+          font-family: 'Poppins', sans-serif; 
+          background: var(--bg); 
+          min-height: 100vh; 
+          padding: 5rem 1.5rem 4rem; 
+          transition: background 0.3s ease;
+        }
         .skills-hero { text-align: center; margin-bottom: 4rem; }
         .skills-badge { display: inline-block; background: rgba(139, 92, 246, 0.15); border: 1px solid rgba(139, 92, 246, 0.3); color: #c4b5fd; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; padding: 0.35rem 1rem; border-radius: 100px; margin-bottom: 1.5rem; }
-        .skills-title { font-size: clamp(2rem, 5vw, 3rem); font-weight: 700; color: #ffffff; letter-spacing: -0.03em; margin: 0 0 1rem; }
+        .skills-title { font-size: clamp(2rem, 5vw, 3rem); font-weight: 700; color: var(--text-h); letter-spacing: -0.03em; margin: 0; transition: color 0.3s ease; }
         .skills-title span { background: linear-gradient(90deg, #8b5cf6, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .skills-subtitle { color: #6b6b85; font-size: 1rem; max-width: 500px; margin: 0 auto; line-height: 1.7; }
+        .skills-subtitle { color: var(--text); font-size: 1rem; max-width: 500px; margin: 0 auto; line-height: 1.7; opacity: 0.8; transition: color 0.3s ease; }
         .skills-grid { max-width: 1000px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1.25rem; }
-        .skills-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 14px; padding: 1.5rem; transition: border-color 0.3s, box-shadow 0.3s, transform 0.3s; }
+        .skills-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; padding: 1.5rem; transition: all 0.3s ease; box-shadow: var(--shadow); }
         .skills-card:hover { border-color: rgba(139,92,246,0.3); box-shadow: 0 10px 30px rgba(139,92,246,0.1); transform: translateY(-4px); }
         .skills-cat { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: #8b5cf6; margin-bottom: 1rem; }
         .skills-items { display: flex; flex-direction: column; gap: 0.5rem; }
-        .skills-item { display: flex; align-items: center; gap: 0.6rem; font-size: 0.875rem; color: #b0b0c8; }
+        .skills-item { display: flex; align-items: center; gap: 0.6rem; font-size: 0.875rem; color: var(--text); transition: color 0.3s ease; }
         .skills-item::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: linear-gradient(135deg, #8b5cf6, #6366f1); flex-shrink: 0; }
       `}</style>
 

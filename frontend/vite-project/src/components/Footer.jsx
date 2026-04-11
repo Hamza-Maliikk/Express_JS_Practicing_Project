@@ -20,9 +20,9 @@ export default function Footer() {
         @import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap');
 
         .hn-footer {
-          border-top: 0.5px solid #e8e4de;
+          border-top: 0.5px solid var(--border);
           padding: 22px 48px;
-          background: #fff;
+          background: var(--bg);
           display: flex;
           justify-content: space-between;
           align-items: center;
