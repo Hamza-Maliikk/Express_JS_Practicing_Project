@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const {connectToDatabase} = require("./connection");
 const {userData, addUser, deleteUser, registerUser, loginUser} = require("./controllers/user");
@@ -13,7 +14,6 @@ const { getProjects, AddProject, updateProject, deleteProject } = require("./con
 const { getContact, AddContact } = require("./controllers/contact");
 const { getDetails, AddDetails, UpdateDetails, deleteDetails } = require("./controllers/details");
 const { getHome, AddHome, UpdateHome, deleteHome } = require("./controllers/home");
-require("dotenv").config();
 const port = 8000;
 
 //connection

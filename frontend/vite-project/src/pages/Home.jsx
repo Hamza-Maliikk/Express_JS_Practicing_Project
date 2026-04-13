@@ -1,8 +1,10 @@
 import { useState } from "react";
 import Profile from "../assets/hamza picture blue background.jpeg";
+import { useEffect } from "react";
 
-
+const API = "http://localhost:8000/api/home";
 const NAV_LINKS = ["Home", "About", "Project", "Skills"];
+
 const PROJECTS = [
   {
     id: 1,
@@ -224,6 +226,19 @@ export default function KineticPortfolio() {
     message: "",
   });
 
+  const [homeData, setHomeData] = useState(null);
+
+  useEffect(() => {
+    // Fetch home page data from backend API
+    fetch(API)
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("Home page data:", data);
+        setHomeData(data); // Store data in state if needed
+        // You can set this data to state if you want to display it on the page
+      })
+      .catch((err) => console.error("Error fetching home page data:", err));
+  }, []);
 
   return (
     <div
@@ -346,7 +361,10 @@ export default function KineticPortfolio() {
       {/* Navbar is rendered by HomeLayout */}
 
       {/* ── HERO ── */}
-      <section
+      {homeData &&
+        Array.isArray(homeData) &&
+        homeData.map((item) => (
+          <section key={item._id}
         style={{ maxWidth: 1160, margin: "0 auto", padding: "112px 48px 80px" }}
       >
         {/* label */}
@@ -369,7 +387,7 @@ export default function KineticPortfolio() {
             cursor: "default",
           }}
         >
-          Full Stack Developer
+          {item.role}
         </p>
 
         <div
@@ -412,9 +430,7 @@ export default function KineticPortfolio() {
                 marginBottom: 36,
               }}
             >
-              From pixel-perfect interfaces to rock-solid APIs and databases — I
-              engineer complete digital products that are fast, scalable, and
-              actually enjoyable to use
+              {item.description}
             </p>
             <div className="flex gap-5">
               <button className="btn-outline fu fu4">
@@ -443,13 +459,15 @@ export default function KineticPortfolio() {
             }}
           >
             <img
-              src={Profile}
+              src={item.image} // Use the image URL from the API response
               style={{ width: "100%", height: "100%", objectFit: "cover" }}
               alt="Profile"
             />
           </div>
         </div>
       </section>
+        ))}
+      
 
       {/* ── SELECTED WORKS ── */}
       <section
@@ -701,8 +719,6 @@ export default function KineticPortfolio() {
           </p>
         </div>
       </section>
-
-   
 
       {/* Footer is rendered by HomeLayout */}
     </div>
