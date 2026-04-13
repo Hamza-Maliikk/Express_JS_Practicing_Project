@@ -15,6 +15,7 @@ import Contact from "./pages/Contact";
 import Work from "./pages/Work";
 import HomeBlogs from "./pages/HomeBlogs";
 import Details from "./pages/Details";
+import Adminhome from "./pages/Adminhome";
 
 function App() {
   return (
@@ -41,6 +42,7 @@ function App() {
         <Route path="/categories" element={<Categories />} />
         <Route path="/work" element={<Work />} />
         <Route path="/details" element={<Details />} />
+        <Route path="/admin" element={<Adminhome />} />
       </Route>
     </Routes>
   );

@@ -1,6 +1,10 @@
 const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
+const cloudinary = require("cloudinary").v2;
+const pkg     = require("multer-storage-cloudinary");
+const CloudinaryStorage = pkg.CloudinaryStorage;
+
 
 const uploadDir = path.resolve(__dirname, "../uploads");
 if (!fs.existsSync(uploadDir)) {
@@ -15,6 +19,15 @@ const storage = multer.diskStorage({
     cb(null, Date.now() + "-" + file.originalname);
   },
 });
-
 const upload = multer({ storage });
-module.exports = { upload };
+// ── "home" folder Cloudinary mein ──
+const homeStorage = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder:          "home",                          // ← alag folder home ke liye
+    allowed_formats: ["jpg", "jpeg", "png", "webp"],
+    transformation:  [{ width: 800, crop: "limit" }],
+  },
+});
+const uploadHome = multer({ storage: homeStorage });
+module.exports = { upload, uploadHome };

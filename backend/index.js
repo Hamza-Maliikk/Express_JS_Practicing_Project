@@ -7,11 +7,12 @@ const app = express();
 const cors = require("cors");  
 const { getBlogs, AddBlog, updateBlog, deleteBlog } = require("./controllers/blog");
 const { getCategories, AddCategory, updateCategory, deleteCategory } = require("./controllers/categories");
-const { upload } = require("./middleware/multer");
+const { upload, uploadHome } = require("./middleware/multer");
 const { AddAbout, getAbout, updateAbout, deleteSkill } = require("./controllers/about");
 const { getProjects, AddProject, updateProject, deleteProject } = require("./controllers/work");
 const { getContact, AddContact } = require("./controllers/contact");
 const { getDetails, AddDetails, UpdateDetails, deleteDetails } = require("./controllers/details");
+const { getHome, AddHome, UpdateHome, deleteHome } = require("./controllers/home");
 require("dotenv").config();
 const port = 8000;
 
@@ -75,7 +76,12 @@ app.get("/api/details", getDetails)
 app.post("/api/details", AddDetails)
 app.put("/api/details/:id", UpdateDetails)
 app.delete("/api/details/:id", deleteDetails)
-
+// home
+app.get("/api/home", getHome)
+app.post("/api/home",uploadHome.single('image'), AddHome)
+app.put("/api/home/:id", uploadHome.single('image'), UpdateHome)
+app.delete("/api/home/:id", deleteHome)
+// Port
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`);
 });

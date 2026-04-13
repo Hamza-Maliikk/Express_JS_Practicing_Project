@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Send, Mail, MapPin, Phone } from "lucide-react";
+import { Send, Mail, MapPin, Phone, User, Briefcase } from "lucide-react";
 
 const CONTACT_API = "http://localhost:8000/api/contact";
 const DETAILS_API = "http://localhost:8000/api/details";
@@ -7,43 +7,61 @@ const DETAILS_API = "http://localhost:8000/api/details";
 export default function Contact() {
   const [form, setForm]       = useState({ name: "", email: "", message: "" });
   const [sent, setSent]       = useState(false);
-  const [details, setDetails] = useState(null); // ← API se aayega
+  const [details, setDetails] = useState([]);
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
+  const [error, setError]     = useState(null);
 
-  // ── Details fetch ──────────────────────────────────
   useEffect(() => {
     fetch(DETAILS_API)
-      .then((r) => r.json())
-      .then((d) => { setDetails(d); setLoading(false); })
-      .catch(() => { setLoading(false); });
+      .then((r) => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); })
+      .then((data) => {
+        // API returns: { _id, name, role, email, phone, location, ... }
+        const item = Array.isArray(data) ? data[0] : data;
+
+        const mapped = [
+          { label: "Email",    value: item.email,    icon: Mail     },
+          { label: "Phone",    value: String(item.phone), icon: Phone },
+          { label: "Location", value: item.location, icon: MapPin   },
+        ].filter(d => d.value); // hide any empty fields
+
+        setDetails(mapped);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Failed to load contact details:", err);
+        setError("Could not load contact info.");
+        setDetails([
+          { label: "Email",    value: "hello@example.com", icon: Mail    },
+          { label: "Phone",    value: "+92 300 0000000",   icon: Phone   },
+          { label: "Location", value: "Karachi, PK",       icon: MapPin  },
+        ]);
+        setLoading(false);
+      });
   }, []);
 
-  const handleChange = (e) =>
-    setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
+  const handleChange = (e) => setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
 
-  // ── Contact form submit ────────────────────────────
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSending(true);
     try {
       const res = await fetch(CONTACT_API, {
-        method:  "POST",
+        method: "POST",
         headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify(form),
+        body: JSON.stringify(form),
       });
-      if (!res.ok) throw new Error("Failed");
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       setSent(true);
       setForm({ name: "", email: "", message: "" });
       setTimeout(() => setSent(false), 4000);
     } catch (err) {
       console.error("Error sending contact message:", err);
+      alert("Failed to send message. Please try again.");
     } finally {
       setSending(false);
     }
   };
-
-
 
   return (
     <>
@@ -64,6 +82,7 @@ export default function Contact() {
         .contact-info-value { font-size: 0.875rem; color: #8b5cf6; font-weight: 600; }
         html.dark-mode .contact-info-value { color: #c4b5fd; }
         .contact-info-loading { opacity: 0.45; font-style: italic; }
+        .contact-error-note { font-size: 0.72rem; color: #f87171; margin-top: 0.5rem; text-align: center; }
         .contact-form-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; padding: 2rem; box-shadow: var(--shadow); transition: background 0.3s ease, border-color 0.3s ease; }
         .contact-form { display: flex; flex-direction: column; gap: 1.1rem; }
         .contact-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
@@ -90,24 +109,30 @@ export default function Contact() {
         </div>
 
         <div className="contact-wrap">
-          {/* Info cards — API se data */}
+
+          {/* ── Info cards ── */}
           <div className="contact-info">
-            {detailsz.map(({ icon: Icon, label, value }) => (
+            {details.map(({ icon: Icon, label, value }) => (
               <div key={label} className="contact-info-card">
-                <div className="contact-info-icon">
-                  <Icon size={18} />
-                </div>
+                <div className="contact-info-icon"><Icon size={18} /></div>
                 <div>
                   <div className="contact-info-label">{label}</div>
                   <div className={`contact-info-value ${loading ? "contact-info-loading" : ""}`}>
-                    {value}
+                    {loading ? "Loading…"
+                      : label.toLowerCase() === "email"
+                        ? <a href={`mailto:${value}`} style={{ color: "inherit", textDecoration: "none" }}>{value}</a>
+                      : label.toLowerCase() === "phone"
+                        ? <a href={`tel:${value}`} style={{ color: "inherit", textDecoration: "none" }}>{value}</a>
+                      : value
+                    }
                   </div>
                 </div>
               </div>
             ))}
+            {error && <p className="contact-error-note">⚠ {error} Showing fallback data.</p>}
           </div>
 
-          {/* Form */}
+          {/* ── Contact form ── */}
           <div className="contact-form-card">
             {sent ? (
               <div className="contact-success">
@@ -118,51 +143,25 @@ export default function Contact() {
                 <div className="contact-form-row">
                   <div className="contact-field">
                     <label className="contact-label">Name</label>
-                    <input
-                      className="contact-input"
-                      type="text"
-                      name="name"
-                      value={form.name}
-                      onChange={handleChange}
-                      placeholder="Your name"
-                      required
-                    />
+                    <input className="contact-input" type="text" name="name" value={form.name} onChange={handleChange} placeholder="Your name" required />
                   </div>
                   <div className="contact-field">
                     <label className="contact-label">Email</label>
-                    <input
-                      className="contact-input"
-                      type="email"
-                      name="email"
-                      value={form.email}
-                      onChange={handleChange}
-                      placeholder="your@email.com"
-                      required
-                    />
+                    <input className="contact-input" type="email" name="email" value={form.email} onChange={handleChange} placeholder="your@email.com" required />
                   </div>
                 </div>
                 <div className="contact-field">
                   <label className="contact-label">Message</label>
-                  <textarea
-                    className="contact-textarea"
-                    name="message"
-                    value={form.message}
-                    onChange={handleChange}
-                    placeholder="Tell me about your project..."
-                    required
-                  />
+                  <textarea className="contact-textarea" name="message" value={form.message} onChange={handleChange} placeholder="Tell me about your project..." required />
                 </div>
-                <button
-                  type="submit"
-                  className="contact-submit"
-                  disabled={sending}
-                >
+                <button type="submit" className="contact-submit" disabled={sending}>
                   <Send size={16} />
                   {sending ? "Sending..." : "Send Message"}
                 </button>
               </form>
             )}
           </div>
+
         </div>
       </div>
     </>
