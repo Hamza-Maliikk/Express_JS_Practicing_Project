@@ -65,16 +65,17 @@ const AdminTestimonials = () => {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('Delete this testimonial?')) return;
-    try {
-      await fetch(`${API}/${id}`, { method: 'DELETE' });
-      showToast('Deleted!', 'success');
-      fetchAll();
-    } catch (e) {
-      showToast('Could not delete', 'error');
-    }
-  };
+const handleDelete = async (id) => {
+  if (!window.confirm('Delete this testimonial?')) return;
+  try {
+    const r = await fetch(`${API}/${id}`, { method: 'DELETE' });
+    if (!r.ok) throw new Error();
+    showToast('Deleted!', 'success');
+    fetchAll();
+  } catch (e) {
+    showToast('Could not delete', 'error');
+  }
+};
 
   return (
     <div style={styles.page}>

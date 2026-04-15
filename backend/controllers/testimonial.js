@@ -53,11 +53,10 @@ const AddTestimonial = async (req, res) => {
 // delete testimonial
 const deleteTestimonial = async (req, res) => {
     try {
-        const testimonial = await Testmonials.findById(req.params.id);
+        const testimonial = await Testmonials.findByIdAndDelete(req.params.id);
         if (!testimonial) {
             return res.status(404).json("Testimonial not found");
         }
-        await testimonial.delete();
         res.status(200).json("Testimonial deleted successfully");
     }catch (err) {
         res.status(500).json(err);

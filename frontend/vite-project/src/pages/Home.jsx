@@ -579,9 +579,7 @@ export default function KineticPortfolio() {
                 marginBottom: 20,
               }}
             >
-              Crafting Digital
-              <br />
-              Excellence
+              Our Clients 
             </h2>
             <p
               style={{
@@ -596,7 +594,7 @@ export default function KineticPortfolio() {
               Every pixel is a choice, every interaction an opportunity to
               delight.
             </p>
-            <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            {/* <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
               {EXPERTISE_LIST.map((item, i) => (
                 <div
                   key={item}
@@ -627,7 +625,7 @@ export default function KineticPortfolio() {
                   </span>
                 </div>
               ))}
-            </div>
+            </div> */}
           </div>
 
           {/* right – 2×2 skills */}
