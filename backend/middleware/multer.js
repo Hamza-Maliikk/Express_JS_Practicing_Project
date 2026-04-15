@@ -30,4 +30,14 @@ const homeStorage = new CloudinaryStorage({
   },
 });
 const uploadHome = multer({ storage: homeStorage });
-module.exports = { upload, uploadHome };
+// testmonial
+const testimonialStorage = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder:          "testimonials",                  // ← alag folder testimonials ke liye
+    allowed_formats: ["jpg", "jpeg", "png", "webp"],
+    transformation:  [{ width: 800, crop: "limit" }],
+  },
+});
+const uploadTestimonial = multer({ storage: testimonialStorage   });
+module.exports = { upload, uploadHome, uploadTestimonial };

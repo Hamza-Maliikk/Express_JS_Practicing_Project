@@ -8,7 +8,7 @@ const app = express();
 const cors = require("cors");  
 const { getBlogs, AddBlog, updateBlog, deleteBlog } = require("./controllers/blog");
 const { getCategories, AddCategory, updateCategory, deleteCategory } = require("./controllers/categories");
-const { upload, uploadHome } = require("./middleware/multer");
+const { upload, uploadHome, uploadTestimonial } = require("./middleware/multer");
 const { AddAbout, getAbout, updateAbout, deleteSkill } = require("./controllers/about");
 const { getProjects, AddProject, updateProject, deleteProject } = require("./controllers/work");
 const { getContact, AddContact } = require("./controllers/contact");
@@ -29,6 +29,18 @@ app.use(express.urlencoded({ extended: true }));
 app.get("/api/user/", userData);
 app.post("/api/user", addUser);
 
+// combined fr homepage 
+app.get("/api/homepage", async (req, res) => {
+  try{
+    const [home, testimonials] = await Promise.all([
+      require("./models/home").find(),
+      require("./models/testimonials").find()
+    ]);
+    res.status(200).json({ home, testimonials });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 // portfolio about
 app.get("/api/about", getAbout);
 app.post("/api/about", AddAbout);
@@ -84,8 +96,8 @@ app.put("/api/home/:id", uploadHome.single('image'), UpdateHome)
 app.delete("/api/home/:id", deleteHome)
 // testimonial section
 app.get("/api/testimonials", getTestimonials)
-app.post("/api/testimonials", AddTestimonial)
-app.put("/api/testimonials/:id", UpdateTestimonial)
+app.post("/api/testimonials",uploadTestimonial.single('image'), AddTestimonial)
+app.put("/api/testimonials/:id",uploadTestimonial.single('image'), UpdateTestimonial)
 app.delete("/api/testimonials/:id", deleteTestimonial)
 
 // Port

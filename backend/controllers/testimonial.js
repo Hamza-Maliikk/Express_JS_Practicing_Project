@@ -14,14 +14,14 @@ const Testmonials = require("../models/testimonials")
 // add testimonial
 const AddTestimonial = async (req, res) => {
     try {
-        // if (!req.file) {
-        //     return res.status(400).json({ message: "Image is required" });
-        // }
+        if (!req.file) {
+            return res.status(400).json({ message: "Image is required" });
+        }
         const testimonial = new Testmonials({
             name: req.body.name,
             username: req.body.username,
             description: req.body.description,
-            // image: req.file.filename
+            image: req.file ? req.file.path : null
         });
         await testimonial.save();
         res.status(201).json({ message: "Testimonial added successfully" });
@@ -40,9 +40,9 @@ const AddTestimonial = async (req, res) => {
         testimonial.name = req.body.name || testimonial.name;
         testimonial.username = req.body.username || testimonial.username;
         testimonial.description = req.body.description || testimonial.description;  
-        // if (req.file) {
-        //     testimonial.image = req.file.filename;
-        // }
+        if (req.file) {
+            testimonial.image = req.file.filename;
+        }
         await testimonial.save();
         res.status(200).json("Testimonial updated successfully");
     }catch (err) {

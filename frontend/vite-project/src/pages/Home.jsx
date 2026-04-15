@@ -2,7 +2,7 @@ import { useState } from "react";
 import Profile from "../assets/hamza picture blue background.jpeg";
 import { useEffect } from "react";
 
-const API = "http://localhost:8000/api/home";
+const API = "http://localhost:8000/api/homepage";
 const NAV_LINKS = ["Home", "About", "Project", "Skills"];
 
 const PROJECTS = [
@@ -227,17 +227,17 @@ export default function KineticPortfolio() {
   });
 
   const [homeData, setHomeData] = useState(null);
+  const [testimonials, setTestimonials] = useState([]); // ← ye add karo
 
   useEffect(() => {
-    // Fetch home page data from backend API
     fetch(API)
       .then((res) => res.json())
       .then((data) => {
-        console.log("Home page data:", data);
-        setHomeData(data); // Store data in state if needed
-        // You can set this data to state if you want to display it on the page
+        console.log("Homepage data:", data);
+        setHomeData(data.home); // ← backend se { home, testimonials }
+        setTestimonials(data.testimonials);
       })
-      .catch((err) => console.error("Error fetching home page data:", err));
+      .catch((err) => console.error("Error:", err));
   }, []);
 
   return (
@@ -364,110 +364,114 @@ export default function KineticPortfolio() {
       {homeData &&
         Array.isArray(homeData) &&
         homeData.map((item) => (
-          <section key={item._id}
-        style={{ maxWidth: 1160, margin: "0 auto", padding: "112px 48px 80px" }}
-      >
-        {/* label */}
-        <p
-          className="fu fu1"
-          style={{
-            display: "inline-block",
-            padding: "6px 14px",
-            fontFamily: "'DM Sans', sans-serif",
-            fontSize: "12px",
-            fontWeight: 600,
-            letterSpacing: ".1em",
-            textTransform: "uppercase",
-            color: "#fff",
-            background: "linear-gradient(135deg, #2563eb, #4f46e5)",
-            borderRadius: "999px",
-            boxShadow: "0 4px 14px rgba(37, 99, 235, 0.4)",
-            marginBottom: "20px",
-            transition: "all 0.3s ease",
-            cursor: "default",
-          }}
-        >
-          {item.role}
-        </p>
-
-        <div
-          className="hero-inner"
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "flex-start",
-            gap: 48,
-          }}
-        >
-          {/* left */}
-          <div style={{ flex: 1 }}>
-            <h1
-              className="hero-h1 fu fu2"
-              style={{
-                fontFamily: "'Poppins', serif",
-                fontSize: 52,
-                fontWeight: 900,
-                lineHeight: 1.05,
-                letterSpacing: "-.025em",
-                color: "var(--text-h)",
-                marginBottom: 24,
-              }}
-            >
-              I build full-stack apps that work
-              <br />
-              end-to-end —
-              <br />
-              not just the parts that look good in a demo.
-            </h1>
-            <p
-              className="fu fu3"
-              style={{
-                fontFamily: "'Poppins', sans-serif",
-                fontSize: 14,
-                color: "var(--text)",
-                lineHeight: 1.75,
-                maxWidth: 370,
-                marginBottom: 36,
-              }}
-            >
-              {item.description}
-            </p>
-            <div className="flex gap-5">
-              <button className="btn-outline fu fu4">
-                ↓ &nbsp;Download Resume
-              </button>
-              <button className="btn-outline fu fu4">
-                ↓ &nbsp;View Resume
-              </button>
-            </div>
-          </div>
-
-          {/* right – photo */}
-          <div
-            className="hero-photo fu fu3"
+          <section
+            key={item._id}
             style={{
-              width: 300,
-              height: 380,
-              borderRadius: 3,
-              overflow: "hidden",
-              flexShrink: 0,
-              background:
-                "linear-gradient(160deg,#1c1c1c 0%,#383838 60%,#222 100%)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
+              maxWidth: 1160,
+              margin: "0 auto",
+              padding: "112px 48px 80px",
             }}
           >
-            <img
-              src={item.image} // Use the image URL from the API response
-              style={{ width: "100%", height: "100%", objectFit: "cover" }}
-              alt="Profile"
-            />
-          </div>
-        </div>
-      </section>
+            {/* label */}
+            <p
+              className="fu fu1"
+              style={{
+                display: "inline-block",
+                padding: "6px 14px",
+                fontFamily: "'DM Sans', sans-serif",
+                fontSize: "12px",
+                fontWeight: 600,
+                letterSpacing: ".1em",
+                textTransform: "uppercase",
+                color: "#fff",
+                background: "linear-gradient(135deg, #2563eb, #4f46e5)",
+                borderRadius: "999px",
+                boxShadow: "0 4px 14px rgba(37, 99, 235, 0.4)",
+                marginBottom: "20px",
+                transition: "all 0.3s ease",
+                cursor: "default",
+              }}
+            >
+              {item.role}
+            </p>
+
+            <div
+              className="hero-inner"
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "flex-start",
+                gap: 48,
+              }}
+            >
+              {/* left */}
+              <div style={{ flex: 1 }}>
+                <h1
+                  className="hero-h1 fu fu2"
+                  style={{
+                    fontFamily: "'Poppins', serif",
+                    fontSize: 52,
+                    fontWeight: 900,
+                    lineHeight: 1.05,
+                    letterSpacing: "-.025em",
+                    color: "var(--text-h)",
+                    marginBottom: 24,
+                  }}
+                >
+                  I build full-stack apps that work
+                  <br />
+                  end-to-end —
+                  <br />
+                  not just the parts that look good in a demo.
+                </h1>
+                <p
+                  className="fu fu3"
+                  style={{
+                    fontFamily: "'Poppins', sans-serif",
+                    fontSize: 14,
+                    color: "var(--text)",
+                    lineHeight: 1.75,
+                    maxWidth: 370,
+                    marginBottom: 36,
+                  }}
+                >
+                  {item.description}
+                </p>
+                <div className="flex gap-5">
+                  <button className="btn-outline fu fu4">
+                    ↓ &nbsp;Download Resume
+                  </button>
+                  <button className="btn-outline fu fu4">
+                    ↓ &nbsp;View Resume
+                  </button>
+                </div>
+              </div>
+
+              {/* right – photo */}
+              <div
+                className="hero-photo fu fu3"
+                style={{
+                  width: 300,
+                  height: 380,
+                  borderRadius: 3,
+                  overflow: "hidden",
+                  flexShrink: 0,
+                  background:
+                    "linear-gradient(160deg,#1c1c1c 0%,#383838 60%,#222 100%)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <img
+                  src={item.image} // Use the image URL from the API response
+                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                  alt="Profile"
+                />
+              </div>
+            </div>
+          </section>
         ))}
-      
 
       {/* ── SELECTED WORKS ── */}
       <section
@@ -579,7 +583,7 @@ export default function KineticPortfolio() {
                 marginBottom: 20,
               }}
             >
-              Our Clients 
+              Our Clients
             </h2>
             <p
               style={{
@@ -629,44 +633,55 @@ export default function KineticPortfolio() {
           </div>
 
           {/* right – 2×2 skills */}
-          <div
-            className="skills-grid"
-            style={{
-              flex: 1,
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              gap: 16,
-            }}
-          >
-            {SKILLS.map((s) => (
-              <div key={s.title} className="skill-card">
-                <div style={{ fontSize: 18, color: s.color, marginBottom: 12 }}>
-                  {s.icon}
+          {/* ── TESTIMONIAL ── */}
+          {Array.isArray(testimonials) &&
+            testimonials.map((t) => (
+              <section
+                key={t._id}
+                style={{
+                  background: "#0f0f0f",
+                  padding: "96px 48px",
+                  textAlign: "center",
+                }}
+              >
+                <div style={{ maxWidth: 680, margin: "0 auto" }}>
+                  <div
+                    style={{
+                      fontSize: 52,
+                      color: "#1d4ed8",
+                      lineHeight: 1,
+                      marginBottom: 36,
+                      fontFamily: "'Playfair Display', serif",
+                    }}
+                  >
+                    "
+                  </div>
+                  <blockquote
+                    style={{
+                      fontFamily: "'Playfair Display', serif",
+                      fontSize: 22,
+                      fontStyle: "italic",
+                      color: "#f0ede8",
+                      lineHeight: 1.65,
+                      marginBottom: 32,
+                    }}
+                  >
+                    "{t.message}"
+                  </blockquote>
+                  <p
+                    style={{
+                      fontFamily: "'DM Sans', sans-serif",
+                      fontSize: 12,
+                      color: "#666",
+                      letterSpacing: ".08em",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    {t.name}
+                  </p>
                 </div>
-                <h3
-                  style={{
-                    fontFamily: "'Playfair Display', serif",
-                    fontSize: 16,
-                    fontWeight: 700,
-                    color: "var(--text-h)",
-                    marginBottom: 10,
-                  }}
-                >
-                  {s.title}
-                </h3>
-                <p
-                  style={{
-                    fontFamily: "'DM Sans', sans-serif",
-                    fontSize: 13,
-                    color: "var(--text)",
-                    lineHeight: 1.72,
-                  }}
-                >
-                  {s.desc}
-                </p>
-              </div>
+              </section>
             ))}
-          </div>
         </div>
       </section>
 

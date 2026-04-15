@@ -9,6 +9,8 @@ const AdminTestimonials = () => {
   const [editingId, setEditingId] = useState(null);
   const [toast, setToast] = useState({ msg: '', type: '' });
   const [form, setForm] = useState({ name: '', username: '', description: '' });
+  const [imageFile, setImageFile] = useState(null);        // ← new
+  const [imagePreview, setImagePreview] = useState(null);  // ← new
 
   useEffect(() => { fetchAll(); }, []);
 
@@ -18,7 +20,7 @@ const AdminTestimonials = () => {
       const data = await r.json();
       setTestimonials(data);
     } catch (e) {
-      showToast('Could not connect to server', 'error');
+      showToast('Could not connect to server', 'error', e);
     } finally {
       setLoading(false);
     }
@@ -32,16 +34,28 @@ const AdminTestimonials = () => {
   const openAdd = () => {
     setEditingId(null);
     setForm({ name: '', username: '', description: '' });
+    setImageFile(null);      // ← reset
+    setImagePreview(null);   // ← reset
     setModalOpen(true);
   };
 
   const openEdit = (t) => {
     setEditingId(t._id);
     setForm({ name: t.name, username: t.username, description: t.description });
+    setImageFile(null);
+    setImagePreview(t.image || null);  // ← existing image show karo
     setModalOpen(true);
   };
 
   const closeModal = () => setModalOpen(false);
+
+  // ← Image change handler
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setImageFile(file);
+    setImagePreview(URL.createObjectURL(file));
+  };
 
   const handleSave = async () => {
     if (!form.name || !form.username || !form.description) {
@@ -51,31 +65,40 @@ const AdminTestimonials = () => {
     try {
       const url = editingId ? `${API}/${editingId}` : API;
       const method = editingId ? 'PUT' : 'POST';
+
+      // ← FormData use karo image ke liye
+      const formData = new FormData();
+      formData.append('name', form.name);
+      formData.append('username', form.username);
+      formData.append('description', form.description);
+      if (imageFile) {
+        formData.append('image', imageFile);
+      }
+
       const r = await fetch(url, {
         method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: formData,  // ← Content-Type header mat lagao, browser khud lagata hai
       });
       if (!r.ok) throw new Error();
       showToast(editingId ? 'Updated successfully!' : 'Added successfully!', 'success');
       closeModal();
       fetchAll();
     } catch (e) {
-      showToast('Something went wrong', 'error');
+      showToast('Something went wrong', 'error', e);
     }
   };
 
-const handleDelete = async (id) => {
-  if (!window.confirm('Delete this testimonial?')) return;
-  try {
-    const r = await fetch(`${API}/${id}`, { method: 'DELETE' });
-    if (!r.ok) throw new Error();
-    showToast('Deleted!', 'success');
-    fetchAll();
-  } catch (e) {
-    showToast('Could not delete', 'error');
-  }
-};
+  const handleDelete = async (id) => {
+    if (!window.confirm('Delete this testimonial?')) return;
+    try {
+      const r = await fetch(`${API}/${id}`, { method: 'DELETE' });
+      if (!r.ok) throw new Error();
+      showToast('Deleted!', 'success');
+      fetchAll();
+    } catch (e) {
+      showToast('Could not delete', 'error', e);
+    }
+  };
 
   return (
     <div style={styles.page}>
@@ -109,7 +132,16 @@ const handleDelete = async (id) => {
                 <tr key={t._id} style={styles.tr}>
                   <td style={styles.td}>
                     <div style={styles.nameCell}>
-                      <div style={styles.avatar}>{t.name?.[0]?.toUpperCase()}</div>
+                      {/* ← Agar image hai toh show karo, warna initial */}
+                      {t.image ? (
+                        <img
+                          src={t.image}
+                          alt={t.name}
+                          style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover' }}
+                        />
+                      ) : (
+                        <div style={styles.avatar}>{t.name?.[0]?.toUpperCase()}</div>
+                      )}
                       <div>
                         <div style={styles.name}>{t.name}</div>
                         <div style={styles.username}>{t.username}</div>
@@ -159,6 +191,36 @@ const handleDelete = async (id) => {
               />
             </div>
 
+            {/* ── IMAGE UPLOAD ── */}
+            <div style={styles.field}>
+              <label style={styles.label}>Profile Image</label>
+
+              {/* Preview */}
+              {imagePreview && (
+                <div style={{ marginBottom: 12 }}>
+                  <img
+                    src={imagePreview}
+                    alt="preview"
+                    style={{ width: 72, height: 72, borderRadius: '50%', objectFit: 'cover', border: '2px solid #2a2a35' }}
+                  />
+                </div>
+              )}
+
+              {/* Upload box */}
+              <label style={styles.uploadBox}>
+                <input
+                  type="file"
+                  accept="image/*"
+                  style={{ display: 'none' }}
+                  onChange={handleImageChange}
+                />
+                <span style={{ fontSize: '1.5rem' }}>📷</span>
+                <span style={{ fontSize: '.85rem', color: '#6b6b80', marginTop: 6 }}>
+                  {imageFile ? imageFile.name : 'Click to upload image'}
+                </span>
+              </label>
+            </div>
+
             <div style={styles.modalActions}>
               <button style={styles.btnCancel} onClick={closeModal}>Cancel</button>
               <button style={styles.btnSave} onClick={handleSave}>Save</button>
@@ -189,6 +251,7 @@ const styles = {
   th: { padding: '12px 16px', textAlign: 'left', fontSize: '.75rem', color: '#6b6b80', fontWeight: 600, letterSpacing: '.8px', textTransform: 'uppercase' },
   tr: { borderTop: '1px solid #2a2a35' },
   td: { padding: '14px 16px', fontSize: '.88rem', verticalAlign: 'middle' },
+  center: { textAlign: 'center', padding: '32px', color: '#6b6b80' },
   nameCell: { display: 'flex', alignItems: 'center', gap: '12px' },
   avatar: { width: '40px', height: '40px', borderRadius: '50%', background: '#f0c040', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '.9rem', color: '#000' },
   name: { fontWeight: 500 },
@@ -202,6 +265,8 @@ const styles = {
   field: { marginBottom: '16px' },
   label: { display: 'block', fontSize: '.8rem', color: '#6b6b80', marginBottom: '6px', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '.5px' },
   input: { width: '100%', background: '#1e1e24', border: '1px solid #2a2a35', borderRadius: '8px', padding: '10px 14px', color: '#f0ede8', fontFamily: 'DM Sans, sans-serif', fontSize: '.9rem', outline: 'none', boxSizing: 'border-box' },
+  // ← New upload box style
+  uploadBox: { display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4, width: '100%', padding: '20px', background: '#1e1e24', border: '1.5px dashed #2a2a35', borderRadius: '10px', cursor: 'pointer', transition: 'border-color .2s' },
   modalActions: { display: 'flex', gap: '10px', marginTop: '24px', justifyContent: 'flex-end' },
   btnCancel: { background: '#1e1e24', color: '#6b6b80', padding: '10px 18px', borderRadius: '8px', border: 'none', cursor: 'pointer' },
   btnSave: { background: '#f0c040', color: '#000', padding: '10px 22px', borderRadius: '8px', fontWeight: 600, border: 'none', cursor: 'pointer' },
