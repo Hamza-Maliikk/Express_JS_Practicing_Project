@@ -179,9 +179,8 @@ export default function AdminResume() {
               <div className="ar-actions">
                 <a
                   href={r.pdf}
-                  type="file"
                   target="_blank"
-                  rel="noreferrer"
+                  rel="noopener noreferrer"
                   className="ar-btn ar-btn-edit ar-btn-sm"
                   style={{ display: "flex", alignItems: "center" }}
                 >

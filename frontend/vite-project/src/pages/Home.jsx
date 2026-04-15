@@ -1,5 +1,4 @@
 import { useState } from "react";
-import Profile from "../assets/hamza picture blue background.jpeg";
 import { useEffect } from "react";
 
 const API = "http://localhost:8000/api/homepage";
@@ -228,6 +227,7 @@ export default function KineticPortfolio() {
 
   const [homeData, setHomeData] = useState(null);
   const [testimonials, setTestimonials] = useState([]); // ← ye add karo
+  const [resume, setResume] = useState([]); // ← ye add karo  
 
   useEffect(() => {
     fetch(API)
@@ -236,6 +236,7 @@ export default function KineticPortfolio() {
         console.log("Homepage data:", data);
         setHomeData(data.home); // ← backend se { home, testimonials }
         setTestimonials(data.testimonials);
+        setResume(data.resume);
       })
       .catch((err) => console.error("Error:", err));
   }, []);
@@ -437,14 +438,19 @@ export default function KineticPortfolio() {
                 >
                   {item.description}
                 </p>
-                <div className="flex gap-5">
-                  <button className="btn-outline fu fu4">
-                    ↓ &nbsp;Download Resume
-                  </button>
-                  <button className="btn-outline fu fu4">
-                    ↓ &nbsp;View Resume
-                  </button>
-                </div>
+                {Array.isArray(resume) && resume.slice(-1).map((r) => (
+                  <div key={r._id} style={{ display: "flex", gap: "12px", marginTop: "10px" }}>
+                    <a
+                      href={r.pdf}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn-outline fu fu4"
+                      style={{ textDecoration: "none" }}
+                    >
+                      📄 &nbsp;View Resume
+                    </a>
+                  </div>
+                ))}
               </div>
 
               {/* right – photo */}
