@@ -437,7 +437,7 @@ export default function KineticPortfolio() {
                 ↓ &nbsp;Download Resume
               </button>
               <button className="btn-outline fu fu4">
-                ↓ &nbsp;Get in touch
+                ↓ &nbsp;View Resume
               </button>
             </div>
           </div>

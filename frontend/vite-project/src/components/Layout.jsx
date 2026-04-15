@@ -10,6 +10,7 @@ const nav = [
   { to: "/categories", label: "Categories", icon: "◈" },
   { to: "/details", label: "mydetails", icon: "◈" },
   { to: "/work", label: "Work", icon: "◈" },
+  { to: "/testimonials", label: "Testimonials", icon: "◈" },
   { to: "/admin", label: "Admin", icon: "◈" },
 ];
 

@@ -16,6 +16,7 @@ import Work from "./pages/Work";
 import HomeBlogs from "./pages/HomeBlogs";
 import Details from "./pages/Details";
 import Adminhome from "./pages/Adminhome";
+import AdminTestimonials from "./pages/Admintestmonials";
 
 function App() {
   return (
@@ -41,6 +42,7 @@ function App() {
         <Route path="/blogs" element={<Blogs />} />
         <Route path="/categories" element={<Categories />} />
         <Route path="/work" element={<Work />} />
+        <Route path="/testimonials" element={<AdminTestimonials />} />
         <Route path="/details" element={<Details />} />
         <Route path="/admin" element={<Adminhome />} />
       </Route>

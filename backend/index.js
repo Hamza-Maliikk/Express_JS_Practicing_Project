@@ -14,14 +14,15 @@ const { getProjects, AddProject, updateProject, deleteProject } = require("./con
 const { getContact, AddContact } = require("./controllers/contact");
 const { getDetails, AddDetails, UpdateDetails, deleteDetails } = require("./controllers/details");
 const { getHome, AddHome, UpdateHome, deleteHome } = require("./controllers/home");
+const { getTestimonials, AddTestimonial, UpdateTestimonial, deleteTestimonial } = require("./controllers/testimonial");
 const port = 8000;
 
 //connection
 connectToDatabase(process.env.MONGO_URI);
 
 // middleware
-app.use(express.json());
 app.use(cors())
+app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 
@@ -81,6 +82,12 @@ app.get("/api/home", getHome)
 app.post("/api/home",uploadHome.single('image'), AddHome)
 app.put("/api/home/:id", uploadHome.single('image'), UpdateHome)
 app.delete("/api/home/:id", deleteHome)
+// testimonial section
+app.get("/api/testimonials", getTestimonials)
+app.post("/api/testimonials", AddTestimonial)
+app.put("/api/testimonials/:id", UpdateTestimonial)
+app.delete("/api/testimonials/:id", deleteTestimonial)
+
 // Port
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`);
