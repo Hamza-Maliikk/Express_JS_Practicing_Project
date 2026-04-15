@@ -40,4 +40,14 @@ const testimonialStorage = new CloudinaryStorage({
   },
 });
 const uploadTestimonial = multer({ storage: testimonialStorage   });
-module.exports = { upload, uploadHome, uploadTestimonial };
+// resume
+const resumeStorage = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder:          "resume",     
+    resource_type: "auto",                 // ← alag folder resume ke liye
+    allowed_formats: ["pdf", "doc", "docx"],
+  },
+});
+const uploadResume = multer({ storage: resumeStorage   });
+module.exports = { upload, uploadHome, uploadTestimonial, uploadResume };

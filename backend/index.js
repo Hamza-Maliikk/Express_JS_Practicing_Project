@@ -8,13 +8,14 @@ const app = express();
 const cors = require("cors");  
 const { getBlogs, AddBlog, updateBlog, deleteBlog } = require("./controllers/blog");
 const { getCategories, AddCategory, updateCategory, deleteCategory } = require("./controllers/categories");
-const { upload, uploadHome, uploadTestimonial } = require("./middleware/multer");
+const { upload, uploadHome, uploadTestimonial, uploadResume } = require("./middleware/multer");
 const { AddAbout, getAbout, updateAbout, deleteSkill } = require("./controllers/about");
 const { getProjects, AddProject, updateProject, deleteProject } = require("./controllers/work");
 const { getContact, AddContact } = require("./controllers/contact");
 const { getDetails, AddDetails, UpdateDetails, deleteDetails } = require("./controllers/details");
 const { getHome, AddHome, UpdateHome, deleteHome } = require("./controllers/home");
 const { getTestimonials, AddTestimonial, UpdateTestimonial, deleteTestimonial } = require("./controllers/testimonial");
+const { getResume, addResume, updateResume, deleteResume } = require("./controllers/resume");
 const port = 8000;
 
 //connection
@@ -32,11 +33,12 @@ app.post("/api/user", addUser);
 // combined fr homepage 
 app.get("/api/homepage", async (req, res) => {
   try{
-    const [home, testimonials] = await Promise.all([
+    const [home, testimonials, resume] = await Promise.all([
       require("./models/home").find(),
-      require("./models/testimonials").find()
+      require("./models/testimonials").find(),
+      require("./models/resume").find()
     ]);
-    res.status(200).json({ home, testimonials });
+    res.status(200).json({ home, testimonials, resume });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -99,7 +101,11 @@ app.get("/api/testimonials", getTestimonials)
 app.post("/api/testimonials",uploadTestimonial.single('image'), AddTestimonial)
 app.put("/api/testimonials/:id",uploadTestimonial.single('image'), UpdateTestimonial)
 app.delete("/api/testimonials/:id", deleteTestimonial)
-
+// resume
+app.get("/api/resume", getResume)
+app.post("/api/resume",uploadResume.single('pdf'), addResume)
+app.put("/api/resume/:id",uploadResume.single('pdf'), updateResume)
+app.delete("/api/resume/:id", deleteResume)
 // Port
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`);

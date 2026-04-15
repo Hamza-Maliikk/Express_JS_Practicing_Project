@@ -560,130 +560,50 @@ export default function KineticPortfolio() {
       </section>
 
       {/* ── EXPERTISE ── */}
-      <section style={{ background: "var(--card-bg)", padding: "88px 48px" }}>
-        <div
-          className="exp-inner"
-          style={{
-            maxWidth: 1160,
-            margin: "0 auto",
-            display: "flex",
-            gap: 80,
-            alignItems: "flex-start",
-          }}
-        >
-          {/* left */}
-          <div style={{ flex: "0 0 300px" }}>
-            <h2
-              style={{
-                fontFamily: "'Playfair Display', serif",
-                fontSize: 38,
-                fontWeight: 800,
-                lineHeight: 1.1,
-                color: "var(--text-h)",
-                marginBottom: 20,
-              }}
-            >
-              Our Clients
-            </h2>
-            <p
-              style={{
-                fontFamily: "'DM Sans', sans-serif",
-                fontSize: 14,
-                color: "var(--text)",
-                lineHeight: 1.8,
-                marginBottom: 36,
-              }}
-            >
-              My approach blends technical precision with artistic intuition.
-              Every pixel is a choice, every interaction an opportunity to
-              delight.
-            </p>
-            {/* <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-              {EXPERTISE_LIST.map((item, i) => (
-                <div
-                  key={item}
-                  style={{ display: "flex", alignItems: "center", gap: 14 }}
-                >
-                  <span
-                    style={{
-                      fontFamily: "'DM Sans', sans-serif",
-                      fontSize: 10,
-                      fontWeight: 500,
-                      color: "#1d4ed8",
-                      letterSpacing: ".06em",
-                      background: "#dbeafe",
-                      borderRadius: 3,
-                      padding: "3px 9px",
-                    }}
-                  >
-                    0{i + 1}
-                  </span>
-                  <span
-                    style={{
-                      fontFamily: "'DM Sans', sans-serif",
-                      fontSize: 14,
-                      color: "var(--text)",
-                    }}
-                  >
-                    {item}
-                  </span>
-                </div>
-              ))}
-            </div> */}
-          </div>
+    {/* ── TESTIMONIALS ── */}
+<section style={{ maxWidth: 1160, margin: "0 auto", padding: "80px 48px" }}>
+  <p style={{ fontSize: 12, letterSpacing: ".08em", textTransform: "uppercase", color: "var(--text)", marginBottom: 4 }}>
+    What people say
+  </p>
+  <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 34, fontWeight: 700, color: "var(--text-h)", marginBottom: 40 }}>
+    Client Testimonials
+  </h2>
 
-          {/* right – 2×2 skills */}
-          {/* ── TESTIMONIAL ── */}
-          {Array.isArray(testimonials) &&
-            testimonials.map((t) => (
-              <section
-                key={t._id}
-                style={{
-                  background: "#0f0f0f",
-                  padding: "96px 48px",
-                  textAlign: "center",
-                }}
-              >
-                <div style={{ maxWidth: 680, margin: "0 auto" }}>
-                  <div
-                    style={{
-                      fontSize: 52,
-                      color: "#1d4ed8",
-                      lineHeight: 1,
-                      marginBottom: 36,
-                      fontFamily: "'Playfair Display', serif",
-                    }}
-                  >
-                    "
-                  </div>
-                  <blockquote
-                    style={{
-                      fontFamily: "'Playfair Display', serif",
-                      fontSize: 22,
-                      fontStyle: "italic",
-                      color: "#f0ede8",
-                      lineHeight: 1.65,
-                      marginBottom: 32,
-                    }}
-                  >
-                    "{t.message}"
-                  </blockquote>
-                  <p
-                    style={{
-                      fontFamily: "'DM Sans', sans-serif",
-                      fontSize: 12,
-                      color: "#666",
-                      letterSpacing: ".08em",
-                      textTransform: "uppercase",
-                    }}
-                  >
-                    {t.name}
-                  </p>
-                </div>
-              </section>
-            ))}
+  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 16 }}>
+    {Array.isArray(testimonials) && testimonials.map((t) => (
+      <div key={t._id} style={{ background: "var(--card-bg)", border: ".5px solid var(--border)", borderRadius: 12, padding: "20px" }}>
+        
+        {/* Stars */}
+        <div style={{ display: "flex", gap: 3, marginBottom: 12 }}>
+          {[...Array(5)].map((_, i) => (
+            <span key={i} style={{ color: "#f0c040", fontSize: 14 }}>★</span>
+          ))}
         </div>
-      </section>
+
+        {/* Description */}
+        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: "var(--text)", lineHeight: 1.7, marginBottom: 16 }}>
+          {t.description}
+        </p>
+
+        {/* Person */}
+        <div style={{ display: "flex", alignItems: "center", gap: 10, borderTop: ".5px solid var(--border)", paddingTop: 12 }}>
+          {t.image ? (
+            <img src={t.image} alt={t.name} style={{ width: 40, height: 40, borderRadius: "50%", objectFit: "cover" }} />
+          ) : (
+            <div style={{ width: 40, height: 40, borderRadius: "50%", background: "#dbeafe", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 600, color: "#1d4ed8" }}>
+              {t.name?.[0]?.toUpperCase()}
+            </div>
+          )}
+          <div>
+            <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 500, color: "var(--text-h)" }}>{t.name}</div>
+            <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: "var(--text)" }}>{t.username}</div>
+          </div>
+        </div>
+
+      </div>
+    ))}
+  </div>
+</section>
 
       {/* ── TESTIMONIAL ── */}
       <section

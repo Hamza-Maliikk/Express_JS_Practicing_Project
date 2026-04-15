@@ -41,7 +41,7 @@ const AddTestimonial = async (req, res) => {
         testimonial.username = req.body.username || testimonial.username;
         testimonial.description = req.body.description || testimonial.description;  
         if (req.file) {
-            testimonial.image = req.file.filename;
+            testimonial.image = req.file.path; // Changed from req.file.filename
         }
         await testimonial.save();
         res.status(200).json("Testimonial updated successfully");
