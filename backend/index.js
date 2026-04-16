@@ -33,12 +33,13 @@ app.post("/api/user", addUser);
 // combined fr homepage 
 app.get("/api/homepage", async (req, res) => {
   try{
-    const [home, testimonials, resume] = await Promise.all([
+    const [home, testimonials, resume, work] = await Promise.all([
       require("./models/home").find(),
       require("./models/testimonials").find(),
-      require("./models/resume").find()
+      require("./models/resume").find(),
+      require("./models/work").find()
     ]);
-    res.status(200).json({ home, testimonials, resume });
+    res.status(200).json({ home, testimonials, resume, work });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

@@ -1,25 +1,16 @@
-export default function Projects() {
-  const projects = [
-    {
-      title: "Express API",
-      desc: "A full-stack REST API with authentication, role-based access and CRUD operations.",
-      tags: ["Node.js", "Express", "MongoDB"],
-      color: "#8b5cf6",
-    },
-    {
-      title: "Portfolio Website",
-      desc: "Personal portfolio built with React and Vite showcasing skills, blogs and education.",
-      tags: ["React", "Vite", "CSS"],
-      color: "#6366f1",
-    },
-    {
-      title: "Blog Platform",
-      desc: "A content management system with categories, rich text editor and user auth.",
-      tags: ["React", "Redux", "Node.js"],
-      color: "#a78bfa",
-    },
-  ];
+import { useEffect } from "react";
+import { useState } from "react";
 
+export default function Projects() {
+  const API = "http://localhost:8000/api/projects";
+  const [projects, setProjects] = useState([]);
+
+  useEffect(() => {
+        fetch(API)
+          .then((res) => res.json())
+          .then((data) => setProjects(data))
+          .catch((err) => console.error("Error fetching projects:", err));
+      }, []);
   return (
     <>
       <style>{`
@@ -153,7 +144,7 @@ export default function Projects() {
           border: 1px solid rgba(139,92,246,0.2);
         }
       `}</style>
-
+      
       <div className="proj-page">
         <div className="proj-hero">
           <div className="proj-badge">My Work</div>
@@ -166,16 +157,17 @@ export default function Projects() {
         </div>
 
         <div className="proj-grid">
-          {projects.map((p) => (
+          {Array.isArray(projects) && projects.map((p) => (
             <div
-              key={p.title}
+              key={p._id}
               className="proj-card"
               style={{ "--card-color": p.color }}
             >
               <h2 className="proj-card-title">{p.title}</h2>
-              <p className="proj-card-desc">{p.desc}</p>
+              <p className="proj-card-desc">{p.description}</p>
+              <p className="proj-card-desc">{p.link}</p>
               <div className="proj-tags">
-                {p.tags.map((t) => (
+                {p.technologies.map((t) => (
                   <span key={t} className="proj-tag">{t}</span>
                 ))}
               </div>

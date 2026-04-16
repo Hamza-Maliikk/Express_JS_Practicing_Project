@@ -5,79 +5,6 @@ import { useEffect } from "react";
 const API = "http://localhost:8000/api/homepage";
 const NAV_LINKS = ["Home", "About", "Project", "Skills"];
 
-const PROJECTS = [
-  {
-    id: 1,
-    title: "Lumina Concept Store",
-    sub: "Brand Identity & Digital Experience",
-    col1: true,
-    tall: false,
-    bg: "linear-gradient(135deg,#1c1c1c 0%,#2e2e2e 100%)",
-    shape: "rect",
-  },
-  {
-    id: 2,
-    title: "Aura Smart Wearable",
-    sub: "Product Design & Interface Strategy",
-    col1: false,
-    tall: true,
-    bg: "linear-gradient(135deg,#0d1b2a 0%,#1a3a5c 100%)",
-    shape: "device",
-  },
-  {
-    id: 3,
-    title: "Synthesis Journal",
-    sub: "Editorial Design & Content Strategy",
-    col1: true,
-    tall: true,
-    bg: "linear-gradient(135deg,#e8e4dc 0%,#d4cfc4 100%)",
-    dark: true,
-    shape: "paper",
-  },
-  {
-    id: 4,
-    title: "Kinetic Motion Lab",
-    sub: "Web & Immersive Art Direction",
-    col1: false,
-    tall: false,
-    bg: "linear-gradient(135deg,#050d1a 0%,#0a1f3d 100%)",
-    shape: "wave",
-  },
-];
-
-const SKILLS = [
-  {
-    icon: "◈",
-    title: "Design Systems",
-    desc: "Scaling brands through modular architecture and robust component libraries that ensure consistency across platforms.",
-    color: "#2563eb",
-  },
-  {
-    icon: "↗",
-    title: "Market Research",
-    desc: "Deep diving into user behavior and market trends to build products that resonate and solve real world problems.",
-    color: "#2563eb",
-  },
-  {
-    icon: "◎",
-    title: "Prototyping",
-    desc: "Rapidly bringing ideas to life with high-fidelity interactive prototypes that bridge the gap between design and development.",
-    color: "#2563eb",
-  },
-  {
-    icon: "✦",
-    title: "Art Direction",
-    desc: "Curating visual narratives that communicate the soul of a brand through intentional typography and imagery.",
-    color: "#2563eb",
-  },
-];
-
-const EXPERTISE_LIST = [
-  "User Experience Design",
-  "Brand Identity & Strategy",
-  "Interactive Art Direction",
-];
-
 function ProjectCard({ project }) {
   const [hovered, setHovered] = useState(false);
 
@@ -219,16 +146,17 @@ function ProjectCard({ project }) {
 }
 
 export default function KineticPortfolio() {
-  const [form, setForm] = useState({
-    name: "",
-    email: "",
-    subject: "Project Inquiry",
-    message: "",
-  });
+  // const [form, setForm] = useState({
+  //   name: "",
+  //   email: "",
+  //   subject: "Project Inquiry",
+  //   message: "",
+  // });
 
   const [homeData, setHomeData] = useState(null);
   const [testimonials, setTestimonials] = useState([]); // ← ye add karo
   const [resume, setResume] = useState([]); // ← ye add karo  
+  const [work, setWork] = useState([]); // ← ye add karo  
 
   useEffect(() => {
     fetch(API)
@@ -238,6 +166,7 @@ export default function KineticPortfolio() {
         setHomeData(data.home); // ← backend se { home, testimonials }
         setTestimonials(data.testimonials);
         setResume(data.resume);
+        setWork(data.work);
       })
       .catch((err) => console.error("Error:", err));
   }, []);
@@ -482,90 +411,78 @@ export default function KineticPortfolio() {
         ))}
 
       {/* ── SELECTED WORKS ── */}
-      <section
-        style={{ maxWidth: 1160, margin: "0 auto", padding: "0 48px 96px" }}
+ {Array.isArray(work) && work.length > 0 && (() => {
+  const last4 = work.slice(-4);
+  return (
+    <section
+      style={{ maxWidth: 1160, margin: "0 auto", padding: "0 48px 96px" }}
+    >
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "flex-end",
+          marginBottom: 40,
+        }}
       >
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "flex-end",
-            marginBottom: 40,
-          }}
-        >
-          <div>
-            <h2
-              style={{
-                fontFamily: "'Playfair Display', serif",
-                fontSize: 34,
-                fontWeight: 700,
-                color: "var(--text-h)",
-                marginBottom: 8,
-              }}
-            >
-              Selected Works
-            </h2>
-            <p
-              style={{
-                fontFamily: "'DM Sans', sans-serif",
-                fontSize: 13,
-                color: "var(--text)",
-              }}
-            >
-              A curated collection of projects where strategy meets aesthetic
-              excellence.
-            </p>
-          </div>
-          <span
-            className="mob-hide"
+        <div>
+          <h2
+            style={{
+              fontFamily: "'Playfair Display', serif",
+              fontSize: 34,
+              fontWeight: 700,
+              color: "var(--text-h)",
+              marginBottom: 8,
+            }}
+          >
+            Selected Works
+          </h2>
+          <p
             style={{
               fontFamily: "'DM Sans', sans-serif",
-              fontSize: 11,
-              color: "#bbb",
-              letterSpacing: ".08em",
-              textTransform: "uppercase",
+              fontSize: 13,
+              color: "var(--text)",
             }}
           >
-            Scroll to discover →
-          </span>
+            A curated collection of projects where strategy meets aesthetic
+            excellence.
+          </p>
+        </div>
+        <span
+          className="mob-hide"
+          style={{
+            fontFamily: "'DM Sans', sans-serif",
+            fontSize: 11,
+            color: "#bbb",
+            letterSpacing: ".08em",
+            textTransform: "uppercase",
+          }}
+        >
+          Scroll to discover →
+        </span>
+      </div>
+
+      {/* Masonry-style 2-col grid */}
+      <div
+        className="works-grid"
+        style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}
+      >
+        {/* Col 1 */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+          {last4[0] && <div style={{ height: 240 }}><ProjectCard project={last4[0]} /></div>}
+          {last4[2] && <div style={{ height: 280 }}><ProjectCard project={last4[2]} /></div>}
         </div>
 
-        {/* Masonry-style 2-col grid */}
-        <div
-          className="works-grid"
-          style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}
-        >
-          {/* Col 1 */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-            {/* Project 1 – shorter */}
-            <div style={{ height: 240 }}>
-              <ProjectCard project={PROJECTS[0]} />
-            </div>
-            {/* Project 3 – taller */}
-            <div style={{ height: 280 }}>
-              <ProjectCard project={PROJECTS[2]} />
-            </div>
-          </div>
-          {/* Col 2 – offset down */}
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: 20,
-              paddingTop: 48,
-            }}
-          >
-            {/* Project 2 */}
-            <div style={{ height: 300 }}>
-              <ProjectCard project={PROJECTS[1]} />
-            </div>
-            {/* Project 4 */}
-            <div style={{ height: 220 }}>
-              <ProjectCard project={PROJECTS[3]} />
-            </div>
-          </div>
+        {/* Col 2 */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+          {last4[1] && <div style={{ height: 280 }}><ProjectCard project={last4[1]} /></div>}
+          {last4[3] && <div style={{ height: 240 }}><ProjectCard project={last4[3]} /></div>}
         </div>
-      </section>
+      </div>
+    </section>
+  );
+})()}
+    
 
       {/* ── EXPERTISE ── */}
     {/* ── TESTIMONIALS ── */}
