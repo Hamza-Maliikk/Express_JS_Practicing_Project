@@ -1,3 +1,4 @@
+import { Eye } from "lucide-react";
 import { useState } from "react";
 import { useEffect } from "react";
 
@@ -447,7 +448,8 @@ export default function KineticPortfolio() {
                       className="btn-outline fu fu4"
                       style={{ textDecoration: "none" }}
                     >
-                      📄 &nbsp;View Resume
+                      <Eye />
+                       &nbsp;View Resume
                     </a>
                   </div>
                 ))}
