@@ -16,6 +16,7 @@ const { getDetails, AddDetails, UpdateDetails, deleteDetails } = require("./cont
 const { getHome, AddHome, UpdateHome, deleteHome } = require("./controllers/home");
 const { getTestimonials, AddTestimonial, UpdateTestimonial, deleteTestimonial } = require("./controllers/testimonial");
 const { getResume, addResume, updateResume, deleteResume } = require("./controllers/resume");
+const { getMessages, AddMessage } = require("./controllers/message");
 const port = 8000;
 
 //connection
@@ -107,6 +108,10 @@ app.get("/api/resume", getResume)
 app.post("/api/resume",uploadResume.single('pdf'), addResume)
 app.put("/api/resume/:id",uploadResume.single('pdf'), updateResume)
 app.delete("/api/resume/:id", deleteResume)
+
+// message
+app.get("/api/messages", getMessages)
+app.post("/api/messages", AddMessage)
 // Port
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`);
