@@ -29,18 +29,26 @@ const io = new Server(server, {
 io.on("connection", (socket) => {
   console.log("User connected:", socket.id);
 
+  // admin join room
+  socket.on("join-admin", () => {
+    socket.join("admin-room");
+    console.log("Admin joined admin-room:", socket.id);
+  });
+
   // user message
   socket.on("user-message", (data) => {
+    console.log("Message from user:", data);
     io.to("admin-room").emit("receive-message", data);
   });
 
   // admin reply
   socket.on("admin-reply", (data) => {
+    console.log("Reply from admin to:", data.userId);
     io.to(data.userId).emit("receive-reply", data);
   });
 
   socket.on("disconnect", () => {
-    console.log("Disconnected");
+    console.log("Disconnected:", socket.id);
   });
 });
 
@@ -138,6 +146,7 @@ app.delete("/api/resume/:id", deleteResume)
 app.get("/api/messages", getMessages)
 app.post("/api/messages", AddMessage)
 // Port
-app.listen(port, () => {
-  console.log(`Example app listening at http://localhost:${port}`);
+
+server.listen(port, () => {
+  console.log(`Server and Socket running at http://localhost:${port}`);
 });

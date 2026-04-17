@@ -1,8 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { io } from "socket.io-client";
 
 const socket = io("http://localhost:8000");
-
 const API = "http://localhost:8000/api/messages";
 
 export default function ChatBot() {
@@ -10,25 +9,34 @@ export default function ChatBot() {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState([]);
   const [showForm, setShowForm] = useState(true);
-  const [userInfo, setUserInfo] = useState({
-    name: "",
-    email: "",
-  });
+  const [userInfo, setUserInfo] = useState({ name: "", email: "" });
+
+  // 👇 YAHAN ADD KIYA — admin reply sunne ke liye
+  useEffect(() => {
+    socket.on("receive-reply", (data) => {
+      const adminMsg = { text: data.text, sender: "bot" };
+      setMessages((prev) => [...prev, adminMsg]);
+    });
+
+    return () => {
+      socket.off("receive-reply");
+    };
+  }, []);
+
   const handleFormSubmit = (e) => {
     e.preventDefault();
-
     if (!userInfo.name || !userInfo.email) return;
-
-    setShowForm(false); // 👈 form band, chat open
+    setShowForm(false);
   };
 
   const msgSubmit = async () => {
     if (!input.trim()) return;
 
-    // user message add
+    // User message show karo
     const newMsg = { text: input, sender: "user" };
     setMessages((prev) => [...prev, newMsg]);
 
+    // Socket se admin ko bhejo
     socket.emit("user-message", {
       text: input,
       userId: socket.id,
@@ -36,28 +44,17 @@ export default function ChatBot() {
       email: userInfo.email,
     });
 
+    // 👇 Sirf DB mein save karo, bot reply HATA DIYA
     try {
-      const res = await fetch(API, {
+      await fetch(API, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           message: input,
           name: userInfo.name,
           email: userInfo.email,
         }),
       });
-
-      const data = await res.json();
-
-      // bot reply
-      const botMsg = {
-        text: data.reply || "No response",
-        sender: "bot",
-      };
-
-      setMessages((prev) => [...prev, botMsg]);
     } catch (err) {
       console.error(err);
     }
@@ -82,7 +79,6 @@ export default function ChatBot() {
           cursor: pointer;
           z-index: 1000;
         }
-
         .chatbot-box {
           position: fixed;
           bottom: 90px;
@@ -97,50 +93,40 @@ export default function ChatBot() {
           overflow: hidden;
           z-index: 1000;
         }
-
         .chatbot-header {
           background: #007bff;
           color: white;
           padding: 10px;
           font-weight: bold;
         }
-
         .chatbot-body {
           flex: 1;
           padding: 10px;
           overflow-y: auto;
           font-size: 14px;
         }
-
         .msg {
           margin-bottom: 8px;
           padding: 6px 10px;
           border-radius: 8px;
           max-width: 80%;
         }
-
         .user {
           background: #007bff;
           color: white;
           margin-left: auto;
         }
-
-        .bot {
-          background: #eee;
-        }
-
+        .bot { background: #eee; }
         .chatbot-input {
           display: flex;
           border-top: 1px solid #ccc;
         }
-
         .chatbot-input input {
           flex: 1;
           border: none;
           padding: 10px;
           outline: none;
         }
-
         .chatbot-input button {
           background: #007bff;
           color: white;
@@ -150,67 +136,43 @@ export default function ChatBot() {
         }
       `}</style>
 
-      {/* Button */}
-      <button className="chatbot-btn" onClick={() => setOpen(!open)}>
-        💬
-      </button>
+      <button className="chatbot-btn" onClick={() => setOpen(!open)}>💬</button>
 
       {open && (
         <div className="chatbot-box">
           <div className="chatbot-header">Chat Support</div>
 
-          {/* 🔥 STEP 1: FORM */}
           {showForm ? (
-            <form
-              onSubmit={handleFormSubmit}
-              style={{
-                padding: "15px",
-                display: "flex",
-                flexDirection: "column",
-                gap: "10px",
-              }}
-            >
+            <form onSubmit={handleFormSubmit} style={{ padding: "15px", display: "flex", flexDirection: "column", gap: "10px" }}>
               <input
                 type="text"
                 placeholder="Your Name"
                 value={userInfo.name}
-                onChange={(e) =>
-                  setUserInfo({ ...userInfo, name: e.target.value })
-                }
+                onChange={(e) => setUserInfo({ ...userInfo, name: e.target.value })}
               />
-
               <input
                 type="email"
                 placeholder="Your Email"
                 value={userInfo.email}
-                onChange={(e) =>
-                  setUserInfo({ ...userInfo, email: e.target.value })
-                }
+                onChange={(e) => setUserInfo({ ...userInfo, email: e.target.value })}
               />
-
               <button type="submit">Start Chat</button>
             </form>
           ) : (
             <>
-              {/* 🔥 STEP 2: CHAT */}
               <div className="chatbot-body">
-                {messages.length === 0 && (
-                  <p>👋 Hello {userInfo.name}! How can I help you?</p>
-                )}
-
+                {messages.length === 0 && <p> Hello {userInfo.name}! How can I help you?</p>}
                 {messages.map((m, i) => (
-                  <div key={i} className={`msg ${m.sender}`}>
-                    {m.text}
-                  </div>
+                  <div key={i} className={`msg ${m.sender}`}>{m.text}</div>
                 ))}
               </div>
-
               <div className="chatbot-input">
                 <input
                   type="text"
                   placeholder="Type a message..."
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && msgSubmit()}
                 />
                 <button onClick={msgSubmit}>Send</button>
               </div>
