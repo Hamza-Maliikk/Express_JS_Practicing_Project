@@ -18,6 +18,7 @@ import Details from "./pages/Details";
 import Adminhome from "./pages/Adminhome";
 import AdminTestimonials from "./pages/Admintestmonials";
 import AdminResume from "./pages/AdminResume";
+import Adminmessage from "./pages/Adminmessage";
 
 function App() {
   return (
@@ -46,6 +47,7 @@ function App() {
         <Route path="/testimonials" element={<AdminTestimonials />} />
         <Route path="/details" element={<Details />} />
         <Route path="/resume" element={<AdminResume />} />
+        <Route path="/message" element={<Adminmessage />} />
         <Route path="/admin" element={<Adminhome />} />
       </Route>
     </Routes>

@@ -4,7 +4,6 @@ const {connectToDatabase} = require("./connection");
 const {userData, addUser, deleteUser, registerUser, loginUser} = require("./controllers/user");
 const {authChecker} = require("./middleware/index");
 const { AddEducation, getEducation, updateEducation, deleteEducation } = require("./controllers/education");
-const app = express();
 const cors = require("cors");  
 const { getBlogs, AddBlog, updateBlog, deleteBlog } = require("./controllers/blog");
 const { getCategories, AddCategory, updateCategory, deleteCategory } = require("./controllers/categories");
@@ -17,7 +16,33 @@ const { getHome, AddHome, UpdateHome, deleteHome } = require("./controllers/home
 const { getTestimonials, AddTestimonial, UpdateTestimonial, deleteTestimonial } = require("./controllers/testimonial");
 const { getResume, addResume, updateResume, deleteResume } = require("./controllers/resume");
 const { getMessages, AddMessage } = require("./controllers/message");
+const http = require("http");
+const { Server } = require("socket.io");
 const port = 8000;
+
+const app = express();
+// socket for chatbot
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: { origin: "*" },
+});
+io.on("connection", (socket) => {
+  console.log("User connected:", socket.id);
+
+  // user message
+  socket.on("user-message", (data) => {
+    io.to("admin-room").emit("receive-message", data);
+  });
+
+  // admin reply
+  socket.on("admin-reply", (data) => {
+    io.to(data.userId).emit("receive-reply", data);
+  });
+
+  socket.on("disconnect", () => {
+    console.log("Disconnected");
+  });
+});
 
 //connection
 connectToDatabase(process.env.MONGO_URI);

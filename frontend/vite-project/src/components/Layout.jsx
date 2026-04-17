@@ -3,6 +3,7 @@ import { useDispatch } from "react-redux";
 import { clearToken } from "../redux/slices/loginSlice/check";
 import { LogOut } from 'lucide-react';
 
+
 const nav = [
   { to: "/portfolio", label: "Portfolio", icon: "◉" },
   { to: "/education", label: "Education", icon: "▣" },
@@ -12,6 +13,7 @@ const nav = [
   { to: "/work", label: "Work", icon: "◈" },
   { to: "/resume", label: "Resume", icon: "◈" },
   { to: "/testimonials", label: "Testimonials", icon: "◈" },
+  { to: "/message", label: "Message", icon: "◈" },
   { to: "/admin", label: "Admin", icon: "◈" },
 ];
 
