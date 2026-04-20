@@ -12,15 +12,35 @@ export default function ChatBot() {
   const [showForm, setShowForm] = useState(true);
   const [userInfo, setUserInfo] = useState({ name: "", email: "" });
   const [selectedFile, setSelectedFile] = useState(null);
+  const [socketId, setSocketId] = useState(null);
   const fileInputRef = useRef(null);
+  const chatBodyRef = useRef(null);
 
   useEffect(() => {
-    socket.on("receive-reply", (data) => {
-      const adminMsg = { text: data, sender: "admin" };
-      setMessages((prev) => [...prev, adminMsg]);
+    // ✅ Socket connect hone pe ID save karo
+    socket.on("connect", () => {
+      setSocketId(socket.id);
+      console.log("Socket connected:", socket.id);
     });
-    return () => socket.off("receive-reply");
+
+    // ✅ AI / Admin reply receive karo
+    socket.on("receive-reply", (data) => {
+      setMessages((prev) => [...prev, { text: data, sender: "bot" }]);
+    });
+
+    // ✅ Cleanup dono listeners
+    return () => {
+      socket.off("connect");
+      socket.off("receive-reply");
+    };
   }, []);
+
+  // ✅ Auto scroll to bottom jab bhi message aaye
+  useEffect(() => {
+    if (chatBodyRef.current) {
+      chatBodyRef.current.scrollTop = chatBodyRef.current.scrollHeight;
+    }
+  }, [messages]);
 
   const handleFormSubmit = (e) => {
     e.preventDefault();
@@ -37,7 +57,7 @@ export default function ChatBot() {
   const msgSubmit = async () => {
     if (!input.trim() && !selectedFile) return;
 
-    // Message + file preview show karo
+    // ✅ User ka message UI mein add karo
     const newMsg = {
       text: input,
       sender: "user",
@@ -51,26 +71,25 @@ export default function ChatBot() {
     };
     setMessages((prev) => [...prev, newMsg]);
 
-    // Socket emit
+    // ✅ Socket pe bhejo — socketId state se lo
     socket.emit("user-message", {
       text: input,
-      userId: socket.id,
+      userId: socketId || socket.id, // fallback bhi rakho
       name: userInfo.name,
       email: userInfo.email,
       fileName: selectedFile?.name || null,
     });
 
-    // DB mein save — FormData use karo file ke liye
+    // ✅ DB mein save karo
     try {
       const formData = new FormData();
       formData.append("message", input);
       formData.append("name", userInfo.name);
       formData.append("email", userInfo.email);
       if (selectedFile) formData.append("file", selectedFile);
-
       await fetch(API, { method: "POST", body: formData });
     } catch (err) {
-      console.error(err);
+      console.error("DB save error:", err);
     }
 
     setInput("");
@@ -78,7 +97,6 @@ export default function ChatBot() {
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
-  // File ka preview render karo
   const renderFilePreview = (file) => {
     if (!file) return null;
     if (file.type.startsWith("image/")) {
@@ -110,6 +128,7 @@ export default function ChatBot() {
           border: none; border-radius: 50%;
           width: 60px; height: 60px;
           font-size: 24px; cursor: pointer; z-index: 1000;
+          box-shadow: 0 4px 12px rgba(0,123,255,0.4);
         }
         .chatbot-box {
           position: fixed; bottom: 90px; right: 20px;
@@ -126,36 +145,26 @@ export default function ChatBot() {
         .chatbot-body {
           flex: 1; padding: 10px;
           overflow-y: auto; font-size: 14px;
+          display: flex; flex-direction: column;
         }
         .msg {
           margin-bottom: 8px; padding: 6px 10px;
           border-radius: 8px; max-width: 80%;
+          word-break: break-word;
         }
         .user { background: #007bff; color: white; margin-left: auto; }
-        .bot { background: #eee; }
-
-        /* Input area */
-        .chatbot-input {
-          border-top: 1px solid #ccc;
-        }
-
-        /* File preview bar — selected file ka naam */
+        .bot { background: #eee; color: #333; margin-right: auto; }
+        .chatbot-input { border-top: 1px solid #ccc; }
         .file-preview-bar {
           display: flex; align-items: center;
           gap: 6px; padding: 4px 10px;
-          background: #f0f4ff; font-size: 12px;
-          color: #333;
+          background: #f0f4ff; font-size: 12px; color: #333;
         }
         .file-preview-bar button {
           background: none; border: none;
-          color: red; cursor: pointer;
-          font-size: 14px; padding: 0;
+          color: red; cursor: pointer; font-size: 14px; padding: 0;
         }
-
-        /* Bottom row: clip + input + send */
-        .input-row {
-          display: flex; align-items: center;
-        }
+        .input-row { display: flex; align-items: center; }
         .clip-btn {
           background: none; border: none;
           font-size: 18px; padding: 8px 10px;
@@ -164,12 +173,22 @@ export default function ChatBot() {
         .clip-btn:hover { color: #007bff; }
         .input-row input[type="text"] {
           flex: 1; border: none;
-          padding: 10px 0; outline: none;
-          font-size: 14px;
+          padding: 10px 0; outline: none; font-size: 14px;
         }
         .send-btn {
           background: #007bff; color: white;
           border: none; padding: 10px 15px;
+          cursor: pointer; font-size: 14px;
+        }
+        .send-btn:hover { background: #0056b3; }
+        .form-input {
+          padding: 8px 10px; border: 1px solid #ccc;
+          border-radius: 6px; font-size: 14px; outline: none;
+        }
+        .form-input:focus { border-color: #007bff; }
+        .form-btn {
+          padding: 8px; background: #007bff; color: white;
+          border: none; border-radius: 6px;
           cursor: pointer; font-size: 14px;
         }
       `}</style>
@@ -178,7 +197,7 @@ export default function ChatBot() {
 
       {open && (
         <div className="chatbot-box">
-          <div className="chatbot-header">Chat Support</div>
+          <div className="chatbot-header">💬 Chat Support</div>
 
           {showForm ? (
             <form
@@ -186,22 +205,27 @@ export default function ChatBot() {
               style={{ padding: "15px", display: "flex", flexDirection: "column", gap: "10px" }}
             >
               <input
+                className="form-input"
                 type="text" placeholder="Your Name"
                 value={userInfo.name}
                 onChange={(e) => setUserInfo({ ...userInfo, name: e.target.value })}
               />
               <input
+                className="form-input"
                 type="email" placeholder="Your Email"
                 value={userInfo.email}
                 onChange={(e) => setUserInfo({ ...userInfo, email: e.target.value })}
               />
-              <button type="submit">Start Chat</button>
+              <button className="form-btn" type="submit">Start Chat</button>
             </form>
           ) : (
             <>
-              <div className="chatbot-body">
+              {/* ✅ ref lagaya auto scroll ke liye */}
+              <div className="chatbot-body" ref={chatBodyRef}>
                 {messages.length === 0 && (
-                  <p>Hello {userInfo.name}! How can I help you?</p>
+                  <p style={{ color: "#888", fontSize: "13px" }}>
+                    Hello {userInfo.name}! How can I help you?
+                  </p>
                 )}
                 {messages.map((m, i) => (
                   <div key={i} className={`msg ${m.sender}`}>
@@ -212,7 +236,6 @@ export default function ChatBot() {
               </div>
 
               <div className="chatbot-input">
-                {/* Selected file ka naam + remove button */}
                 {selectedFile && (
                   <div className="file-preview-bar">
                     📎 {selectedFile.name}
@@ -221,19 +244,15 @@ export default function ChatBot() {
                 )}
 
                 <div className="input-row">
-                  {/* Hidden file input */}
                   <input
                     type="file"
                     ref={fileInputRef}
                     style={{ display: "none" }}
                     onChange={handleFileChange}
                   />
-
-                  {/* Clip icon — file input trigger */}
                   <button className="clip-btn" onClick={() => fileInputRef.current.click()}>
-                    <Paperclip />
+                    <Paperclip size={18} />
                   </button>
-
                   <input
                     type="text"
                     placeholder="Type a message..."
@@ -241,7 +260,6 @@ export default function ChatBot() {
                     onChange={(e) => setInput(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && msgSubmit()}
                   />
-
                   <button className="send-btn" onClick={msgSubmit}>Send</button>
                 </div>
               </div>

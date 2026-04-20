@@ -1,150 +1,121 @@
 require("dotenv").config();
 const express = require("express");
 const { connectToDatabase } = require("./connection");
-const {
-  userData,
-  addUser,
-  deleteUser,
-  registerUser,
-  loginUser,
-} = require("./controllers/user");
+const { userData, addUser, deleteUser, registerUser, loginUser } = require("./controllers/user");
 const { authChecker } = require("./middleware/index");
-const {
-  AddEducation,
-  getEducation,
-  updateEducation,
-  deleteEducation,
-} = require("./controllers/education");
+const { AddEducation, getEducation, updateEducation, deleteEducation } = require("./controllers/education");
 const cors = require("cors");
-const {
-  getBlogs,
-  AddBlog,
-  updateBlog,
-  deleteBlog,
-} = require("./controllers/blog");
-const {
-  getCategories,
-  AddCategory,
-  updateCategory,
-  deleteCategory,
-} = require("./controllers/categories");
-const {
-  upload,
-  uploadHome,
-  uploadTestimonial,
-  uploadResume,
-  uploadChat,
-} = require("./middleware/multer");
-const {
-  AddAbout,
-  getAbout,
-  updateAbout,
-  deleteSkill,
-} = require("./controllers/about");
-const {
-  getProjects,
-  AddProject,
-  updateProject,
-  deleteProject,
-} = require("./controllers/work");
+const { getBlogs, AddBlog, updateBlog, deleteBlog } = require("./controllers/blog");
+const { getCategories, AddCategory, updateCategory, deleteCategory } = require("./controllers/categories");
+const { upload, uploadHome, uploadTestimonial, uploadResume, uploadChat } = require("./middleware/multer");
+const { AddAbout, getAbout, updateAbout, deleteSkill } = require("./controllers/about");
+const { getProjects, AddProject, updateProject, deleteProject } = require("./controllers/work");
 const { getContact, AddContact } = require("./controllers/contact");
-const {
-  getDetails,
-  AddDetails,
-  UpdateDetails,
-  deleteDetails,
-} = require("./controllers/details");
-const {
-  getHome,
-  AddHome,
-  UpdateHome,
-  deleteHome,
-} = require("./controllers/home");
-const {
-  getTestimonials,
-  AddTestimonial,
-  UpdateTestimonial,
-  deleteTestimonial,
-} = require("./controllers/testimonial");
-const {
-  getResume,
-  addResume,
-  updateResume,
-  deleteResume,
-} = require("./controllers/resume");
+const { getDetails, AddDetails, UpdateDetails, deleteDetails } = require("./controllers/details");
+const { getHome, AddHome, UpdateHome, deleteHome } = require("./controllers/home");
+const { getTestimonials, AddTestimonial, UpdateTestimonial, deleteTestimonial } = require("./controllers/testimonial");
+const { getResume, addResume, updateResume, deleteResume } = require("./controllers/resume");
 const { getMessages, AddMessage } = require("./controllers/message");
 const http = require("http");
 const { Server } = require("socket.io");
-const { GoogleGenerativeAI } = require("@google/generative-ai");
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+
+// ✅ Sirf OpenAI
+const OpenAI = require("openai");
+const moonshot = new OpenAI({
+  apiKey: process.env.MOONSHOT_API_KEY,
+  baseURL: "https://api.moonshot.ai/v1", // ✅ Yeh add karo
+});
+
 const port = 8000;
 const app = express();
-let adminOnline = false; // Admin online status track karne ke liye variable
+let adminOnline = false;
+let adminSocketId = null;
 
-// Gemini ka respnse kai liay
-async function getGeminiReply(userMessage) {
+// ✅ OpenAI reply function
+async function getAIReply(userMessage) {
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
-    const prompt = `
-      Tum ek portfolio website ka helpful chat assistant ho.
-      User ne yeh message bheja: "${userMessage}"
-      Short aur helpful reply do (2-3 lines max).
-    `;
-    const result = await model.generateContent(prompt);
-    return result.response.text();
+    const completion = await moonshot.chat.completions.create({
+      model: "kimi-k2.5",
+      messages: [
+        {
+          role: "system",
+          content:
+            "Tum ek portfolio website ka helpful chat assistant ho. Sirf final jawab do. Reasoning mat do. Short reply (2-3 lines max).",
+        },
+        {
+          role: "user",
+          content: userMessage,
+        },
+      ],
+      max_tokens: 150,
+    });
+
+    const message = completion.choices[0].message;
+
+    // ✅ handle empty content issue
+    let reply =
+      message.content && message.content.trim() !== ""
+        ? message.content
+        : message.reasoning_content || "Sorry, reply generate nahi hua.";
+
+    return reply;
   } catch (err) {
-    console.error("Gemini error:", err);
+    console.error("Moonshot error:", err.message);
     return "Sorry, abhi reply nahi de sakta. Thodi der baad try karo!";
   }
 }
-// socket for chatbot
+ 
+
+// socket
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: { origin: "*" },
 });
+
 io.on("connection", (socket) => {
   console.log("User connected:", socket.id);
 
-  // admin join room
   socket.on("join-admin", () => {
     socket.join("admin-room");
-    adminOnline = true; // Admin online ho gaya
-    console.log("Admin joined admin-room:", socket.id);
+    adminOnline = true;
+    adminSocketId = socket.id;
+    console.log("Admin ONLINE:", socket.id);
   });
 
-  // ✅ Fix
   socket.on("user-message", async (data) => {
     console.log("Admin online status:", adminOnline);
     console.log("Message from user:", data);
 
     if (adminOnline) {
       console.log("Admin online — message forward kar raha hun");
-      io.to("admin-room").emit("receive-message", data);
+      io.to("admin-room").emit("receive-message",{
+        ...data,
+        userId: socket.id 
+    });
     } else {
-      console.log("Admin offline — Gemini reply karega");
-      const aiReply = await getGeminiReply(data.text);
-      io.to(data.userId).emit("receive-reply", aiReply);
+      console.log("Admin offline — OpenAI reply karega");
+      const aiReply = await getAIReply(data.text);
+      console.log("AI Reply:", aiReply);
+      socket.emit("receive-reply", aiReply); 
     }
   });
 
-  // admin reply
   socket.on("admin-reply", (data) => {
-    console.log("Reply from admindata:", JSON.stringify(data));
-    console.log("Reply from admin to:", data.userId);
+    console.log("Reply from admin:", JSON.stringify(data));
     io.to(data.userId).emit("receive-reply", data.text);
   });
 
-  // ✅ Fix
   socket.on("disconnect", () => {
     console.log("Disconnected:", socket.id);
-    if (socket.rooms.has("admin-room")) {
+    if (socket.id === adminSocketId) {
       adminOnline = false;
+      adminSocketId = null;
       console.log("Admin OFFLINE!");
     }
   });
 });
 
-//connection
+// connection
 connectToDatabase(process.env.MONGO_URI);
 
 // middleware
@@ -155,7 +126,6 @@ app.use(express.urlencoded({ extended: true }));
 app.get("/api/user/", userData);
 app.post("/api/user", addUser);
 
-// combined fr homepage
 app.get("/api/homepage", async (req, res) => {
   try {
     const [home, testimonials, resume, work] = await Promise.all([
@@ -169,80 +139,51 @@ app.get("/api/homepage", async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-// portfolio about
+
 app.get("/api/about", getAbout);
 app.post("/api/about", AddAbout);
 app.put("/api/about/:id", updateAbout);
 app.delete("/api/about/skill/:skill", deleteSkill);
-
-// Work projects
 app.get("/api/projects", getProjects);
 app.post("/api/projects", AddProject);
 app.put("/api/projects/:id", updateProject);
 app.delete("/api/projects/:id", deleteProject);
-// Login user
 app.post("/api/register", registerUser);
 app.post("/api/login", loginUser);
-app.post("/", loginUser); // backward compatibility with existing frontend
+app.post("/", loginUser);
 app.get("/dashboard", authChecker, userData);
-
-//   users[user] = { ...users[user], ...req.body };
-//   fs.writeFile("./MOCK_DATA.json", JSON.stringify(users), (err, data) => {
-//     return res.json("User Edit successfully");
-//   });
-// });
-// categries routes
 app.get("/api/categories", getCategories);
 app.post("/api/categories", AddCategory);
 app.put("/api/categories/:id", updateCategory);
 app.delete("/api/categories/:id", deleteCategory);
-// blog routes
 app.get("/api/blogs", getBlogs);
 app.post("/api/blogs", upload.single("image"), AddBlog);
 app.put("/api/blogs/:id", upload.single("image"), updateBlog);
 app.delete("/api/blogs/:id", deleteBlog);
-// education routes
 app.get("/api/education", getEducation);
 app.post("/api/education", AddEducation);
 app.put("/api/education/:id", updateEducation);
 app.delete("/api/education/:id", deleteEducation);
-
-// contact
 app.get("/api/contact", getContact);
 app.post("/api/contact", AddContact);
-// details
 app.get("/api/details", getDetails);
 app.post("/api/details", AddDetails);
 app.put("/api/details/:id", UpdateDetails);
 app.delete("/api/details/:id", deleteDetails);
-// home
 app.get("/api/home", getHome);
 app.post("/api/home", uploadHome.single("image"), AddHome);
 app.put("/api/home/:id", uploadHome.single("image"), UpdateHome);
 app.delete("/api/home/:id", deleteHome);
-// testimonial section
 app.get("/api/testimonials", getTestimonials);
-app.post(
-  "/api/testimonials",
-  uploadTestimonial.single("image"),
-  AddTestimonial,
-);
-app.put(
-  "/api/testimonials/:id",
-  uploadTestimonial.single("image"),
-  UpdateTestimonial,
-);
+app.post("/api/testimonials", uploadTestimonial.single("image"), AddTestimonial);
+app.put("/api/testimonials/:id", uploadTestimonial.single("image"), UpdateTestimonial);
 app.delete("/api/testimonials/:id", deleteTestimonial);
-// resume
 app.get("/api/resume", getResume);
 app.post("/api/resume", uploadResume.single("pdf"), addResume);
 app.put("/api/resume/:id", uploadResume.single("pdf"), updateResume);
 app.delete("/api/resume/:id", deleteResume);
-
-// message
 app.get("/api/messages", getMessages);
 app.post("/api/messages", uploadChat.array("file", 5), AddMessage);
-// Port
 
 server.listen(port, () => {
   console.log(`Server and Socket running at http://localhost:${port}`);
