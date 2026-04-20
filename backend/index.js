@@ -7,7 +7,7 @@ const { AddEducation, getEducation, updateEducation, deleteEducation } = require
 const cors = require("cors");  
 const { getBlogs, AddBlog, updateBlog, deleteBlog } = require("./controllers/blog");
 const { getCategories, AddCategory, updateCategory, deleteCategory } = require("./controllers/categories");
-const { upload, uploadHome, uploadTestimonial, uploadResume } = require("./middleware/multer");
+const { upload, uploadHome, uploadTestimonial, uploadResume, uploadChat } = require("./middleware/multer");
 const { AddAbout, getAbout, updateAbout, deleteSkill } = require("./controllers/about");
 const { getProjects, AddProject, updateProject, deleteProject } = require("./controllers/work");
 const { getContact, AddContact } = require("./controllers/contact");
@@ -43,8 +43,9 @@ io.on("connection", (socket) => {
 
   // admin reply
   socket.on("admin-reply", (data) => {
+    console.log("Reply from admindata:", JSON.stringify(data));
     console.log("Reply from admin to:", data.userId);
-    io.to(data.userId).emit("receive-reply", data);
+    io.to(data.userId).emit("receive-reply", data.text);
   });
 
   socket.on("disconnect", () => {
@@ -144,7 +145,7 @@ app.delete("/api/resume/:id", deleteResume)
 
 // message
 app.get("/api/messages", getMessages)
-app.post("/api/messages", AddMessage)
+app.post("/api/messages",uploadChat.array('file', 5), AddMessage)
 // Port
 
 server.listen(port, () => {

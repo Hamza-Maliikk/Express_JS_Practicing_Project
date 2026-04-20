@@ -50,4 +50,14 @@ const resumeStorage = new CloudinaryStorage({
   },
 });
 const uploadResume = multer({ storage: resumeStorage   });
-module.exports = { upload, uploadHome, uploadTestimonial, uploadResume };
+
+const ChatStorage = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder:          "chat",     
+    resource_type: "auto",                 // ← alag folder chat ke liye
+    allowed_formats: ["jpeg","png", "pdf", "doc", "docx"],
+  },
+});
+const uploadChat = multer({ storage: ChatStorage   });
+module.exports = { upload, uploadHome, uploadTestimonial, uploadResume, uploadChat };

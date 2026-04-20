@@ -34,9 +34,9 @@ const Adminmessage = () => {
         if (!replyText?.trim()) return;
 
         socket.emit("admin-reply", {
-            userId: msg.userId,  // us specific user ko bhejo
-            text: replyText,
-            sender: "admin"
+          userId: msg.userId,  // us specific user ko bhejo
+          text: replyText,
+          sender: "admin"
         });
 
         setReplies(prev => ({ ...prev, [msg.userId || msg._id]: "" })); // input clear
