@@ -1,111 +1,212 @@
 import { useState, useEffect } from "react";
 
-const API_BASE = 'http://localhost:8000/api/about';
+// Poppins font inject
+const fontLink = document.createElement("link");
+fontLink.href = "https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap";
+fontLink.rel = "stylesheet";
+document.head.appendChild(fontLink);
+
+const API_BASE = "http://localhost:8000/api/about";
 
 const getAbout = async () => {
-  try {
-    const response = await fetch(API_BASE);
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error("Error fetching about:", error);
-    throw error;
-  }
+  const response = await fetch(API_BASE);
+  if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+  return response.json();
 };
+
+const values = [
+  {
+    icon: "💡",
+    title: "Innovation",
+    desc: "We don't just follow trends — we stay curious and aim to set them.",
+    color: "from-violet-500/10 to-indigo-500/10",
+    border: "border-violet-400/20",
+    label: "text-violet-400",
+  },
+  {
+    icon: "🤝",
+    title: "Integrity",
+    desc: "Transparency is our default setting. We value your trust above all else.",
+    color: "from-sky-500/10 to-cyan-500/10",
+    border: "border-sky-400/20",
+    label: "text-sky-400",
+  },
+  {
+    icon: "🌱",
+    title: "Community",
+    desc: "Built for users, by users. Your feedback is the engine that drives us.",
+    color: "from-emerald-500/10 to-teal-500/10",
+    border: "border-emerald-400/20",
+    label: "text-emerald-400",
+  },
+];
 
 const About = () => {
   const [aboutData, setAboutData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [loading,   setLoading]   = useState(true);
+  const [error,     setError]     = useState(null);
 
-  // ✅ DB se data fetch karo
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const data = await getAbout();
-        setAboutData(data);
-      } catch (err) {
-        setError("Failed to load data.", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
+    getAbout()
+      .then(setAboutData)
+      .catch(() => setError("Failed to load data."))
+      .finally(() => setLoading(false));
   }, []);
 
-  if (loading) return <p className="text-center mt-10 text-gray-500">Loading...</p>;
-  if (error)   return <p className="text-center mt-10 text-red-500">{error}</p>;
+  if (loading)
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[var(--bg)]" style={{ fontFamily: "'Poppins', sans-serif" }}>
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 rounded-full border-2 border-violet-500 border-t-transparent animate-spin" />
+          <p className="text-sm text-gray-400">Loading...</p>
+        </div>
+      </div>
+    );
+
+  if (error)
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[var(--bg)]" style={{ fontFamily: "'Poppins', sans-serif" }}>
+        <p className="text-red-400 text-sm">{error}</p>
+      </div>
+    );
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-12 font-sans text-[var(--text)] bg-[var(--bg)]">
+    <div
+      className="min-h-screen bg-[var(--bg)] text-[var(--text)] px-6 py-20 transition-colors duration-300"
+      style={{ fontFamily: "'Poppins', sans-serif" }}
+    >
+      <div className="max-w-4xl mx-auto">
 
-      {/* Header Section */}
-      <header className="text-center mb-16">
-        <h1 className="text-4xl font-bold mb-4 text-indigo-500">Our Story</h1>
-        {/* ✅ DB se intro show hoga */}
-        <p className="text-lg text-[var(--text)] italic opacity-80">
-          {aboutData?.intro || '"Building the future, one line of code at a time."'}
-        </p>
-      </header>
+        {/* ── Hero ── */}
+        <div className="text-center mb-20">
+          <span className="inline-block bg-violet-500/10 border border-violet-400/30 text-violet-300 text-[11px] font-semibold tracking-widest uppercase px-4 py-1.5 rounded-full mb-5">
+            About Me
+          </span>
 
-      {/* Mission Section */}
-      <section className="mb-12">
-        <h2 className="text-2xl font-semibold mb-4 border-b-2 border-[var(--border)] pb-2 transition-colors">
-          Who We Are
-        </h2>
-        {/* ✅ DB se intro paragraph bhi show hoga */}
-        <p className="leading-relaxed mb-4 text-[var(--text)]">
-          {aboutData?.intro
-            ? aboutData.intro
-            : <>
-                Welcome to <span className="font-bold">[Company Name]</span>. Founded in 2026, we began
-                with a simple goal: to bridge the gap between complex technology and human-centric
-                design. We believe that digital tools should empower people, not overwhelm them.
-              </>
-          }
-        </p>
-      </section>
+          <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-[var(--text-h)] mb-5">
+            The{" "}
+            <span
+              style={{
+                background: "linear-gradient(90deg, #8b5cf6, #a78bfa)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+              }}
+            >
+              Story
+            </span>{" "}
+            So Far
+          </h1>
 
-      {/* Values Grid */}
-      <section className="grid md:grid-cols-3 gap-8 mb-12">
-        <div className="bg-indigo-900/10 p-6 rounded-lg shadow-sm border border-indigo-500/20">
-          <h3 className="font-bold text-indigo-400 mb-2">Innovation</h3>
-          <p className="text-sm opacity-90">We don't just follow trends; we aim to set them by staying curious.</p>
+          <p className="text-base italic text-[var(--text)] opacity-70 max-w-xl mx-auto leading-relaxed">
+            {aboutData?.intro || '"Building the future, one line of code at a time."'}
+          </p>
         </div>
-        <div className="bg-indigo-900/10 p-6 rounded-lg shadow-sm border border-indigo-500/20">
-          <h3 className="font-bold text-indigo-400 mb-2">Integrity</h3>
-          <p className="text-sm opacity-90">Transparency is our default setting. We value your trust above all else.</p>
-        </div>
-        <div className="bg-indigo-900/10 p-6 rounded-lg shadow-sm border border-indigo-500/20">
-          <h3 className="font-bold text-indigo-400 mb-2">Community</h3>
-          <p className="text-sm opacity-90">Built for users, by users. Your feedback is the engine that drives us.</p>
-        </div>
-      </section>
 
-      {/* Philosophy Section */}
-      <section className="bg-indigo-950 text-white p-8 rounded-2xl mb-12 border border-indigo-500/30">
-        <h2 className="text-2xl font-semibold mb-4 text-indigo-300">Our Philosophy</h2>
-        <p className="mb-4 text-indigo-100/80">
-          We treat every project like an equation where the solution must be elegant and efficient.
-          Our success is calculated by a simple formula:
-        </p>
-        <div className="text-center py-4 bg-indigo-900/40 rounded-md border border-indigo-500/20">
-          <code className="text-indigo-300 text-xl">
-            Success = (User Experience + Reliability) × Creativity
-          </code>
-        </div>
-      </section>
+        {/* ── Who I Am ── */}
+        <section className="mb-16">
+          <div className="flex items-center gap-3 mb-5">
+            <span className="w-8 h-px bg-violet-400/40" />
+            <h2 className="text-xs font-semibold tracking-widest uppercase text-violet-400">
+              Who I Am
+            </h2>
+          </div>
 
-      {/* Call to Action */}
-      <footer className="text-center">
-        <p className="mb-6 opacity-80">Want to learn more about what we do?</p>
-        <button className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-8 rounded-full transition duration-300 shadow-lg shadow-indigo-500/20">
-          Get In Touch
-        </button>
-      </footer>
+          <div className="bg-[var(--card-bg)] border border-[var(--border)] rounded-2xl p-8">
+            <p className="text-base leading-relaxed text-[var(--text)] opacity-85">
+              {aboutData?.intro ||
+                "Welcome! I'm a passionate developer focused on building modern, human-centric web applications. I believe digital tools should empower people — not overwhelm them. Every project I take on is a chance to merge great design with reliable engineering."}
+            </p>
+          </div>
+        </section>
+
+        {/* ── Values Grid ── */}
+        <section className="mb-16">
+          <div className="flex items-center gap-3 mb-5">
+            <span className="w-8 h-px bg-violet-400/40" />
+            <h2 className="text-xs font-semibold tracking-widest uppercase text-violet-400">
+              Core Values
+            </h2>
+          </div>
+
+          <div className="grid sm:grid-cols-3 gap-5">
+            {values.map((v) => (
+              <div
+                key={v.title}
+                className={`bg-gradient-to-br ${v.color} border ${v.border} rounded-2xl p-6
+                  transition-all duration-300 hover:-translate-y-1 hover:shadow-lg`}
+              >
+                <div className="text-2xl mb-3">{v.icon}</div>
+                <h3 className={`font-semibold text-base mb-2 ${v.label}`}>{v.title}</h3>
+                <p className="text-sm text-[var(--text)] opacity-75 leading-relaxed">{v.desc}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* ── Skills ── */}
+        {aboutData?.skills?.length > 0 && (
+          <section className="mb-16">
+            <div className="flex items-center gap-3 mb-5">
+              <span className="w-8 h-px bg-violet-400/40" />
+              <h2 className="text-xs font-semibold tracking-widest uppercase text-violet-400">
+                Tech Stack
+              </h2>
+            </div>
+
+            <div className="bg-[var(--card-bg)] border border-[var(--border)] rounded-2xl p-8">
+              <div className="flex flex-wrap gap-2.5">
+                {aboutData.skills.map((skill) => (
+                  <span
+                    key={skill}
+                    className="bg-violet-500/10 border border-violet-400/20 text-violet-300
+                      text-xs font-medium px-4 py-1.5 rounded-full tracking-wide
+                      hover:bg-violet-500/20 transition-colors duration-200 cursor-default"
+                  >
+                    {skill}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* ── Philosophy ── */}
+        <section className="mb-16">
+          <div className="flex items-center gap-3 mb-5">
+            <span className="w-8 h-px bg-violet-400/40" />
+            <h2 className="text-xs font-semibold tracking-widest uppercase text-violet-400">
+              My Philosophy
+            </h2>
+          </div>
+
+          <div className="bg-[var(--card-bg)] border border-[var(--border)] rounded-2xl p-8">
+            <p className="text-base text-[var(--text)] opacity-80 leading-relaxed mb-6">
+              I treat every project like an equation where the solution must be both elegant and efficient.
+              My approach to building software follows one simple formula:
+            </p>
+            <div className="bg-violet-500/5 border border-violet-400/20 rounded-xl py-5 px-6 text-center">
+              <code className="text-violet-300 text-base sm:text-lg font-mono">
+                Success = (UX + Reliability) × Creativity
+              </code>
+            </div>
+          </div>
+        </section>
+
+        {/* ── CTA ── */}
+        <div className="text-center">
+          <p className="text-sm text-[var(--text)] opacity-60 mb-5">
+            Want to learn more or work together?
+          </p>
+          <button
+            className="bg-violet-600 hover:bg-violet-700 text-white font-semibold text-sm
+              py-3 px-8 rounded-full transition-all duration-300
+              shadow-lg shadow-violet-500/20 hover:shadow-violet-500/40 hover:-translate-y-0.5"
+          >
+            Get In Touch
+          </button>
+        </div>
+
+      </div>
     </div>
   );
 };
