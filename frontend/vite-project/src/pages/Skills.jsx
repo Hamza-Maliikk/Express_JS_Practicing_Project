@@ -1,9 +1,24 @@
 import { useEffect, useState } from "react";
 
+// Poppins font inject
+const fontLink = document.createElement("link");
+fontLink.href = "https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap";
+fontLink.rel = "stylesheet";
+document.head.appendChild(fontLink);
+
 const API = "http://localhost:8000";
 
+const PALETTE = [
+  { dot: "from-violet-500 to-indigo-500", border: "hover:border-violet-300", label: "text-violet-500" },
+  { dot: "from-pink-500 to-rose-400",     border: "hover:border-pink-300",   label: "text-pink-500"   },
+  { dot: "from-emerald-500 to-teal-400",  border: "hover:border-emerald-300",label: "text-emerald-500"},
+  { dot: "from-amber-500 to-yellow-400",  border: "hover:border-amber-300",  label: "text-amber-500"  },
+  { dot: "from-sky-500 to-cyan-400",      border: "hover:border-sky-300",    label: "text-sky-500"    },
+];
+
 export default function Skills() {
-  const [skills, setSkills] = useState([]);
+  const [skills,  setSkills]  = useState([]);
+  const [hovered, setHovered] = useState(null);
 
   useEffect(() => {
     const fetchSkills = async () => {
@@ -11,11 +26,7 @@ export default function Skills() {
         const res = await fetch(`${API}/api/about`);
         if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
         const data = await res.json();
-
-        // About model se skills array aayega
-        if (data && data.skills && data.skills.length > 0) {
-          // skills strings hain ["React", "Node.js"...]
-          // inhe category format mein convert karo
+        if (data?.skills?.length > 0) {
           setSkills([{ category: "Skills", items: data.skills }]);
         }
       } catch (error) {
@@ -26,52 +37,72 @@ export default function Skills() {
   }, []);
 
   return (
-    <>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
-        .skills-page { 
-          font-family: 'Poppins', sans-serif; 
-          background: var(--bg); 
-          min-height: 100vh; 
-          padding: 5rem 1.5rem 4rem; 
-          transition: background 0.3s ease;
-        }
-        .skills-hero { text-align: center; margin-bottom: 4rem; }
-        .skills-badge { display: inline-block; background: rgba(139, 92, 246, 0.15); border: 1px solid rgba(139, 92, 246, 0.3); color: #c4b5fd; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; padding: 0.35rem 1rem; border-radius: 100px; margin-bottom: 1.5rem; }
-        .skills-title { font-size: clamp(2rem, 5vw, 3rem); font-weight: 700; color: var(--text-h); letter-spacing: -0.03em; margin: 0; transition: color 0.3s ease; }
-        .skills-title span { background: linear-gradient(90deg, #8b5cf6, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .skills-subtitle { color: var(--text); font-size: 1rem; max-width: 500px; margin: 0 auto; line-height: 1.7; opacity: 0.8; transition: color 0.3s ease; }
-        .skills-grid { max-width: 1000px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1.25rem; }
-        .skills-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; padding: 1.5rem; transition: all 0.3s ease; box-shadow: var(--shadow); }
-        .skills-card:hover { border-color: rgba(139,92,246,0.3); box-shadow: 0 10px 30px rgba(139,92,246,0.1); transform: translateY(-4px); }
-        .skills-cat { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: #8b5cf6; margin-bottom: 1rem; }
-        .skills-items { display: flex; flex-direction: column; gap: 0.5rem; }
-        .skills-item { display: flex; align-items: center; gap: 0.6rem; font-size: 0.875rem; color: var(--text); transition: color 0.3s ease; }
-        .skills-item::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: linear-gradient(135deg, #8b5cf6, #6366f1); flex-shrink: 0; }
-      `}</style>
+    <div
+      className="min-h-screen px-6 py-20 bg-[var(--bg)] transition-colors duration-300"
+      style={{ fontFamily: "'Poppins', sans-serif" }}
+    >
+      {/* ── Hero ── */}
+      <div className="text-center mb-16">
+        {/* Badge */}
+        <span className="inline-block bg-violet-500/10 border border-violet-400/30 text-violet-300 text-[11px] font-semibold tracking-widest uppercase px-4 py-1.5 rounded-full mb-5">
+          Tech Stack
+        </span>
 
-      <div className="skills-page">
-        <div className="skills-hero">
-          <div className="skills-badge">Tech Stack</div>
-          <h1 className="skills-title">My <span>Skills</span></h1>
-          <p className="skills-subtitle">
-            Technologies and tools I work with to build modern web applications.
-          </p>
-        </div>
+        {/* Title */}
+        <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-[var(--text-h)] mb-4 m-0">
+          My{" "}
+          <span
+            className="font-bold"
+            style={{
+              background: "linear-gradient(90deg, #8b5cf6, #a78bfa)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+            }}
+          >
+            Skills
+          </span>
+        </h1>
 
-        <div className="skills-grid">
-          {skills.map((s) => (
-            <div key={s.category} className="skills-card">
-              <p className="skills-cat">{s.category}</p>
-              <div className="skills-items">
+        {/* Subtitle */}
+        <p className="text-[var(--text)] text-base max-w-md mx-auto leading-relaxed opacity-75">
+          Technologies and tools I work with to build modern web applications.
+        </p>
+      </div>
+
+      {/* ── Skills Grid ── */}
+      <div className="max-w-[1000px] mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+        {skills.map((s, si) => {
+          const palette   = PALETTE[si % PALETTE.length];
+          const isHovered = hovered === s.category;
+          return (
+            <div
+              key={s.category}
+              onMouseEnter={() => setHovered(s.category)}
+              onMouseLeave={() => setHovered(null)}
+              className={`bg-[var(--card-bg)] border border-[var(--border)] rounded-2xl p-6 shadow-[var(--shadow)]
+                transition-all duration-300 cursor-default
+                ${palette.border}
+                ${isHovered ? "-translate-y-1 shadow-violet-200/40 shadow-xl" : ""}`}
+            >
+              {/* Category label */}
+              <p className={`text-[11px] font-semibold uppercase tracking-widest mb-4 ${palette.label}`}>
+                {s.category}
+              </p>
+
+              {/* Skill items */}
+              <div className="flex flex-col gap-2.5">
                 {s.items.map((item) => (
-                  <div key={item} className="skills-item">{item}</div>
+                  <div key={item} className="flex items-center gap-2.5 text-sm text-[var(--text)]">
+                    {/* Dot */}
+                    <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 bg-gradient-to-br ${palette.dot}`} />
+                    {item}
+                  </div>
                 ))}
               </div>
             </div>
-          ))}
-        </div>
+          );
+        })}
       </div>
-    </>
+    </div>
   );
 }

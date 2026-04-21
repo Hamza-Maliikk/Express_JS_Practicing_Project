@@ -20,6 +20,7 @@ import AdminTestimonials from "./pages/Admintestmonials";
 import AdminResume from "./pages/AdminResume";
 import Adminmessage from "./pages/Adminmessage";
 import Adminsetting from "./pages/Adminsetting";
+import "../src/App.css"
 
 function App() {
   return (

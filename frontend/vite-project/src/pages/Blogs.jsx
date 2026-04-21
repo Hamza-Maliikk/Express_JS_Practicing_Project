@@ -132,13 +132,9 @@ const Blog = () => {
   if (selected) {
     return (
       <>
-        <style>{`
-          @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,500;1,400&family=DM+Mono:wght@400;500&display=swap');
-          .blog-shell { max-width: 900px; font-family: 'DM Mono', monospace; color: #1a1a1a; }
-          .blog-shell h1, .blog-shell h2 { font-family: 'Fraunces', serif; letter-spacing: -0.02em; }
-        `}</style>
+      
         <div
-          className="blog-shell"
+          className="blog-shell "
           style={{ padding: "0", maxWidth: "800px", margin: "0 auto" }}
         >
           <button onClick={() => setSelected(null)} style={backBtn}>
@@ -216,11 +212,7 @@ const Blog = () => {
 
   return (
     <>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,500;1,400&family=DM+Mono:wght@400;500&display=swap');
-        .blog-shell { max-width: 900px; font-family: 'DM Mono', monospace; color: #1a1a1a; }
-        .blog-shell h2 { font-family: 'Fraunces', serif; letter-spacing: -0.02em; }
-      `}</style>
+      
       <div
         className="blog-shell"
         style={{ padding: "0", maxWidth: "900px", margin: "0 auto" }}
@@ -228,6 +220,7 @@ const Blog = () => {
         {/* Header */}
         <div
           style={{
+            fontFamily: "'Poppins', sans-serif",
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",

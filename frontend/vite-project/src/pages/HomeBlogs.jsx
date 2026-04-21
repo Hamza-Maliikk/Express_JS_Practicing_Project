@@ -1,5 +1,12 @@
 import { useEffect, useState } from "react";
 
+// Poppins font Google se load karo — index.html mein bhi add kar sakte ho
+// ya seedha yahan import karo
+const fontLink = document.createElement("link");
+fontLink.href = "https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap";
+fontLink.rel = "stylesheet";
+document.head.appendChild(fontLink);
+
 const API = "http://localhost:8000/api/blogs";
 
 function formatDate(iso) {
@@ -25,29 +32,27 @@ function mapBlog(raw) {
     tag:      Array.isArray(raw.tags) ? raw.tags[0] : raw.tags || raw.category || "Post",
     date:     formatDate(raw.createdAt),
     readTime: calcReadTime(raw.content),
-    image:    raw.image || null,   // Cloudinary URL direct
+    image:    raw.image || null,
   };
 }
 
 const PALETTE = [
-  { bg: "#e8f4fd", text: "#1a6fa8", dot: "#3b9de8" },
-  { bg: "#f0ebfe", text: "#6235c1", dot: "#8b5cf6" },
-  { bg: "#e6faf3", text: "#0e7a52", dot: "#10b981" },
-  { bg: "#fef3e8", text: "#b45309", dot: "#f59e0b" },
-  { bg: "#fde8f0", text: "#9d1f5a", dot: "#ec4899" },
+  { bg: "bg-blue-50",   text: "text-blue-700",   dot: "bg-blue-400",   hex: "#3b9de8" },
+  { bg: "bg-purple-50", text: "text-purple-700",  dot: "bg-purple-500", hex: "#8b5cf6" },
+  { bg: "bg-emerald-50",text: "text-emerald-700", dot: "bg-emerald-500",hex: "#10b981" },
+  { bg: "bg-amber-50",  text: "text-amber-700",   dot: "bg-amber-400",  hex: "#f59e0b" },
+  { bg: "bg-pink-50",   text: "text-pink-700",    dot: "bg-pink-500",   hex: "#ec4899" },
 ];
+
 const colorCache = {};
 let colorIdx = 0;
 function getColor(cat) {
-  if (!colorCache[cat]) { colorCache[cat] = PALETTE[colorIdx % PALETTE.length]; colorIdx++; }
+  if (!colorCache[cat]) {
+    colorCache[cat] = PALETTE[colorIdx % PALETTE.length];
+    colorIdx++;
+  }
   return colorCache[cat];
 }
-
-const tagStyle = {
-  display: "inline-block", fontSize: "11px", fontWeight: 600,
-  letterSpacing: "0.08em", textTransform: "uppercase",
-  padding: "3px 10px", borderRadius: "99px", marginBottom: "14px",
-};
 
 export default function HomeBlogs() {
   const [blogs,   setBlogs]   = useState([]);
@@ -72,139 +77,178 @@ export default function HomeBlogs() {
   const rest       = filtered.slice(1);
 
   return (
-    <section style={styles.section}>
+    <section className="max-w-[1100px] mx-auto px-6 py-20" style={{ fontFamily: "'Poppins', sans-serif" }}>
 
-      {/* Header */}
-      <div style={styles.header}>
+      {/* ── Header ── */}
+      <div className="flex justify-between items-end mb-12 gap-8 flex-wrap">
         <div>
-          <p style={styles.eyebrow}>Writing & Thoughts</p>
-          <h2 style={styles.heading}>
-            From the <span style={styles.headingAccent}>notebook</span>
+          <p className="text-xs tracking-widest uppercase text-gray-400 mb-2 font-mono">
+            Writing & Thoughts
+          </p>
+          <h2 className="text-5xl font-bold leading-tight m-0 text-gray-900">
+            From the{" "}
+            <span className="italic text-purple-600">notebook</span>
           </h2>
         </div>
-        <p style={styles.subtext}>
+        <p className="text-base text-gray-500 max-w-[340px] leading-relaxed m-0">
           Essays on engineering, design, and the craft of building software that people love.
         </p>
       </div>
 
-      {/* Filter tabs */}
+      {/* ── Filter Tabs ── */}
       {!loading && blogs.length > 0 && (
-        <div style={styles.tabs}>
+        <div className="flex gap-2 mb-10 flex-wrap">
           {categories.map((cat) => (
-            <button key={cat} onClick={() => setActive(cat)}
-              style={{ ...styles.tab, ...(active === cat ? styles.tabActive : {}) }}>
+            <button
+              key={cat}
+              onClick={() => setActive(cat)}
+              className={`px-5 py-2 rounded-full text-xs font-semibold tracking-wide transition-all duration-200 border border-gray-200
+                ${active === cat
+                  ? "bg-gray-900 text-white border-gray-900"
+                  : "bg-transparent text-gray-500 hover:border-gray-400"
+                }`}
+            >
               {cat}
             </button>
           ))}
         </div>
       )}
 
-      {/* States */}
+      {/* ── Loading Skeletons ── */}
       {loading ? (
-        <div style={styles.grid}>
-          {[1, 2, 3].map((n) => <div key={n} style={styles.skeleton} />)}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-14">
+          {[1, 2, 3].map((n) => (
+            <div
+              key={n}
+              className="border border-gray-100 rounded-2xl h-72 animate-pulse"
+              style={{
+                background: "linear-gradient(90deg,#f7f7f7 25%,#efefef 50%,#f7f7f7 75%)",
+                backgroundSize: "200% 100%",
+              }}
+            />
+          ))}
         </div>
 
       ) : filtered.length === 0 ? (
-        <p style={styles.empty}>
+        <p className="text-gray-400 text-center py-12 text-sm font-mono">
           {blogs.length === 0 ? "No blog posts found." : "No posts in this category yet."}
         </p>
 
       ) : (
         <>
-          {/* ── Featured (pehla blog bada) ── */}
-          <div
-            style={{ ...styles.featured, ...(hovered === "featured" ? styles.featuredHover : {}) }}
-            onMouseEnter={() => setHovered("featured")}
-            onMouseLeave={() => setHovered(null)}
-          >
-            {/* Colored left accent bar */}
-            <div style={{ ...styles.featuredAccent, background: getColor(featured.category).dot }} />
+          {/* ── Featured Card ── */}
+          {featured && (
+            <div
+              className={`relative border rounded-2xl mb-6 cursor-pointer overflow-hidden bg-white transition-all duration-200
+                ${hovered === "featured" ? "border-purple-400 -translate-y-0.5 shadow-lg" : "border-gray-200"}`}
+              onMouseEnter={() => setHovered("featured")}
+              onMouseLeave={() => setHovered(null)}
+            >
+              {/* Left accent bar */}
+              <div
+                className={`absolute top-0 left-0 w-1 h-full rounded-l-2xl z-10 ${getColor(featured.category).dot}`}
+              />
 
-            <div style={styles.featuredLayout}>
-              {/* Image — left side agar image hai */}
-              {featured.image && (
-                <div style={styles.featuredImgWrap}>
-                  <img
-                    src={featured.image}
-                    alt={featured.title}
-                    style={styles.featuredImg}
-                    loading="lazy"
-                  />
+              <div className="flex items-stretch">
+                {/* Featured Image */}
+                {featured.image && (
+                  <div className="flex-shrink-0 w-[280px] min-h-[220px] overflow-hidden">
+                    <img
+                      src={featured.image}
+                      alt={featured.title}
+                      className="w-full h-full object-cover block"
+                      loading="lazy"
+                    />
+                  </div>
+                )}
+
+                {/* Featured Content */}
+                <div className="flex-1 p-9">
+                  <span className={`inline-block text-[11px] font-semibold tracking-widest uppercase px-3 py-1 rounded-full mb-4
+                    ${getColor(featured.category).bg} ${getColor(featured.category).text}`}>
+                    {featured.tag}
+                  </span>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-3 leading-snug">
+                    {featured.title}
+                  </h3>
+                  <p className="text-sm text-gray-500 leading-relaxed mb-5">
+                    {featured.excerpt}
+                  </p>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-xs text-gray-400 font-mono">{featured.date}</span>
+                    <span className="text-gray-300 text-xs">·</span>
+                    <span className="text-xs text-gray-400 font-mono">{featured.readTime}</span>
+                  </div>
                 </div>
-              )}
 
-              {/* Text content */}
-              <div style={styles.featuredContent}>
-                <span style={{
-                  ...tagStyle,
-                  background: getColor(featured.category).bg,
-                  color: getColor(featured.category).text,
-                }}>
-                  {featured.tag}
-                </span>
-                <h3 style={styles.featuredTitle}>{featured.title}</h3>
-                <p style={styles.featuredExcerpt}>{featured.excerpt}</p>
-                <div style={styles.meta}>
-                  <span style={styles.metaDate}>{featured.date}</span>
-                  <span style={styles.metaDot}>·</span>
-                  <span style={styles.metaRead}>{featured.readTime}</span>
+                {/* Arrow */}
+                <div className="flex-shrink-0 text-gray-300 flex items-start pt-9 pr-7">
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <path d="M4 10h12M10 4l6 6-6 6" stroke="currentColor"
+                      strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
                 </div>
-              </div>
-
-              {/* Arrow */}
-              <div style={styles.featuredArrow}>
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                  <path d="M4 10h12M10 4l6 6-6 6" stroke="currentColor"
-                    strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
               </div>
             </div>
-          </div>
+          )}
 
-          {/* ── Grid (baaki blogs) ── */}
+          {/* ── Blog Cards Grid ── */}
           {rest.length > 0 && (
-            <div style={styles.grid}>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-14">
               {rest.map((blog) => {
                 const colors    = getColor(blog.category);
                 const isHovered = hovered === blog.id;
                 return (
-                  <div key={blog.id}
-                    style={{ ...styles.card, ...(isHovered ? styles.cardHover : {}) }}
+                  <div
+                    key={blog.id}
+                    className={`relative border rounded-2xl cursor-pointer overflow-hidden bg-white flex flex-col transition-all duration-200
+                      ${isHovered ? "border-purple-400 -translate-y-0.5 shadow-lg" : "border-gray-200"}`}
                     onMouseEnter={() => setHovered(blog.id)}
                     onMouseLeave={() => setHovered(null)}
                   >
-                    {/* Card image — top */}
+                    {/* Card Image */}
                     {blog.image ? (
-                      <div style={styles.cardImgWrap}>
+                      <div className="w-full h-44 overflow-hidden flex-shrink-0">
                         <img
                           src={blog.image}
                           alt={blog.title}
-                          style={styles.cardImg}
+                          className="w-full h-full object-cover block transition-transform duration-300 hover:scale-105"
                           loading="lazy"
                         />
                       </div>
                     ) : (
-                      /* Fallback colored banner jab image na ho */
-                      <div style={{ ...styles.cardImgFallback, background: colors.bg }}>
-                        <span style={{ fontSize: "28px", opacity: 0.5 }}>✍</span>
+                      <div className={`w-full h-36 flex-shrink-0 flex items-center justify-center ${colors.bg}`}>
+                        <span className="text-3xl opacity-50">✍</span>
                       </div>
                     )}
 
-                    <div style={styles.cardBody}>
-                      <div style={{ ...styles.cardDot, background: colors.dot }} />
-                      <span style={{ ...tagStyle, background: colors.bg, color: colors.text }}>
+                    {/* Card Body */}
+                    <div className="p-6 flex flex-col flex-1 relative">
+                      {/* Dot indicator */}
+                      <div className={`absolute top-5 right-5 w-2 h-2 rounded-full ${colors.dot}`} />
+
+                      <span className={`inline-block text-[11px] font-semibold tracking-widest uppercase px-3 py-1 rounded-full mb-3
+                        ${colors.bg} ${colors.text}`}>
                         {blog.tag}
                       </span>
-                      <h4 style={styles.cardTitle}>{blog.title}</h4>
-                      <p style={styles.cardExcerpt}>{blog.excerpt}</p>
-                      <div style={styles.cardFooter}>
-                        <div style={styles.meta}>
-                          <span style={styles.metaDate}>{blog.date}</span>
-                          <span style={styles.metaDot}>·</span>
-                          <span style={styles.metaRead}>{blog.readTime}</span>
+
+                      <h4 className="text-base font-bold text-gray-900 mb-2 leading-snug">
+                        {blog.title}
+                      </h4>
+                      <p className="text-sm text-gray-500 leading-relaxed mb-4 flex-1">
+                        {blog.excerpt}
+                      </p>
+
+                      {/* Card Footer */}
+                      <div className="flex justify-between items-center border-t border-gray-100 pt-3 mt-auto">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-xs text-gray-400 font-mono">{blog.date}</span>
+                          <span className="text-gray-300 text-xs">·</span>
+                          <span className="text-xs text-gray-400 font-mono">{blog.readTime}</span>
                         </div>
-                        <span style={{ ...styles.readMore, color: colors.text }}>Read →</span>
+                        <span className={`text-xs font-semibold font-mono tracking-wide ${colors.text}`}>
+                          Read →
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -215,172 +259,15 @@ export default function HomeBlogs() {
         </>
       )}
 
-      {/* Footer CTA */}
-      <div style={styles.cta}>
-        <span style={styles.ctaLine} />
-        <button style={styles.ctaBtn}>View all posts</button>
-        <span style={styles.ctaLine} />
+      {/* ── Footer CTA ── */}
+      <div className="flex items-center gap-5">
+        <span className="flex-1 h-px bg-gray-200" />
+        <button className="px-7 py-3 rounded-full border border-gray-900 bg-transparent text-gray-900 text-xs font-semibold tracking-widest whitespace-nowrap transition-all duration-200 hover:bg-gray-900 hover:text-white font-mono">
+          View all posts
+        </button>
+        <span className="flex-1 h-px bg-gray-200" />
       </div>
+
     </section>
   );
 }
-
-const styles = {
-  section: {
-    maxWidth: "1100px", margin: "0 auto",
-    padding: "80px 24px", fontFamily: "'Georgia', serif",
-  },
-  header: {
-    display: "flex", justifyContent: "space-between",
-    alignItems: "flex-end", marginBottom: "48px",
-    gap: "32px", flexWrap: "wrap",
-  },
-  eyebrow: {
-    fontSize: "12px", fontFamily: "'Courier New', monospace",
-    letterSpacing: "0.15em", textTransform: "uppercase",
-    color: "#999", margin: "0 0 10px",
-  },
-  heading: {
-    fontSize: "clamp(36px, 5vw, 56px)", fontWeight: 700,
-    lineHeight: 1.05, margin: 0, color: "var(--text-h)", fontFamily: "'Georgia', serif",
-  },
-  headingAccent: { fontStyle: "italic", color: "#6235c1" },
-  subtext: {
-    fontSize: "16px", color: "#666", maxWidth: "340px",
-    lineHeight: 1.65, margin: 0, fontFamily: "'Georgia', serif",
-  },
-
-  /* tabs */
-  tabs: { display: "flex", gap: "8px", marginBottom: "40px", flexWrap: "wrap" },
-  tab: {
-    padding: "8px 20px", borderRadius: "99px",
-    border: "1.5px solid #e5e5e5", background: "transparent",
-    cursor: "pointer", fontSize: "13px", fontWeight: 500, color: "#555",
-    fontFamily: "'Courier New', monospace", letterSpacing: "0.04em",
-    transition: "all 0.18s ease",
-  },
-  tabActive: { background: "#111", color: "#fff", border: "1.5px solid #111" },
-
-  /* featured */
-  featured: {
-    position: "relative", border: "1.5px solid #e8e8e8",
-    borderRadius: "16px", marginBottom: "24px",
-    cursor: "pointer", overflow: "hidden",
-    transition: "border-color 0.2s ease, transform 0.2s ease",
-    background: "var(--card-bg)",
-  },
-  featuredHover: { borderColor: "var(--accent)", transform: "translateY(-2px)" },
-  featuredAccent: {
-    position: "absolute", top: 0, left: 0,
-    width: "4px", height: "100%", borderRadius: "16px 0 0 16px", zIndex: 1,
-  },
-  featuredLayout: {
-    display: "flex", alignItems: "stretch", gap: "0",
-  },
-  featuredImgWrap: {
-    flexShrink: 0, width: "280px", minHeight: "220px",
-    overflow: "hidden",
-  },
-  featuredImg: {
-    width: "100%", height: "100%",
-    objectFit: "cover", display: "block",
-  },
-  featuredContent: {
-    flex: 1, padding: "36px 32px 36px 36px",
-  },
-  featuredTitle: {
-    fontSize: "clamp(20px, 3vw, 28px)", fontWeight: 700,
-    color: "var(--text-h)", margin: "0 0 12px", lineHeight: 1.25,
-    fontFamily: "'Georgia', serif",
-  },
-  featuredExcerpt: {
-    fontSize: "15px", color: "#666", lineHeight: 1.7,
-    margin: "0 0 20px", fontFamily: "'Georgia', serif",
-  },
-  featuredArrow: {
-    flexShrink: 0, color: "#aaa",
-    display: "flex", alignItems: "flex-start",
-    padding: "36px 28px 0 0",
-  },
-
-  /* grid */
-  grid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
-    gap: "20px", marginBottom: "56px",
-  },
-
-  /* card */
-  card: {
-    position: "relative", border: "1.5px solid #e8e8e8",
-    borderRadius: "14px", cursor: "pointer", overflow: "hidden",
-    transition: "border-color 0.2s ease, transform 0.2s ease",
-    background: "var(--card-bg)", display: "flex", flexDirection: "column",
-  },
-  cardHover: { borderColor: "var(--accent)", transform: "translateY(-3px)" },
-
-  /* card image */
-  cardImgWrap: {
-    width: "100%", height: "180px", overflow: "hidden", flexShrink: 0,
-  },
-  cardImg: {
-    width: "100%", height: "100%",
-    objectFit: "cover", display: "block",
-    transition: "transform 0.3s ease",
-  },
-  cardImgFallback: {
-    width: "100%", height: "140px", flexShrink: 0,
-    display: "flex", alignItems: "center", justifyContent: "center",
-  },
-
-  cardBody: {
-    padding: "22px 24px 18px", display: "flex",
-    flexDirection: "column", flex: 1, position: "relative",
-  },
-  cardDot: {
-    position: "absolute", top: "22px", right: "22px",
-    width: "8px", height: "8px", borderRadius: "50%",
-  },
-  cardTitle: {
-    fontSize: "17px", fontWeight: 700, color: "var(--text-h)",
-    margin: "0 0 10px", lineHeight: 1.35, fontFamily: "'Georgia', serif",
-  },
-  cardExcerpt: {
-    fontSize: "14px", color: "#777", lineHeight: 1.65,
-    margin: "0 0 16px", fontFamily: "'Georgia', serif", flex: 1,
-  },
-  cardFooter: {
-    display: "flex", justifyContent: "space-between", alignItems: "center",
-    borderTop: "1px solid #f0f0f0", paddingTop: "12px", marginTop: "auto",
-  },
-
-  /* meta */
-  meta: { display: "flex", alignItems: "center", gap: "6px" },
-  metaDate: { fontSize: "12px", color: "#aaa", fontFamily: "'Courier New', monospace" },
-  metaDot: { color: "#ccc", fontSize: "12px" },
-  metaRead: { fontSize: "12px", color: "#aaa", fontFamily: "'Courier New', monospace" },
-  readMore: { fontSize: "13px", fontWeight: 600, fontFamily: "'Courier New', monospace", letterSpacing: "0.02em" },
-
-  /* loading & empty */
-  skeleton: {
-    border: "1.5px solid #f0f0f0", borderRadius: "14px", height: "300px",
-    background: "linear-gradient(90deg,#f7f7f7 25%,#efefef 50%,#f7f7f7 75%)",
-    backgroundSize: "200% 100%",
-  },
-  empty: {
-    color: "#999", textAlign: "center", padding: "3rem 0",
-    fontFamily: "'Courier New', monospace", fontSize: "14px",
-  },
-
-  /* cta */
-  cta: { display: "flex", alignItems: "center", gap: "20px" },
-  ctaLine: { flex: 1, height: "1px", background: "#e8e8e8" },
-  ctaBtn: {
-    padding: "12px 28px", borderRadius: "99px",
-    border: "1.5px solid var(--text-h)", background: "transparent",
-    color: "var(--text-h)", fontSize: "13px", fontWeight: 600,
-    cursor: "pointer", fontFamily: "'Courier New', monospace",
-    letterSpacing: "0.05em", whiteSpace: "nowrap",
-    transition: "background 0.18s ease, color 0.18s ease",
-  },
-};
