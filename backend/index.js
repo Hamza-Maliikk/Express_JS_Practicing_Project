@@ -21,6 +21,7 @@ const { Server } = require("socket.io");
 
 // ✅ Sirf OpenAI
 const OpenAI = require("openai");
+const { Addkey, fetchKey } = require("./controllers/key");
 const moonshot = new OpenAI({
   apiKey: process.env.MOONSHOT_API_KEY,
   baseURL: "https://api.moonshot.ai/v1", // ✅ Yeh add karo
@@ -184,6 +185,10 @@ app.put("/api/resume/:id", uploadResume.single("pdf"), updateResume);
 app.delete("/api/resume/:id", deleteResume);
 app.get("/api/messages", getMessages);
 app.post("/api/messages", uploadChat.array("file", 5), AddMessage);
+
+// save key
+app.post("/api/save-key", Addkey)
+app.post("/api/save-key", fetchKey)
 
 server.listen(port, () => {
   console.log(`Server and Socket running at http://localhost:${port}`);

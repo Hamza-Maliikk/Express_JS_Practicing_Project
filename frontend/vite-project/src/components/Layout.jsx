@@ -14,6 +14,7 @@ const nav = [
   { to: "/resume", label: "Resume", icon: "◈" },
   { to: "/testimonials", label: "Testimonials", icon: "◈" },
   { to: "/message", label: "Message", icon: "◈" },
+  { to: "/setting", label: "Setting", icon: "◈" },
   { to: "/admin", label: "Admin", icon: "◈" },
 ];
 
