@@ -1,5 +1,7 @@
 import React, { useState } from 'react'
 
+const API = "http://localhost:8000/api/save-key";   
+
 const Adminsetting = () => {
   const [apiKey, setApiKey] = useState('')
   const [showKey, setShowKey] = useState(false)
@@ -16,20 +18,18 @@ const Adminsetting = () => {
     setMessage(null)
 
     try {
-      // Yahan apna database save logic lagao
-      // Example:
-      // await fetch('/api/save-key', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ apiKey })
-      // })
+      await fetch(API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ apiKey })
+      })
 
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000))
 
       setMessage({ type: 'success', text: 'API Key kamiyabi se save ho gayi!' })
     } catch (error) {
-      setMessage({ type: 'error', text: 'Kuch masla aaya, dobara try karo.' })
+      setMessage({ type: 'error', text: 'Kuch masla aaya, dobara try karo.', error })
     } finally {
       setLoading(false)
     }

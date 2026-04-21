@@ -1,31 +1,101 @@
 require("dotenv").config();
 const express = require("express");
 const { connectToDatabase } = require("./connection");
-const { userData, addUser, deleteUser, registerUser, loginUser } = require("./controllers/user");
+const {
+  userData,
+  addUser,
+  deleteUser,
+  registerUser,
+  loginUser,
+} = require("./controllers/user");
 const { authChecker } = require("./middleware/index");
-const { AddEducation, getEducation, updateEducation, deleteEducation } = require("./controllers/education");
+const {
+  AddEducation,
+  getEducation,
+  updateEducation,
+  deleteEducation,
+} = require("./controllers/education");
 const cors = require("cors");
-const { getBlogs, AddBlog, updateBlog, deleteBlog } = require("./controllers/blog");
-const { getCategories, AddCategory, updateCategory, deleteCategory } = require("./controllers/categories");
-const { upload, uploadHome, uploadTestimonial, uploadResume, uploadChat } = require("./middleware/multer");
-const { AddAbout, getAbout, updateAbout, deleteSkill } = require("./controllers/about");
-const { getProjects, AddProject, updateProject, deleteProject } = require("./controllers/work");
+const {
+  getBlogs,
+  AddBlog,
+  updateBlog,
+  deleteBlog,
+} = require("./controllers/blog");
+const {
+  getCategories,
+  AddCategory,
+  updateCategory,
+  deleteCategory,
+} = require("./controllers/categories");
+const {
+  upload,
+  uploadHome,
+  uploadTestimonial,
+  uploadResume,
+  uploadChat,
+} = require("./middleware/multer");
+const {
+  AddAbout,
+  getAbout,
+  updateAbout,
+  deleteSkill,
+} = require("./controllers/about");
+const {
+  getProjects,
+  AddProject,
+  updateProject,
+  deleteProject,
+} = require("./controllers/work");
 const { getContact, AddContact } = require("./controllers/contact");
-const { getDetails, AddDetails, UpdateDetails, deleteDetails } = require("./controllers/details");
-const { getHome, AddHome, UpdateHome, deleteHome } = require("./controllers/home");
-const { getTestimonials, AddTestimonial, UpdateTestimonial, deleteTestimonial } = require("./controllers/testimonial");
-const { getResume, addResume, updateResume, deleteResume } = require("./controllers/resume");
+const {
+  getDetails,
+  AddDetails,
+  UpdateDetails,
+  deleteDetails,
+} = require("./controllers/details");
+const {
+  getHome,
+  AddHome,
+  UpdateHome,
+  deleteHome,
+} = require("./controllers/home");
+const {
+  getTestimonials,
+  AddTestimonial,
+  UpdateTestimonial,
+  deleteTestimonial,
+} = require("./controllers/testimonial");
+const {
+  getResume,
+  addResume,
+  updateResume,
+  deleteResume,
+} = require("./controllers/resume");
 const { getMessages, AddMessage } = require("./controllers/message");
+const { Addkey, fetchKey, decryptApiKey } = require("./controllers/key");
+const Key = require("./models/key");
+const OpenAI = require("openai");
 const http = require("http");
 const { Server } = require("socket.io");
 
-// ✅ Sirf OpenAI
-const OpenAI = require("openai");
-const { Addkey, fetchKey } = require("./controllers/key");
-const moonshot = new OpenAI({
-  apiKey: process.env.MOONSHOT_API_KEY,
-  baseURL: "https://api.moonshot.ai/v1", // ✅ Yeh add karo
-});
+let moonshot;
+
+async function initAI() {
+  const keyDoc = await Key.findOne().sort({ _id: -1 }); // DB se latest key lo
+  const decryptedKey = decryptApiKey(keyDoc.key); // 🔓 decrypt
+
+  if (!keyDoc) {
+    console.log("❌ Koi key nahi mili — pehle /api/save-key se key save karo!");
+    return;
+  }
+
+  moonshot = new OpenAI({
+    apiKey: decryptedKey, // ✅ DB wali decrypted key
+    baseURL: "https://api.moonshot.ai/v1",
+  });
+  console.log("AI ready");
+}
 
 const port = 8000;
 const app = express();
@@ -65,7 +135,6 @@ async function getAIReply(userMessage) {
     return "Sorry, abhi reply nahi de sakta. Thodi der baad try karo!";
   }
 }
- 
 
 // socket
 const server = http.createServer(app);
@@ -89,15 +158,15 @@ io.on("connection", (socket) => {
 
     if (adminOnline) {
       console.log("Admin online — message forward kar raha hun");
-      io.to("admin-room").emit("receive-message",{
+      io.to("admin-room").emit("receive-message", {
         ...data,
-        userId: socket.id 
-    });
+        userId: socket.id,
+      });
     } else {
       console.log("Admin offline — OpenAI reply karega");
       const aiReply = await getAIReply(data.text);
       console.log("AI Reply:", aiReply);
-      socket.emit("receive-reply", aiReply); 
+      socket.emit("receive-reply", aiReply);
     }
   });
 
@@ -117,7 +186,6 @@ io.on("connection", (socket) => {
 });
 
 // connection
-connectToDatabase(process.env.MONGO_URI);
 
 // middleware
 app.use(cors());
@@ -176,8 +244,16 @@ app.post("/api/home", uploadHome.single("image"), AddHome);
 app.put("/api/home/:id", uploadHome.single("image"), UpdateHome);
 app.delete("/api/home/:id", deleteHome);
 app.get("/api/testimonials", getTestimonials);
-app.post("/api/testimonials", uploadTestimonial.single("image"), AddTestimonial);
-app.put("/api/testimonials/:id", uploadTestimonial.single("image"), UpdateTestimonial);
+app.post(
+  "/api/testimonials",
+  uploadTestimonial.single("image"),
+  AddTestimonial,
+);
+app.put(
+  "/api/testimonials/:id",
+  uploadTestimonial.single("image"),
+  UpdateTestimonial,
+);
 app.delete("/api/testimonials/:id", deleteTestimonial);
 app.get("/api/resume", getResume);
 app.post("/api/resume", uploadResume.single("pdf"), addResume);
@@ -187,9 +263,12 @@ app.get("/api/messages", getMessages);
 app.post("/api/messages", uploadChat.array("file", 5), AddMessage);
 
 // save key
-app.post("/api/save-key", Addkey)
-app.post("/api/save-key", fetchKey)
+app.post("/api/save-key", Addkey);
+app.get("/api/save-key", fetchKey);
 
-server.listen(port, () => {
-  console.log(`Server and Socket running at http://localhost:${port}`);
+connectToDatabase(process.env.MONGO_URI).then(async () => {
+  await initAI();
+  server.listen(port, () => {
+    console.log(`Server and Socket running at http://localhost:${port}`);
+  });
 });
