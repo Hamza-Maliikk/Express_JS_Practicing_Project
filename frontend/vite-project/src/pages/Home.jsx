@@ -349,11 +349,7 @@ export default function KineticPortfolio() {
                     marginBottom: 24,
                   }}
                 >
-                  I build full-stack apps that work
-                  <br />
-                  end-to-end —
-                  <br />
-                  not just the parts that look good in a demo.
+                 {item.headline}
                 </h1>
                 <p
                   className="fu fu3"
