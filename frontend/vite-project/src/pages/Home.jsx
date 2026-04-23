@@ -155,8 +155,8 @@ export default function KineticPortfolio() {
 
   const [homeData, setHomeData] = useState(null);
   const [testimonials, setTestimonials] = useState([]); // ← ye add karo
-  const [resume, setResume] = useState([]); // ← ye add karo  
-  const [work, setWork] = useState([]); // ← ye add karo  
+  const [resume, setResume] = useState([]); // ← ye add karo
+  const [work, setWork] = useState([]); // ← ye add karo
 
   useEffect(() => {
     fetch(API)
@@ -349,7 +349,7 @@ export default function KineticPortfolio() {
                     marginBottom: 24,
                   }}
                 >
-                 {item.headline}
+                  {item.headline}
                 </h1>
                 <p
                   className="fu fu3"
@@ -364,20 +364,37 @@ export default function KineticPortfolio() {
                 >
                   {item.description}
                 </p>
-                {Array.isArray(resume) && resume.slice(-1).map((r) => (
-                  <div key={r._id} style={{ display: "flex", gap: "12px", marginTop: "10px" }}>
-                    <a
-                      href={r.pdf}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="btn-outline fu fu4"
-                      style={{ textDecoration: "none" }}
+                {Array.isArray(resume) &&
+                  resume.slice(-1).map((r) => (
+                    <div
+                      key={r._id}
+                      style={{
+                        display: "flex",
+                        gap: "12px",
+                        marginTop: "10px",
+                      }}
                     >
-                      <Eye />
-                       &nbsp;View Resume
-                    </a>
-                  </div>
-                ))}
+                      <a
+                        href={r.pdf}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="btn-outline fu fu4"
+                        style={{ textDecoration: "none" }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.background =
+                            "rgba(255,255,255,0.1)";
+                          e.currentTarget.style.color = "#ffffff";
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.background = "transparent";
+                          e.currentTarget.style.color = ""; // revert to CSS class color
+                        }}
+                      >
+                        <Eye />
+                        &nbsp;View Resume
+                      </a>
+                    </div>
+                  ))}
               </div>
 
               {/* right – photo */}
@@ -407,124 +424,241 @@ export default function KineticPortfolio() {
         ))}
 
       {/* ── SELECTED WORKS ── */}
- {Array.isArray(work) && work.length > 0 && (() => {
-  const last4 = work.slice(-4);
-  return (
-    <section
-      style={{ maxWidth: 1160, margin: "0 auto", padding: "0 48px 96px" }}
-    >
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "flex-end",
-          marginBottom: 40,
-        }}
-      >
-        <div>
-          <h2
-            style={{
-              fontFamily: "'Playfair Display', serif",
-              fontSize: 34,
-              fontWeight: 700,
-              color: "var(--text-h)",
-              marginBottom: 8,
-            }}
-          >
-            Selected Works
-          </h2>
-          <p
-            style={{
-              fontFamily: "'DM Sans', sans-serif",
-              fontSize: 13,
-              color: "var(--text)",
-            }}
-          >
-            A curated collection of projects where strategy meets aesthetic
-            excellence.
-          </p>
-        </div>
-        <span
-          className="mob-hide"
-          style={{
-            fontFamily: "'DM Sans', sans-serif",
-            fontSize: 11,
-            color: "#bbb",
-            letterSpacing: ".08em",
-            textTransform: "uppercase",
-          }}
-        >
-          Scroll to discover →
-        </span>
-      </div>
+      {Array.isArray(work) &&
+        work.length > 0 &&
+        (() => {
+          const last4 = work.slice(-4);
+          return (
+            <section
+              style={{
+                maxWidth: 1160,
+                margin: "0 auto",
+                padding: "0 48px 96px",
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "flex-end",
+                  marginBottom: 40,
+                }}
+              >
+                <div>
+                  <h2
+                    style={{
+                      fontFamily: "'Playfair Display', serif",
+                      fontSize: 34,
+                      fontWeight: 700,
+                      color: "var(--text-h)",
+                      marginBottom: 8,
+                    }}
+                  >
+                    Selected Works
+                  </h2>
+                  <p
+                    style={{
+                      fontFamily: "'DM Sans', sans-serif",
+                      fontSize: 13,
+                      color: "var(--text)",
+                    }}
+                  >
+                    A curated collection of projects where strategy meets
+                    aesthetic excellence.
+                  </p>
+                </div>
+                <span
+                  className="mob-hide"
+                  style={{
+                    fontFamily: "'DM Sans', sans-serif",
+                    fontSize: 11,
+                    color: "#bbb",
+                    letterSpacing: ".08em",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  Scroll to discover →
+                </span>
+              </div>
 
-      {/* Masonry-style 2-col grid */}
-      <div
-        className="works-grid"
-        style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}
-      >
-        {/* Col 1 */}
-        <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-          {last4[0] && <div style={{ height: 240 }}><ProjectCard project={last4[0]} /></div>}
-          {last4[2] && <div style={{ height: 280 }}><ProjectCard project={last4[2]} /></div>}
-        </div>
+              {/* Masonry-style 2-col grid */}
+              <div
+                className="works-grid"
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: 20,
+                }}
+              >
+                {/* Col 1 */}
+                <div
+                  style={{ display: "flex", flexDirection: "column", gap: 20 }}
+                >
+                  {last4[0] && (
+                    <div style={{ height: 240 }}>
+                      <ProjectCard project={last4[0]} />
+                    </div>
+                  )}
+                  {last4[2] && (
+                    <div style={{ height: 280 }}>
+                      <ProjectCard project={last4[2]} />
+                    </div>
+                  )}
+                </div>
 
-        {/* Col 2 */}
-        <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-          {last4[1] && <div style={{ height: 280 }}><ProjectCard project={last4[1]} /></div>}
-          {last4[3] && <div style={{ height: 240 }}><ProjectCard project={last4[3]} /></div>}
-        </div>
-      </div>
-    </section>
-  );
-})()}
-    
+                {/* Col 2 */}
+                <div
+                  style={{ display: "flex", flexDirection: "column", gap: 20 }}
+                >
+                  {last4[1] && (
+                    <div style={{ height: 280 }}>
+                      <ProjectCard project={last4[1]} />
+                    </div>
+                  )}
+                  {last4[3] && (
+                    <div style={{ height: 240 }}>
+                      <ProjectCard project={last4[3]} />
+                    </div>
+                  )}
+                </div>
+              </div>
+            </section>
+          );
+        })()}
 
       {/* ── EXPERTISE ── */}
-    {/* ── TESTIMONIALS ── */}
-<section style={{ maxWidth: 1160, margin: "0 auto", padding: "80px 48px" }}>
-  <p style={{ fontSize: 12, letterSpacing: ".08em", textTransform: "uppercase", color: "var(--text)", marginBottom: 4 }}>
-    What people say
-  </p>
-  <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 34, fontWeight: 700, color: "var(--text-h)", marginBottom: 40 }}>
-    Client Testimonials
-  </h2>
-
-  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 16 }}>
-    {Array.isArray(testimonials) && testimonials.map((t) => (
-      <div key={t._id} style={{ background: "var(--card-bg)", border: ".5px solid var(--border)", borderRadius: 12, padding: "20px" }}>
-        
-        {/* Stars */}
-        <div style={{ display: "flex", gap: 3, marginBottom: 12 }}>
-          {[...Array(5)].map((_, i) => (
-            <span key={i} style={{ color: "#f0c040", fontSize: 14 }}>★</span>
-          ))}
-        </div>
-
-        {/* Description */}
-        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: "var(--text)", lineHeight: 1.7, marginBottom: 16 }}>
-          {t.description}
+      {/* ── TESTIMONIALS ── */}
+      <section
+        style={{ maxWidth: 1160, margin: "0 auto", padding: "80px 48px" }}
+      >
+        <p
+          style={{
+            fontSize: 12,
+            letterSpacing: ".08em",
+            textTransform: "uppercase",
+            color: "var(--text)",
+            marginBottom: 4,
+          }}
+        >
+          What people say
         </p>
+        <h2
+          style={{
+            fontFamily: "'Playfair Display', serif",
+            fontSize: 34,
+            fontWeight: 700,
+            color: "var(--text-h)",
+            marginBottom: 40,
+          }}
+        >
+          Client Testimonials
+        </h2>
 
-        {/* Person */}
-        <div style={{ display: "flex", alignItems: "center", gap: 10, borderTop: ".5px solid var(--border)", paddingTop: 12 }}>
-          {t.image ? (
-            <img src={t.image} alt={t.name} style={{ width: 40, height: 40, borderRadius: "50%", objectFit: "cover" }} />
-          ) : (
-            <div style={{ width: 40, height: 40, borderRadius: "50%", background: "#dbeafe", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 600, color: "#1d4ed8" }}>
-              {t.name?.[0]?.toUpperCase()}
-            </div>
-          )}
-          <div>
-            <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 500, color: "var(--text-h)" }}>{t.name}</div>
-            <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: "var(--text)" }}>{t.username}</div>
-          </div>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+            gap: 16,
+          }}
+        >
+          {Array.isArray(testimonials) &&
+            testimonials.map((t) => (
+              <div
+                key={t._id}
+                style={{
+                  background: "var(--card-bg)",
+                  border: ".5px solid var(--border)",
+                  borderRadius: 12,
+                  padding: "20px",
+                }}
+              >
+                {/* Stars */}
+                <div style={{ display: "flex", gap: 3, marginBottom: 12 }}>
+                  {[...Array(5)].map((_, i) => (
+                    <span key={i} style={{ color: "#f0c040", fontSize: 14 }}>
+                      ★
+                    </span>
+                  ))}
+                </div>
+
+                {/* Description */}
+                <p
+                  style={{
+                    fontFamily: "'DM Sans', sans-serif",
+                    fontSize: 14,
+                    color: "var(--text)",
+                    lineHeight: 1.7,
+                    marginBottom: 16,
+                  }}
+                >
+                  {t.description}
+                </p>
+
+                {/* Person */}
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 10,
+                    borderTop: ".5px solid var(--border)",
+                    paddingTop: 12,
+                  }}
+                >
+                  {t.image ? (
+                    <img
+                      src={t.image}
+                      alt={t.name}
+                      style={{
+                        width: 40,
+                        height: 40,
+                        borderRadius: "50%",
+                        objectFit: "cover",
+                      }}
+                    />
+                  ) : (
+                    <div
+                      style={{
+                        width: 40,
+                        height: 40,
+                        borderRadius: "50%",
+                        background: "#dbeafe",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: 14,
+                        fontWeight: 600,
+                        color: "#1d4ed8",
+                      }}
+                    >
+                      {t.name?.[0]?.toUpperCase()}
+                    </div>
+                  )}
+                  <div>
+                    <div
+                      style={{
+                        fontFamily: "'DM Sans', sans-serif",
+                        fontSize: 14,
+                        fontWeight: 500,
+                        color: "var(--text-h)",
+                      }}
+                    >
+                      {t.name}
+                    </div>
+                    <div
+                      style={{
+                        fontFamily: "'DM Sans', sans-serif",
+                        fontSize: 12,
+                        color: "var(--text)",
+                      }}
+                    >
+                      {t.username}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
         </div>
-
-      </div>
-    ))}
-  </div>
-</section>
+      </section>
 
       {/* ── TESTIMONIAL ── */}
       <section

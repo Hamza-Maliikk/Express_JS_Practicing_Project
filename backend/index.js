@@ -188,7 +188,7 @@ io.on("connection", (socket) => {
 // connection
 
 // middleware
-app.use(cors());
+app.use(cors("*"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -210,8 +210,8 @@ app.get("/api/homepage", async (req, res) => {
 });
 
 app.get("/api/about", getAbout);
-app.post("/api/about", AddAbout);
-app.put("/api/about/:id", updateAbout);
+app.post("/api/about", authChecker, AddAbout);
+app.put("/api/about/:id",authChecker, updateAbout);
 app.delete("/api/about/skill/:skill", deleteSkill);
 app.get("/api/projects", getProjects);
 app.post("/api/projects", AddProject);
@@ -229,10 +229,12 @@ app.get("/api/blogs", getBlogs);
 app.post("/api/blogs", upload.single("image"), AddBlog);
 app.put("/api/blogs/:id", upload.single("image"), updateBlog);
 app.delete("/api/blogs/:id", deleteBlog);
+// Education
 app.get("/api/education", getEducation);
 app.post("/api/education", AddEducation);
 app.put("/api/education/:id", updateEducation);
 app.delete("/api/education/:id", deleteEducation);
+// Contact
 app.get("/api/contact", getContact);
 app.post("/api/contact", AddContact);
 app.get("/api/details", getDetails);

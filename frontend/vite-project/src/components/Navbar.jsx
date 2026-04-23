@@ -292,12 +292,12 @@ export default function Navbar() {
             {isDark ? <Sun /> : <Moon />}
           </button>
 
-          <button
+          {/* <button
             className="hn-btn-outline"
             onClick={() => navigate("/login")}
           >
             Admin Login
-          </button>
+          </button> */}
 
           <NavLink to="/contact" className="hn-btn-primary">
             Contact
