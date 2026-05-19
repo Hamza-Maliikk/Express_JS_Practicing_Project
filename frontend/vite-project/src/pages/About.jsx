@@ -1,10 +1,5 @@
 import { useState, useEffect } from "react";
-
-// Poppins font inject
-const fontLink = document.createElement("link");
-fontLink.href = "https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap";
-fontLink.rel = "stylesheet";
-document.head.appendChild(fontLink);
+import { ArrowRight, Mail } from "lucide-react";
 
 const API_BASE = "http://localhost:8000/api/about";
 
@@ -14,196 +9,416 @@ const getAbout = async () => {
   return response.json();
 };
 
-const values = [
+const VALUES = [
   {
     icon: "💡",
     title: "Innovation",
     desc: "We don't just follow trends — we stay curious and aim to set them.",
-    color: "from-violet-500/10 to-indigo-500/10",
-    border: "border-violet-400/20",
-    label: "text-violet-400",
+    accent: "#6366f1",
+    tag: "rgba(99,102,241,0.12)",
+    tagText: "#818cf8",
   },
   {
     icon: "🤝",
     title: "Integrity",
     desc: "Transparency is our default setting. We value your trust above all else.",
-    color: "from-sky-500/10 to-cyan-500/10",
-    border: "border-sky-400/20",
-    label: "text-sky-400",
+    accent: "#06b6d4",
+    tag: "rgba(6,182,212,0.10)",
+    tagText: "#22d3ee",
   },
   {
     icon: "🌱",
     title: "Community",
     desc: "Built for users, by users. Your feedback is the engine that drives us.",
-    color: "from-emerald-500/10 to-teal-500/10",
-    border: "border-emerald-400/20",
-    label: "text-emerald-400",
+    accent: "#10b981",
+    tag: "rgba(16,185,129,0.10)",
+    tagText: "#34d399",
   },
 ];
 
 const About = () => {
   const [aboutData, setAboutData] = useState(null);
-  const [loading,   setLoading]   = useState(true);
-  const [error,     setError]     = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [apiError, setApiError] = useState(false);
 
   useEffect(() => {
     getAbout()
       .then(setAboutData)
-      .catch(() => setError("Failed to load data."))
+      .catch(() => setApiError(true))
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading)
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[var(--bg)]" style={{ fontFamily: "'Poppins', sans-serif" }}>
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 rounded-full border-2 border-violet-500 border-t-transparent animate-spin" />
-          <p className="text-sm text-gray-400">Loading...</p>
-        </div>
-      </div>
-    );
+  // Demo fallback
+  const data = aboutData || (apiError ? {
+    intro: "Welcome! I'm a passionate developer focused on building modern, human-centric web applications. I believe digital tools should empower people — not overwhelm them.",
+    skills: ["React", "Node.js", "TypeScript", "MongoDB", "Tailwind CSS", "Next.js", "PostgreSQL", "Docker"],
+  } : null);
 
-  if (error)
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[var(--bg)]" style={{ fontFamily: "'Poppins', sans-serif" }}>
-        <p className="text-red-400 text-sm">{error}</p>
-      </div>
-    );
+  if (loading) return (
+    <div style={{
+      minHeight: "100vh", background: "#050508",
+      display: "flex", flexDirection: "column",
+      alignItems: "center", justifyContent: "center", gap: 14,
+    }}>
+      <div style={{
+        width: 34, height: 34,
+        border: "3px solid rgba(99,102,241,0.2)",
+        borderTop: "3px solid #6366f1",
+        borderRadius: "50%",
+        animation: "spin 0.7s linear infinite",
+      }} />
+      <p style={{ color: "rgba(255,255,255,0.2)", fontSize: 11, letterSpacing: "0.12em" }}>LOADING</p>
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+    </div>
+  );
 
   return (
-    <div
-      className="min-h-screen bg-[var(--bg)] text-[var(--text)] px-6 py-20 transition-colors duration-300"
-      style={{ fontFamily: "'Poppins', sans-serif" }}
-    >
-      <div className="max-w-4xl mx-auto">
+    <div style={{
+      minHeight: "100vh",
+      background: "#050508",
+      color: "#e2e8f0",
+      fontFamily: "'DM Sans', sans-serif",
+      overflowX: "hidden",
+    }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap');
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-        {/* ── Hero ── */}
-        <div className="text-center mb-20">
-          <span className="inline-block bg-violet-500/10 border border-violet-400/30 text-violet-300 text-[11px] font-semibold tracking-widest uppercase px-4 py-1.5 rounded-full mb-5">
-            About Me
-          </span>
+        @keyframes fadeUp {
+          from { opacity: 0; transform: translateY(24px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
-          <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-[var(--text-h)] mb-5">
-            The{" "}
-            <span
-              style={{
-                background: "linear-gradient(90deg, #8b5cf6, #a78bfa)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-              }}
-            >
-              Story
-            </span>{" "}
-            So Far
+        .fu { animation: fadeUp 0.7s ease forwards; opacity: 0; }
+        .d1 { animation-delay: 0.05s; }
+        .d2 { animation-delay: 0.2s; }
+        .d3 { animation-delay: 0.35s; }
+        .d4 { animation-delay: 0.5s; }
+        .d5 { animation-delay: 0.65s; }
+
+        .gradient-text {
+          background: linear-gradient(90deg, #fff 0%, #a5b4fc 50%, #06b6d4 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+        }
+
+        .section-tag {
+          display: inline-flex;
+          align-items: center;
+          gap: 7px;
+          padding: 5px 14px;
+          border-radius: 99px;
+          border: 1px solid rgba(99,102,241,0.3);
+          background: rgba(99,102,241,0.07);
+          color: #a5b4fc;
+          font-size: 10px;
+          font-weight: 700;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+          margin-bottom: 18px;
+        }
+        .section-tag::before {
+          content: '';
+          width: 5px; height: 5px;
+          border-radius: 50%;
+          background: #6366f1;
+          box-shadow: 0 0 6px #6366f1;
+        }
+
+        .section-rule {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          margin-bottom: 22px;
+        }
+        .section-rule::before {
+          content: '';
+          width: 28px; height: 1px;
+          background: rgba(99,102,241,0.5);
+          flex-shrink: 0;
+        }
+        .rule-label {
+          font-size: 10px;
+          font-weight: 700;
+          letter-spacing: 0.14em;
+          text-transform: uppercase;
+          color: #818cf8;
+        }
+
+        .card {
+          background: #0d0d18;
+          border: 1px solid rgba(255,255,255,0.07);
+          border-radius: 16px;
+          padding: 28px;
+          transition: border-color 0.3s;
+        }
+        .card:hover { border-color: rgba(99,102,241,0.25); }
+
+        .value-card {
+          background: #0d0d18;
+          border-radius: 16px;
+          padding: 24px;
+          transition: transform 0.3s, border-color 0.3s;
+          cursor: default;
+        }
+        .value-card:hover { transform: translateY(-5px); }
+
+        .skill-pill {
+          display: inline-block;
+          padding: 5px 14px;
+          border-radius: 99px;
+          background: rgba(99,102,241,0.08);
+          border: 1px solid rgba(99,102,241,0.2);
+          color: #a5b4fc;
+          font-size: 12px;
+          font-weight: 500;
+          letter-spacing: 0.03em;
+          transition: background 0.2s, border-color 0.2s;
+          cursor: default;
+        }
+        .skill-pill:hover {
+          background: rgba(99,102,241,0.18);
+          border-color: rgba(99,102,241,0.4);
+        }
+
+        .divider {
+          height: 1px;
+          background: linear-gradient(90deg, transparent, rgba(99,102,241,0.18), transparent);
+          margin: 0;
+        }
+
+        @media(max-width: 640px) {
+          .values-grid { grid-template-columns: 1fr !important; }
+          .hero-h1 { font-size: 36px !important; }
+          .page-pad { padding: 60px 20px !important; }
+        }
+      `}</style>
+
+      {/* ── Background glows ── */}
+      <div style={{
+        position: "fixed", inset: 0, pointerEvents: "none", zIndex: 0,
+        background: `
+          radial-gradient(ellipse at 20% 10%, rgba(99,102,241,0.07) 0%, transparent 50%),
+          radial-gradient(ellipse at 80% 80%, rgba(6,182,212,0.05) 0%, transparent 50%)
+        `,
+      }} />
+
+      <div style={{ maxWidth: 860, margin: "0 auto", padding: "100px 48px 80px", position: "relative", zIndex: 1 }}
+        className="page-pad">
+
+        {/* API error banner */}
+        {apiError && (
+          <div style={{
+            background: "rgba(244,63,94,0.08)",
+            border: "1px solid rgba(244,63,94,0.2)",
+            borderRadius: 10,
+            padding: "10px 18px",
+            color: "#fb7185",
+            fontSize: 12,
+            textAlign: "center",
+            marginBottom: 28,
+          }}>
+            ⚠ API not reachable — showing demo data. Make sure your backend is running on port 8000.
+          </div>
+        )}
+
+        {/* ── Hero ──────────────────────────────────────────── */}
+        <div className="fu d1" style={{ textAlign: "center", marginBottom: 72 }}>
+          <div className="section-tag" style={{ margin: "0 auto 18px" }}>About Me</div>
+
+          <h1 className="hero-h1 gradient-text" style={{
+            fontFamily: "'Syne', sans-serif",
+            fontSize: 52,
+            fontWeight: 800,
+            lineHeight: 1.1,
+            letterSpacing: "-0.02em",
+            marginBottom: 20,
+          }}>
+            The Story So Far
           </h1>
 
-          <p className="text-base italic text-[var(--text)] opacity-70 max-w-xl mx-auto leading-relaxed">
-            {aboutData?.intro || '"Building the future, one line of code at a time."'}
+          <p style={{
+            fontSize: 15,
+            fontStyle: "italic",
+            color: "rgba(255,255,255,0.42)",
+            maxWidth: 520,
+            margin: "0 auto",
+            lineHeight: 1.85,
+          }}>
+            {data?.intro || '"Building the future, one line of code at a time."'}
           </p>
         </div>
 
-        {/* ── Who I Am ── */}
-        <section className="mb-16">
-          <div className="flex items-center gap-3 mb-5">
-            <span className="w-8 h-px bg-violet-400/40" />
-            <h2 className="text-xs font-semibold tracking-widest uppercase text-violet-400">
-              Who I Am
-            </h2>
+        {/* ── Who I Am ──────────────────────────────────────── */}
+        <section className="fu d2" style={{ marginBottom: 52 }}>
+          <div className="section-rule">
+            <span className="rule-label">Who I Am</span>
           </div>
-
-          <div className="bg-[var(--card-bg)] border border-[var(--border)] rounded-2xl p-8">
-            <p className="text-base leading-relaxed text-[var(--text)] opacity-85">
-              {aboutData?.intro ||
+          <div className="card">
+            <p style={{
+              fontSize: 14.5,
+              lineHeight: 1.9,
+              color: "rgba(255,255,255,0.6)",
+            }}>
+              {data?.intro ||
                 "Welcome! I'm a passionate developer focused on building modern, human-centric web applications. I believe digital tools should empower people — not overwhelm them. Every project I take on is a chance to merge great design with reliable engineering."}
             </p>
           </div>
         </section>
 
-        {/* ── Values Grid ── */}
-        <section className="mb-16">
-          <div className="flex items-center gap-3 mb-5">
-            <span className="w-8 h-px bg-violet-400/40" />
-            <h2 className="text-xs font-semibold tracking-widest uppercase text-violet-400">
-              Core Values
-            </h2>
-          </div>
+        <div className="divider" style={{ marginBottom: 52 }} />
 
-          <div className="grid sm:grid-cols-3 gap-5">
-            {values.map((v) => (
+        {/* ── Core Values ───────────────────────────────────── */}
+        <section className="fu d3" style={{ marginBottom: 52 }}>
+          <div className="section-rule">
+            <span className="rule-label">Core Values</span>
+          </div>
+          <div className="values-grid" style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(3, 1fr)",
+            gap: 16,
+          }}>
+            {VALUES.map((v) => (
               <div
                 key={v.title}
-                className={`bg-gradient-to-br ${v.color} border ${v.border} rounded-2xl p-6
-                  transition-all duration-300 hover:-translate-y-1 hover:shadow-lg`}
+                className="value-card"
+                style={{ border: `1px solid ${v.accent}22` }}
               >
-                <div className="text-2xl mb-3">{v.icon}</div>
-                <h3 className={`font-semibold text-base mb-2 ${v.label}`}>{v.title}</h3>
-                <p className="text-sm text-[var(--text)] opacity-75 leading-relaxed">{v.desc}</p>
+                {/* Top accent line */}
+                <div style={{
+                  height: 2,
+                  background: v.accent,
+                  borderRadius: 99,
+                  marginBottom: 20,
+                  opacity: 0.7,
+                }} />
+
+                <div style={{ fontSize: 26, marginBottom: 12 }}>{v.icon}</div>
+
+                <span style={{
+                  display: "inline-block",
+                  padding: "2px 10px",
+                  borderRadius: 99,
+                  background: v.tag,
+                  color: v.tagText,
+                  fontSize: 10,
+                  fontWeight: 700,
+                  letterSpacing: "0.09em",
+                  textTransform: "uppercase",
+                  marginBottom: 10,
+                }}>
+                  {v.title}
+                </span>
+
+                <p style={{
+                  fontSize: 12.5,
+                  color: "rgba(255,255,255,0.42)",
+                  lineHeight: 1.75,
+                }}>
+                  {v.desc}
+                </p>
               </div>
             ))}
           </div>
         </section>
 
-        {/* ── Skills ── */}
-        {aboutData?.skills?.length > 0 && (
-          <section className="mb-16">
-            <div className="flex items-center gap-3 mb-5">
-              <span className="w-8 h-px bg-violet-400/40" />
-              <h2 className="text-xs font-semibold tracking-widest uppercase text-violet-400">
-                Tech Stack
-              </h2>
-            </div>
+        <div className="divider" style={{ marginBottom: 52 }} />
 
-            <div className="bg-[var(--card-bg)] border border-[var(--border)] rounded-2xl p-8">
-              <div className="flex flex-wrap gap-2.5">
-                {aboutData.skills.map((skill) => (
-                  <span
-                    key={skill}
-                    className="bg-violet-500/10 border border-violet-400/20 text-violet-300
-                      text-xs font-medium px-4 py-1.5 rounded-full tracking-wide
-                      hover:bg-violet-500/20 transition-colors duration-200 cursor-default"
-                  >
-                    {skill}
-                  </span>
+        {/* ── Tech Stack ────────────────────────────────────── */}
+        {data?.skills?.length > 0 && (
+          <section className="fu d3" style={{ marginBottom: 52 }}>
+            <div className="section-rule">
+              <span className="rule-label">Tech Stack</span>
+            </div>
+            <div className="card">
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
+                {data.skills.map((skill) => (
+                  <span key={skill} className="skill-pill">{skill}</span>
                 ))}
               </div>
             </div>
           </section>
         )}
 
-        {/* ── Philosophy ── */}
-        <section className="mb-16">
-          <div className="flex items-center gap-3 mb-5">
-            <span className="w-8 h-px bg-violet-400/40" />
-            <h2 className="text-xs font-semibold tracking-widest uppercase text-violet-400">
-              My Philosophy
-            </h2>
-          </div>
+        <div className="divider" style={{ marginBottom: 52 }} />
 
-          <div className="bg-[var(--card-bg)] border border-[var(--border)] rounded-2xl p-8">
-            <p className="text-base text-[var(--text)] opacity-80 leading-relaxed mb-6">
+        {/* ── Philosophy ────────────────────────────────────── */}
+        <section className="fu d4" style={{ marginBottom: 52 }}>
+          <div className="section-rule">
+            <span className="rule-label">My Philosophy</span>
+          </div>
+          <div className="card">
+            <p style={{
+              fontSize: 14.5,
+              color: "rgba(255,255,255,0.55)",
+              lineHeight: 1.9,
+              marginBottom: 24,
+            }}>
               I treat every project like an equation where the solution must be both elegant and efficient.
               My approach to building software follows one simple formula:
             </p>
-            <div className="bg-violet-500/5 border border-violet-400/20 rounded-xl py-5 px-6 text-center">
-              <code className="text-violet-300 text-base sm:text-lg font-mono">
+            <div style={{
+              background: "rgba(99,102,241,0.06)",
+              border: "1px solid rgba(99,102,241,0.2)",
+              borderRadius: 12,
+              padding: "18px 24px",
+              textAlign: "center",
+            }}>
+              <code style={{
+                fontFamily: "'Fira Code', 'Courier New', monospace",
+                fontSize: 15,
+                color: "#a5b4fc",
+                letterSpacing: "0.02em",
+              }}>
                 Success = (UX + Reliability) × Creativity
               </code>
             </div>
           </div>
         </section>
 
-        {/* ── CTA ── */}
-        <div className="text-center">
-          <p className="text-sm text-[var(--text)] opacity-60 mb-5">
+        <div className="divider" style={{ marginBottom: 52 }} />
+
+        {/* ── CTA ───────────────────────────────────────────── */}
+        <div className="fu d5" style={{ textAlign: "center" }}>
+          <p style={{
+            fontSize: 13,
+            color: "rgba(255,255,255,0.3)",
+            marginBottom: 22,
+            letterSpacing: "0.03em",
+          }}>
             Want to learn more or work together?
           </p>
-          <button
-            className="bg-violet-600 hover:bg-violet-700 text-white font-semibold text-sm
-              py-3 px-8 rounded-full transition-all duration-300
-              shadow-lg shadow-violet-500/20 hover:shadow-violet-500/40 hover:-translate-y-0.5"
+          <a
+            href="#contact"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 9,
+              padding: "12px 28px",
+              borderRadius: 8,
+              background: "linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)",
+              color: "#fff",
+              fontSize: 13,
+              fontWeight: 600,
+              textDecoration: "none",
+              fontFamily: "'Syne', sans-serif",
+              boxShadow: "0 4px 24px rgba(99,102,241,0.35)",
+              transition: "transform 0.2s, box-shadow 0.2s",
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.transform = "translateY(-2px)";
+              e.currentTarget.style.boxShadow = "0 8px 32px rgba(99,102,241,0.5)";
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.transform = "translateY(0)";
+              e.currentTarget.style.boxShadow = "0 4px 24px rgba(99,102,241,0.35)";
+            }}
           >
+            <Mail size={15} />
             Get In Touch
-          </button>
+          </a>
         </div>
 
       </div>
