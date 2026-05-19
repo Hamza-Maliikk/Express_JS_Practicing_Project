@@ -1,108 +1,53 @@
-require("dotenv").config();
-const express = require("express");
-const { connectToDatabase } = require("./connection");
-const {
-  userData,
-  addUser,
-  deleteUser,
-  registerUser,
-  loginUser,
-} = require("./controllers/user");
-const { authChecker } = require("./middleware/index");
-const {
-  AddEducation,
-  getEducation,
-  updateEducation,
-  deleteEducation,
-} = require("./controllers/education");
-const cors = require("cors");
-const {
-  getBlogs,
-  AddBlog,
-  updateBlog,
-  deleteBlog,
-} = require("./controllers/blog");
-const {
-  getCategories,
-  AddCategory,
-  updateCategory,
-  deleteCategory,
-} = require("./controllers/categories");
-const {
-  upload,
-  uploadHome,
-  uploadTestimonial,
-  uploadResume,
-  uploadChat,
-} = require("./middleware/multer");
-const {
-  AddAbout,
-  getAbout,
-  updateAbout,
-  deleteSkill,
-} = require("./controllers/about");
-const {
-  getProjects,
-  AddProject,
-  updateProject,
-  deleteProject,
-} = require("./controllers/work");
-const { getContact, AddContact } = require("./controllers/contact");
-const {
-  getDetails,
-  AddDetails,
-  UpdateDetails,
-  deleteDetails,
-} = require("./controllers/details");
-const {
-  getHome,
-  AddHome,
-  UpdateHome,
-  deleteHome,
-} = require("./controllers/home");
-const {
-  getTestimonials,
-  AddTestimonial,
-  UpdateTestimonial,
-  deleteTestimonial,
-} = require("./controllers/testimonial");
-const {
-  getResume,
-  addResume,
-  updateResume,
-  deleteResume,
-} = require("./controllers/resume");
-const { getMessages, AddMessage } = require("./controllers/message");
-const { Addkey, fetchKey, decryptApiKey } = require("./controllers/key");
-const Key = require("./models/key");
-const OpenAI = require("openai");
-const http = require("http");
-const { Server } = require("socket.io");
+import "dotenv/config";
+import express from "express";
+import cors from "cors";
+import http from "http";
+import { Server } from "socket.io";
+import OpenAI from "openai";
+
+import { connectToDatabase } from "./connection.js";
+import { userData, addUser, registerUser, loginUser } from "./controllers/user.js";
+import { authChecker } from "./middleware/index.js";
+import { AddEducation, getEducation, updateEducation, deleteEducation } from "./controllers/education.js";
+import { getBlogs, AddBlog, updateBlog, deleteBlog } from "./controllers/blog.js";
+import { getCategories, AddCategory, updateCategory, deleteCategory } from "./controllers/categories.js";
+import { upload, uploadHome, uploadTestimonial, uploadResume, uploadChat } from "./middleware/multer.js";
+import { AddAbout, getAbout, updateAbout, deleteSkill } from "./controllers/about.js";
+import { getProjects, AddProject, updateProject, deleteProject } from "./controllers/work.js";
+import { getContact, AddContact } from "./controllers/contact.js";
+import { getDetails, AddDetails, UpdateDetails, deleteDetails } from "./controllers/details.js";
+import { getHome, AddHome, UpdateHome, deleteHome } from "./controllers/home.js";
+import { getTestimonials, AddTestimonial, UpdateTestimonial, deleteTestimonial } from "./controllers/testimonial.js";
+import { getResume, addResume, updateResume, deleteResume } from "./controllers/resume.js";
+import { getMessages, AddMessage } from "./controllers/message.js";
+import { Addkey, fetchKey, decryptApiKey } from "./controllers/key.js";
+import Key from "./models/key.js";
+import HomeModel from "./models/home.js";
+import TestimonialsModel from "./models/testimonials.js";
+import ResumeModel from "./models/resume.js";
+import WorkModel from "./models/work.js";
+
+// ─── AI Setup ────────────────────────────────────────────────────────────────
 
 let moonshot;
 
 async function initAI() {
-  const keyDoc = await Key.findOne().sort({ _id: -1 }); // DB se latest key lo
-  const decryptedKey = decryptApiKey(keyDoc.key); // 🔓 decrypt
+  const keyDoc = await Key.findOne().sort({ _id: -1 });
 
   if (!keyDoc) {
     console.log("❌ Koi key nahi mili — pehle /api/save-key se key save karo!");
     return;
   }
 
+  const decryptedKey = decryptApiKey(keyDoc.key);
+
   moonshot = new OpenAI({
-    apiKey: decryptedKey, // ✅ DB wali decrypted key
+    apiKey: decryptedKey,
     baseURL: "https://api.moonshot.ai/v1",
   });
-  console.log("AI ready");
+  console.log("✅ AI ready");
 }
 
-const port = 8000;
-const app = express();
-let adminOnline = false;
-let adminSocketId = null;
-
-// ✅ OpenAI reply function
 async function getAIReply(userMessage) {
   try {
     const completion = await moonshot.chat.completions.create({
@@ -123,8 +68,7 @@ async function getAIReply(userMessage) {
 
     const message = completion.choices[0].message;
 
-    // ✅ handle empty content issue
-    let reply =
+    const reply =
       message.content && message.content.trim() !== ""
         ? message.content
         : message.reasoning_content || "Sorry, reply generate nahi hua.";
@@ -136,7 +80,13 @@ async function getAIReply(userMessage) {
   }
 }
 
-// socket
+// ─── App & Socket Setup ───────────────────────────────────────────────────────
+
+const port = 8000;
+const app = express();
+let adminOnline = false;
+let adminSocketId = null;
+
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: { origin: "*" },
@@ -163,7 +113,7 @@ io.on("connection", (socket) => {
         userId: socket.id,
       });
     } else {
-      console.log("Admin offline — OpenAI reply karega");
+      console.log("Admin offline — AI reply karega");
       const aiReply = await getAIReply(data.text);
       console.log("AI Reply:", aiReply);
       socket.emit("receive-reply", aiReply);
@@ -185,23 +135,30 @@ io.on("connection", (socket) => {
   });
 });
 
-// connection
+// ─── Middleware ───────────────────────────────────────────────────────────────
 
-// middleware
 app.use(cors("*"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// ─── Routes ───────────────────────────────────────────────────────────────────
+
+// User
 app.get("/api/user/", userData);
 app.post("/api/user", addUser);
+app.post("/api/register", registerUser);
+app.post("/api/login", loginUser);
+app.post("/", loginUser);
+app.get("/dashboard", authChecker, userData);
 
+// Homepage (combined)
 app.get("/api/homepage", async (req, res) => {
   try {
     const [home, testimonials, resume, work] = await Promise.all([
-      require("./models/home").find(),
-      require("./models/testimonials").find(),
-      require("./models/resume").find(),
-      require("./models/work").find(),
+      HomeModel.find(),
+      TestimonialsModel.find(),
+      ResumeModel.find(),
+      WorkModel.find(),
     ]);
     res.status(200).json({ home, testimonials, resume, work });
   } catch (error) {
@@ -209,68 +166,77 @@ app.get("/api/homepage", async (req, res) => {
   }
 });
 
+// About
 app.get("/api/about", getAbout);
 app.post("/api/about", authChecker, AddAbout);
-app.put("/api/about/:id",authChecker, updateAbout);
+app.put("/api/about/:id", authChecker, updateAbout);
 app.delete("/api/about/skill/:skill", deleteSkill);
+
+// Projects
 app.get("/api/projects", getProjects);
 app.post("/api/projects", AddProject);
 app.put("/api/projects/:id", updateProject);
 app.delete("/api/projects/:id", deleteProject);
-app.post("/api/register", registerUser);
-app.post("/api/login", loginUser);
-app.post("/", loginUser);
-app.get("/dashboard", authChecker, userData);
+
+// Categories
 app.get("/api/categories", getCategories);
 app.post("/api/categories", AddCategory);
 app.put("/api/categories/:id", updateCategory);
 app.delete("/api/categories/:id", deleteCategory);
+
+// Blogs
 app.get("/api/blogs", getBlogs);
 app.post("/api/blogs", upload.single("image"), AddBlog);
 app.put("/api/blogs/:id", upload.single("image"), updateBlog);
 app.delete("/api/blogs/:id", deleteBlog);
+
 // Education
 app.get("/api/education", getEducation);
 app.post("/api/education", AddEducation);
 app.put("/api/education/:id", updateEducation);
 app.delete("/api/education/:id", deleteEducation);
+
 // Contact
 app.get("/api/contact", getContact);
 app.post("/api/contact", AddContact);
+
+// Details
 app.get("/api/details", getDetails);
 app.post("/api/details", AddDetails);
 app.put("/api/details/:id", UpdateDetails);
 app.delete("/api/details/:id", deleteDetails);
+
+// Home
 app.get("/api/home", getHome);
 app.post("/api/home", uploadHome.single("image"), AddHome);
 app.put("/api/home/:id", uploadHome.single("image"), UpdateHome);
 app.delete("/api/home/:id", deleteHome);
+
+// Testimonials
 app.get("/api/testimonials", getTestimonials);
-app.post(
-  "/api/testimonials",
-  uploadTestimonial.single("image"),
-  AddTestimonial,
-);
-app.put(
-  "/api/testimonials/:id",
-  uploadTestimonial.single("image"),
-  UpdateTestimonial,
-);
+app.post("/api/testimonials", uploadTestimonial.single("image"), AddTestimonial);
+app.put("/api/testimonials/:id", uploadTestimonial.single("image"), UpdateTestimonial);
 app.delete("/api/testimonials/:id", deleteTestimonial);
+
+// Resume
 app.get("/api/resume", getResume);
 app.post("/api/resume", uploadResume.single("pdf"), addResume);
 app.put("/api/resume/:id", uploadResume.single("pdf"), updateResume);
 app.delete("/api/resume/:id", deleteResume);
+
+// Messages
 app.get("/api/messages", getMessages);
 app.post("/api/messages", uploadChat.array("file", 5), AddMessage);
 
-// save key
+// API Key
 app.post("/api/save-key", Addkey);
 app.get("/api/save-key", fetchKey);
+
+// ─── Start Server ─────────────────────────────────────────────────────────────
 
 connectToDatabase(process.env.MONGO_URI).then(async () => {
   await initAI();
   server.listen(port, () => {
-    console.log(`Server and Socket running at http://localhost:${port}`);
+    console.log(`🚀 Server and Socket running at http://localhost:${port}`);
   });
 });
