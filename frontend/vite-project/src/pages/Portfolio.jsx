@@ -59,7 +59,8 @@ export default function Portfolio() {
       });
       const data = await res.json();
       setAbout(data.data.intro);
-      setAboutId(data.data._id);
+      console.log("Updated skills:", data); // ✅ updated skills log karo
+      setAboutId(null);
       setEditingAbout(false);
     } catch (err) {
       console.error("About save error:", err);

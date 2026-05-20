@@ -1,178 +1,351 @@
-import { useEffect } from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function Projects() {
   const API = "http://localhost:8000/api/projects";
   const [projects, setProjects] = useState([]);
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-        fetch(API)
-          .then((res) => res.json())
-          .then((data) => setProjects(data))
-          .catch((err) => console.error("Error fetching projects:", err));
-      }, []);
+    fetch(API)
+      .then((res) => res.json())
+      .then((data) => {
+        setProjects(data);
+        setTimeout(() => setLoaded(true), 100);
+      })
+      .catch((err) => console.error("Error fetching projects:", err));
+  }, []);
+
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap');
 
-        .proj-page {
-          font-family: 'Poppins', sans-serif;
-          background: var(--bg);
+        .pp-root {
+          font-family: 'DM Sans', sans-serif;
+          background: var(--bg, #0a0a0f);
           min-height: 100vh;
-          padding: 5rem 1.5rem 4rem;
-          transition: background 0.3s ease;
+          padding: 6rem 1.5rem 6rem;
+          position: relative;
+          overflow-x: hidden;
         }
 
-        .proj-hero {
-          text-align: center;
-          margin-bottom: 4rem;
+        /* ── Ambient Background ── */
+        .pp-root::before {
+          content: '';
+          position: fixed;
+          top: -30%;
+          left: -20%;
+          width: 70vw;
+          height: 70vw;
+          background: radial-gradient(circle, rgba(109,40,217,0.08) 0%, transparent 65%);
+          pointer-events: none;
+          z-index: 0;
+        }
+        .pp-root::after {
+          content: '';
+          position: fixed;
+          bottom: -20%;
+          right: -15%;
+          width: 55vw;
+          height: 55vw;
+          background: radial-gradient(circle, rgba(59,130,246,0.06) 0%, transparent 65%);
+          pointer-events: none;
+          z-index: 0;
         }
 
-        .proj-badge {
-          display: inline-block;
-          background: rgba(139, 92, 246, 0.15);
-          border: 1px solid rgba(139, 92, 246, 0.3);
-          color: #c4b5fd;
-          font-size: 0.75rem;
-          font-weight: 600;
-          letter-spacing: 0.12em;
+        .pp-inner {
+          position: relative;
+          z-index: 1;
+          max-width: 1120px;
+          margin: 0 auto;
+        }
+
+        /* ── Hero ── */
+        .pp-hero {
+          margin-bottom: 5rem;
+        }
+
+        .pp-eyebrow {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.5rem;
+          font-family: 'DM Sans', sans-serif;
+          font-size: 0.72rem;
+          font-weight: 500;
+          letter-spacing: 0.18em;
           text-transform: uppercase;
-          padding: 0.35rem 1rem;
-          border-radius: 100px;
+          color: #a78bfa;
           margin-bottom: 1.5rem;
+          opacity: 0;
+          transform: translateY(12px);
+          transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+        .pp-eyebrow::before {
+          content: '';
+          width: 28px;
+          height: 1px;
+          background: #a78bfa;
+          display: block;
         }
 
-        .proj-title {
-          font-size: clamp(2rem, 5vw, 3rem);
-          font-weight: 700;
-          color: var(--text-h);
+        .pp-h1 {
+          font-family: 'Syne', sans-serif;
+          font-size: clamp(2.8rem, 6vw, 4.5rem);
+          font-weight: 800;
+          line-height: 1.05;
           letter-spacing: -0.03em;
-          margin: 0 0 1rem;
-          transition: color 0.3s ease;
+          color: var(--text-h, #f1f0ff);
+          margin: 0 0 1.25rem;
+          opacity: 0;
+          transform: translateY(18px);
+          transition: opacity 0.65s ease 0.1s, transform 0.65s ease 0.1s;
         }
 
-        .proj-title span {
-          background: linear-gradient(90deg, #8b5cf6, #a78bfa);
+        .pp-h1 em {
+          font-style: normal;
+          background: linear-gradient(135deg, #8b5cf6 0%, #c4b5fd 50%, #60a5fa 100%);
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
+          background-clip: text;
         }
 
-        .proj-subtitle {
-          color: var(--text);
+        .pp-sub {
           font-size: 1rem;
-          max-width: 500px;
-          margin: 0 auto;
-          line-height: 1.7;
-          opacity: 0.8;
-          transition: color 0.3s ease;
+          color: var(--text, #9ca3af);
+          line-height: 1.75;
+          max-width: 480px;
+          opacity: 0;
+          transform: translateY(14px);
+          transition: opacity 0.65s ease 0.2s, transform 0.65s ease 0.2s;
         }
 
-        .proj-grid {
-          max-width: 1100px;
-          margin: 0 auto;
+        /* ── Loaded state ── */
+        .pp-root.is-loaded .pp-eyebrow,
+        .pp-root.is-loaded .pp-h1,
+        .pp-root.is-loaded .pp-sub {
+          opacity: 1;
+          transform: translateY(0);
+        }
+
+        .pp-root.is-loaded .pp-card {
+          opacity: 1;
+          transform: translateY(0);
+        }
+
+        /* ── Grid ── */
+        .pp-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-          gap: 1.5rem;
+          grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+          gap: 1.25rem;
         }
 
-        .proj-card {
-          background: var(--card-bg);
-          border: 1px solid var(--border);
-          border-radius: 16px;
-          padding: 2rem;
-          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        /* ── Card ── */
+        .pp-card {
           position: relative;
+          background: rgba(255,255,255,0.03);
+          border: 1px solid rgba(255,255,255,0.07);
+          border-radius: 20px;
+          padding: 2rem 2rem 1.75rem;
+          cursor: default;
           overflow: hidden;
-          box-shadow: var(--shadow);
+          opacity: 0;
+          transform: translateY(24px);
+          transition:
+            opacity 0.55s ease,
+            transform 0.55s ease,
+            border-color 0.3s ease,
+            background 0.3s ease,
+            box-shadow 0.3s ease;
         }
 
-        .proj-card::before {
+        .pp-card:nth-child(1)  { transition-delay: 0.05s; }
+        .pp-card:nth-child(2)  { transition-delay: 0.12s; }
+        .pp-card:nth-child(3)  { transition-delay: 0.19s; }
+        .pp-card:nth-child(4)  { transition-delay: 0.26s; }
+        .pp-card:nth-child(5)  { transition-delay: 0.33s; }
+        .pp-card:nth-child(6)  { transition-delay: 0.40s; }
+
+        /* Glowing top accent bar */
+        .pp-card::before {
           content: '';
           position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          height: 2px;
-          background: var(--card-color);
-          opacity: 0.6;
+          top: 0; left: 0; right: 0;
+          height: 1px;
+          background: var(--c, #8b5cf6);
+          opacity: 0.5;
           transition: opacity 0.3s;
         }
 
-        .proj-card:hover {
-          transform: translateY(-6px);
+        /* Soft glow on hover */
+        .pp-card::after {
+          content: '';
+          position: absolute;
+          top: -60px; left: 50%;
+          transform: translateX(-50%);
+          width: 200px; height: 120px;
+          background: radial-gradient(ellipse, var(--c, rgba(139,92,246,0.3)) 0%, transparent 70%);
+          opacity: 0;
+          transition: opacity 0.4s ease;
+          pointer-events: none;
+        }
+
+        .pp-card:hover {
+          background: rgba(255,255,255,0.055);
           border-color: rgba(139,92,246,0.25);
-          box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+          box-shadow:
+            0 0 0 1px rgba(139,92,246,0.1),
+            0 24px 48px rgba(0,0,0,0.35);
+          transform: translateY(-5px) !important;
         }
 
-        html.dark-mode .proj-card:hover {
-          box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        .pp-card:hover::before { opacity: 1; }
+        .pp-card:hover::after  { opacity: 1; }
+
+        /* ── Card Number ── */
+        .pp-num {
+          font-family: 'Syne', sans-serif;
+          font-size: 0.68rem;
+          font-weight: 700;
+          letter-spacing: 0.1em;
+          color: var(--c, #8b5cf6);
+          opacity: 0.6;
+          margin-bottom: 1rem;
         }
 
-        .proj-card:hover::before { opacity: 1; }
-
-        .proj-card-title {
-          font-size: 1.15rem;
-          font-weight: 600;
-          color: var(--text-h);
-          margin: 0 0 0.75rem;
-          transition: color 0.3s ease;
+        /* ── Card Title ── */
+        .pp-ctitle {
+          font-family: 'Syne', sans-serif;
+          font-size: 1.2rem;
+          font-weight: 700;
+          letter-spacing: -0.02em;
+          color: var(--text-h, #f1f0ff);
+          margin: 0 0 0.65rem;
         }
 
-        .proj-card-desc {
-          font-size: 0.85rem;
-          color: var(--text);
-          line-height: 1.7;
+        /* ── Card Desc ── */
+        .pp-cdesc {
+          font-size: 0.875rem;
+          color: var(--text, #9ca3af);
+          line-height: 1.75;
           margin-bottom: 1.5rem;
-          opacity: 0.8;
-          transition: color 0.3s ease;
         }
 
-        .proj-tags {
+        /* ── Link ── */
+        .pp-link {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.4rem;
+          font-size: 0.78rem;
+          font-weight: 500;
+          color: #a78bfa;
+          text-decoration: none;
+          margin-bottom: 1.5rem;
+          opacity: 0.75;
+          transition: opacity 0.2s, gap 0.2s;
+        }
+        .pp-link:hover { opacity: 1; gap: 0.6rem; }
+        .pp-link svg { width: 12px; height: 12px; }
+
+        /* ── Tags ── */
+        .pp-tags {
           display: flex;
           flex-wrap: wrap;
           gap: 0.4rem;
+          padding-top: 1.25rem;
+          border-top: 1px solid rgba(255,255,255,0.06);
         }
 
-        .proj-tag {
-          font-size: 0.72rem;
+        .pp-tag {
+          font-size: 0.7rem;
           font-weight: 500;
-          padding: 0.25rem 0.7rem;
-          border-radius: 6px;
-          background: rgba(139,92,246,0.1);
-          color: #a78bfa;
-          border: 1px solid rgba(139,92,246,0.2);
+          letter-spacing: 0.04em;
+          padding: 0.28rem 0.75rem;
+          border-radius: 100px;
+          background: rgba(139,92,246,0.08);
+          color: #c4b5fd;
+          border: 1px solid rgba(139,92,246,0.18);
+          transition: background 0.2s, border-color 0.2s;
+        }
+
+        .pp-tag:hover {
+          background: rgba(139,92,246,0.18);
+          border-color: rgba(139,92,246,0.35);
+        }
+
+        /* ── Empty state ── */
+        .pp-empty {
+          grid-column: 1 / -1;
+          text-align: center;
+          padding: 4rem 2rem;
+          color: var(--text, #6b7280);
+          font-size: 0.9rem;
+        }
+
+        /* ── Scrollbar ── */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb {
+          background: rgba(139,92,246,0.25);
+          border-radius: 3px;
         }
       `}</style>
-      
-      <div className="proj-page">
-        <div className="proj-hero">
-          <div className="proj-badge">My Work</div>
-          <h1 className="proj-title">
-            Featured <span>Projects</span>
-          </h1>
-          <p className="proj-subtitle">
-            A collection of things I've built — from APIs to full-stack web apps.
-          </p>
-        </div>
 
-        <div className="proj-grid">
-          {Array.isArray(projects) && projects.map((p) => (
-            <div
-              key={p._id}
-              className="proj-card"
-              style={{ "--card-color": p.color }}
-            >
-              <h2 className="proj-card-title">{p.title}</h2>
-              <p className="proj-card-desc">{p.description}</p>
-              <p className="proj-card-desc">{p.link}</p>
-              <div className="proj-tags">
-                {p.technologies.map((t) => (
-                  <span key={t} className="proj-tag">{t}</span>
-                ))}
+      <div className={`pp-root${loaded ? " is-loaded" : ""}`}>
+        <div className="pp-inner">
+
+          {/* Hero */}
+          <div className="pp-hero">
+            <p className="pp-eyebrow">My Work</p>
+            <h1 className="pp-h1">
+              Featured<br /><em>Projects</em>
+            </h1>
+            <p className="pp-sub">
+              A collection of things I've built — from APIs to full-stack web apps.
+            </p>
+          </div>
+
+          {/* Grid */}
+          <div className="pp-grid">
+            {Array.isArray(projects) && projects.length === 0 && (
+              <div className="pp-empty">Loading projects…</div>
+            )}
+
+            {Array.isArray(projects) && projects.map((p, i) => (
+              <div
+                key={p._id}
+                className="pp-card"
+                style={{ "--c": p.color || "#8b5cf6" }}
+              >
+                <div className="pp-num">
+                  {String(i + 1).padStart(2, "0")}
+                </div>
+
+                <h2 className="pp-ctitle">{p.title}</h2>
+                <p className="pp-cdesc">{p.description}</p>
+
+                {p.link && (
+                  <a
+                    className="pp-link"
+                    href={p.link}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    {p.link}
+                    <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5">
+                      <path d="M2 10L10 2M10 2H5M10 2v5" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </a>
+                )}
+
+                <div className="pp-tags">
+                  {p.technologies?.map((t) => (
+                    <span key={t} className="pp-tag">{t}</span>
+                  ))}
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
+
         </div>
       </div>
     </>
