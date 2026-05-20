@@ -9,32 +9,7 @@ const getAbout = async () => {
   return response.json();
 };
 
-const VALUES = [
-  {
-    icon: "💡",
-    title: "Innovation",
-    desc: "We don't just follow trends — we stay curious and aim to set them.",
-    accent: "#6366f1",
-    tag: "rgba(99,102,241,0.12)",
-    tagText: "#818cf8",
-  },
-  {
-    icon: "🤝",
-    title: "Integrity",
-    desc: "Transparency is our default setting. We value your trust above all else.",
-    accent: "#06b6d4",
-    tag: "rgba(6,182,212,0.10)",
-    tagText: "#22d3ee",
-  },
-  {
-    icon: "🌱",
-    title: "Community",
-    desc: "Built for users, by users. Your feedback is the engine that drives us.",
-    accent: "#10b981",
-    tag: "rgba(16,185,129,0.10)",
-    tagText: "#34d399",
-  },
-];
+
 
 const About = () => {
   const [aboutData, setAboutData] = useState(null);
@@ -44,7 +19,7 @@ const About = () => {
   useEffect(() => {
     getAbout()
       .then(setAboutData)
-      .catch(() => setApiError(true))
+      .catch(() => setApiError(true))   
       .finally(() => setLoading(false));
   }, []);
 
@@ -228,27 +203,9 @@ const About = () => {
         <div className="fu d1" style={{ textAlign: "center", marginBottom: 72 }}>
           <div className="section-tag" style={{ margin: "0 auto 18px" }}>About Me</div>
 
-          <h1 className="hero-h1 gradient-text" style={{
-            fontFamily: "'Syne', sans-serif",
-            fontSize: 52,
-            fontWeight: 800,
-            lineHeight: 1.1,
-            letterSpacing: "-0.02em",
-            marginBottom: 20,
-          }}>
-            The Story So Far
-          </h1>
+          
 
-          <p style={{
-            fontSize: 15,
-            fontStyle: "italic",
-            color: "rgba(255,255,255,0.42)",
-            maxWidth: 520,
-            margin: "0 auto",
-            lineHeight: 1.85,
-          }}>
-            {data?.intro || '"Building the future, one line of code at a time."'}
-          </p>
+       
         </div>
 
         {/* ── Who I Am ──────────────────────────────────────── */}
@@ -270,59 +227,7 @@ const About = () => {
 
         <div className="divider" style={{ marginBottom: 52 }} />
 
-        {/* ── Core Values ───────────────────────────────────── */}
-        <section className="fu d3" style={{ marginBottom: 52 }}>
-          <div className="section-rule">
-            <span className="rule-label">Core Values</span>
-          </div>
-          <div className="values-grid" style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(3, 1fr)",
-            gap: 16,
-          }}>
-            {VALUES.map((v) => (
-              <div
-                key={v.title}
-                className="value-card"
-                style={{ border: `1px solid ${v.accent}22` }}
-              >
-                {/* Top accent line */}
-                <div style={{
-                  height: 2,
-                  background: v.accent,
-                  borderRadius: 99,
-                  marginBottom: 20,
-                  opacity: 0.7,
-                }} />
-
-                <div style={{ fontSize: 26, marginBottom: 12 }}>{v.icon}</div>
-
-                <span style={{
-                  display: "inline-block",
-                  padding: "2px 10px",
-                  borderRadius: 99,
-                  background: v.tag,
-                  color: v.tagText,
-                  fontSize: 10,
-                  fontWeight: 700,
-                  letterSpacing: "0.09em",
-                  textTransform: "uppercase",
-                  marginBottom: 10,
-                }}>
-                  {v.title}
-                </span>
-
-                <p style={{
-                  fontSize: 12.5,
-                  color: "rgba(255,255,255,0.42)",
-                  lineHeight: 1.75,
-                }}>
-                  {v.desc}
-                </p>
-              </div>
-            ))}
-          </div>
-        </section>
+     
 
         <div className="divider" style={{ marginBottom: 52 }} />
 
@@ -344,39 +249,7 @@ const About = () => {
 
         <div className="divider" style={{ marginBottom: 52 }} />
 
-        {/* ── Philosophy ────────────────────────────────────── */}
-        <section className="fu d4" style={{ marginBottom: 52 }}>
-          <div className="section-rule">
-            <span className="rule-label">My Philosophy</span>
-          </div>
-          <div className="card">
-            <p style={{
-              fontSize: 14.5,
-              color: "rgba(255,255,255,0.55)",
-              lineHeight: 1.9,
-              marginBottom: 24,
-            }}>
-              I treat every project like an equation where the solution must be both elegant and efficient.
-              My approach to building software follows one simple formula:
-            </p>
-            <div style={{
-              background: "rgba(99,102,241,0.06)",
-              border: "1px solid rgba(99,102,241,0.2)",
-              borderRadius: 12,
-              padding: "18px 24px",
-              textAlign: "center",
-            }}>
-              <code style={{
-                fontFamily: "'Fira Code', 'Courier New', monospace",
-                fontSize: 15,
-                color: "#a5b4fc",
-                letterSpacing: "0.02em",
-              }}>
-                Success = (UX + Reliability) × Creativity
-              </code>
-            </div>
-          </div>
-        </section>
+
 
         <div className="divider" style={{ marginBottom: 52 }} />
 
@@ -391,7 +264,7 @@ const About = () => {
             Want to learn more or work together?
           </p>
           <a
-            href="#contact"
+            href="/contact"
             style={{
               display: "inline-flex",
               alignItems: "center",
