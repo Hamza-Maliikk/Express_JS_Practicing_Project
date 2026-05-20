@@ -168,7 +168,7 @@ app.get("/api/homepage", async (req, res) => {
 
 // About
 app.get("/api/about", getAbout);
-app.post("/api/about", authChecker, AddAbout);
+app.post("/api/about",   AddAbout);
 app.put("/api/about/:id",  updateAbout);
 app.delete("/api/about/skill/:skill", deleteSkill);
 

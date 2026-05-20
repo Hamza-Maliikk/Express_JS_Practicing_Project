@@ -18,7 +18,7 @@ export default function Portfolio() {
   const [aboutDraft, setAboutDraft]     = useState("");
   const [editingAbout, setEditingAbout] = useState(false);
   const [loading, setLoading]           = useState(false);
-  const [skills, setSkills]             = useState([]); // ✅ DEFAULT_SKILLS hataya, DB se aayengi
+  const [skills, setSkills]             = useState([]);
   const [newSkill, setNewSkill]         = useState("");
 
   // ── GET ──
@@ -32,7 +32,6 @@ export default function Portfolio() {
           setAboutDraft(data.intro);
           setAboutId(data._id);
         }
-        // ✅ Skills bhi DB se load karo
         if (data && data.skills && data.skills.length > 0) {
           setSkills(data.skills);
         }
@@ -43,24 +42,39 @@ export default function Portfolio() {
     fetchAbout();
   }, []);
 
-  // ── About Save (PUT) ──
+  // ── About Save: POST (create) ya PUT (edit) ──
   const saveAbout = async () => {
     const next = aboutDraft.trim();
     if (!next) return;
     setLoading(true);
     try {
-      const res = await fetch(`${API}/api/about/${aboutId}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify({ intro: next, skills }), // ✅ skills bhi bhejo
-      });
+      let res;
+
+      if (!aboutId) {
+        // ✅ Pehli baar — POST se create karo
+        res = await fetch(`${API}/api/about`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          body: JSON.stringify({ intro: next, skills }),
+        });
+      } else {
+        // ✅ Already exist karta hai — PUT se update karo
+        res = await fetch(`${API}/api/about/${aboutId}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          body: JSON.stringify({ intro: next, skills }),
+        });
+      }
+
       const data = await res.json();
       setAbout(data.data.intro);
-      console.log("Updated skills:", data); // ✅ updated skills log karo
-      setAboutId(null);
+      setAboutId(data.data._id); // ✅ naya _id bhi set karo (POST ke baad)
       setEditingAbout(false);
     } catch (err) {
       console.error("About save error:", err);
@@ -69,7 +83,7 @@ export default function Portfolio() {
     }
   };
 
-  // ✅ Skills DB mein save karne ka helper
+  // ── Skills DB mein save karne ka helper ──
   const saveSkillsToDB = async (updatedSkills) => {
     if (!aboutId) return;
     try {
@@ -86,7 +100,6 @@ export default function Portfolio() {
     }
   };
 
-  // ✅ Skill add — destructure karke DB mein save
   const addSkill = async () => {
     const value = newSkill.trim();
     if (!value) return;
@@ -96,7 +109,6 @@ export default function Portfolio() {
     await saveSkillsToDB(updatedSkills);
   };
 
-  // ✅ Skill delete — DB se bhi hata do
   const removeSkill = async (idx) => {
     const skillToDelete = skills[idx];
     try {
@@ -159,8 +171,9 @@ export default function Portfolio() {
                 <p>Hi, I am {displayName}. {about}</p>
                 {canCrud && (
                   <div className="inline">
+                    {/* ✅ aboutId nahi hai → "Create" button, hai → "Edit" button */}
                     <button className="btn" onClick={() => { setEditingAbout(true); setAboutDraft(about); }}>
-                      Edit Intro
+                      {!aboutId ? "Create Intro" : "Edit Intro"}
                     </button>
                   </div>
                 )}
