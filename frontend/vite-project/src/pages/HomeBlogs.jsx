@@ -1,13 +1,24 @@
 import { useEffect, useState } from "react";
 
-// Poppins font Google se load karo — index.html mein bhi add kar sakte ho
-// ya seedha yahan import karo
-const fontLink = document.createElement("link");
-fontLink.href = "https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap";
-fontLink.rel = "stylesheet";
-document.head.appendChild(fontLink);
-
 const API = "http://localhost:8000/api/blogs";
+
+const COLORS = [
+  { accent: "#8b5cf6", glow: "rgba(139,92,246,0.3)" },
+  { accent: "#3b82f6", glow: "rgba(59,130,246,0.3)"  },
+  { accent: "#ec4899", glow: "rgba(236,72,153,0.3)"  },
+  { accent: "#10b981", glow: "rgba(16,185,129,0.3)"  },
+  { accent: "#f59e0b", glow: "rgba(245,158,11,0.3)"  },
+];
+
+const colorCache = {};
+let colorIdx = 0;
+function getColor(cat) {
+  if (!colorCache[cat]) {
+    colorCache[cat] = COLORS[colorIdx % COLORS.length];
+    colorIdx++;
+  }
+  return colorCache[cat];
+}
 
 function formatDate(iso) {
   if (!iso) return "";
@@ -36,29 +47,11 @@ function mapBlog(raw) {
   };
 }
 
-const PALETTE = [
-  { bg: "bg-blue-50",   text: "text-blue-700",   dot: "bg-blue-400",   hex: "#3b9de8" },
-  { bg: "bg-purple-50", text: "text-purple-700",  dot: "bg-purple-500", hex: "#8b5cf6" },
-  { bg: "bg-emerald-50",text: "text-emerald-700", dot: "bg-emerald-500",hex: "#10b981" },
-  { bg: "bg-amber-50",  text: "text-amber-700",   dot: "bg-amber-400",  hex: "#f59e0b" },
-  { bg: "bg-pink-50",   text: "text-pink-700",    dot: "bg-pink-500",   hex: "#ec4899" },
-];
-
-const colorCache = {};
-let colorIdx = 0;
-function getColor(cat) {
-  if (!colorCache[cat]) {
-    colorCache[cat] = PALETTE[colorIdx % PALETTE.length];
-    colorIdx++;
-  }
-  return colorCache[cat];
-}
-
-export default function HomeBlogs() {
+export default function Blogs() {
   const [blogs,   setBlogs]   = useState([]);
   const [loading, setLoading] = useState(true);
   const [active,  setActive]  = useState("All");
-  const [hovered, setHovered] = useState(null);
+  const [loaded,  setLoaded]  = useState(false);
 
   useEffect(() => {
     fetch(API)
@@ -68,7 +61,10 @@ export default function HomeBlogs() {
         setBlogs(list.map(mapBlog));
       })
       .catch((err) => console.error("Blogs fetch error:", err))
-      .finally(() => setLoading(false));
+      .finally(() => {
+        setLoading(false);
+        setTimeout(() => setLoaded(true), 100);
+      });
   }, []);
 
   const categories = ["All", ...new Set(blogs.map((b) => b.category))];
@@ -77,178 +73,557 @@ export default function HomeBlogs() {
   const rest       = filtered.slice(1);
 
   return (
-    <section className="max-w-[1100px] mx-auto px-6 py-20" style={{ fontFamily: "'Poppins', sans-serif" }}>
+    <>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap');
 
-      {/* ── Header ── */}
-      <div className="flex justify-between items-end mb-12 gap-8 flex-wrap">
-        <div>
-          <p className="text-xs tracking-widest uppercase text-gray-400 mb-2 font-mono">
-            Writing & Thoughts
-          </p>
-          <h2 className="text-5xl font-bold leading-tight m-0 text-gray-900">
-            From the{" "}
-            <span className="italic text-purple-600">notebook</span>
-          </h2>
-        </div>
-        <p className="text-base text-gray-500 max-w-[340px] leading-relaxed m-0">
-          Essays on engineering, design, and the craft of building software that people love.
-        </p>
-      </div>
+        .bp-root {
+          font-family: 'DM Sans', sans-serif;
+          background: var(--bg, #0a0a0f);
+          min-height: 100vh;
+          padding: 6rem 1.5rem 6rem;
+          position: relative;
+          overflow-x: hidden;
+        }
 
-      {/* ── Filter Tabs ── */}
-      {!loading && blogs.length > 0 && (
-        <div className="flex gap-2 mb-10 flex-wrap">
-          {categories.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setActive(cat)}
-              className={`px-5 py-2 rounded-full text-xs font-semibold tracking-wide transition-all duration-200 border border-gray-200
-                ${active === cat
-                  ? "bg-gray-900 text-white border-gray-900"
-                  : "bg-transparent text-gray-500 hover:border-gray-400"
-                }`}
-            >
-              {cat}
-            </button>
-          ))}
-        </div>
-      )}
+        /* Ambient glows */
+        .bp-root::before {
+          content: '';
+          position: fixed;
+          top: -30%; left: -20%;
+          width: 70vw; height: 70vw;
+          background: radial-gradient(circle, rgba(109,40,217,0.08) 0%, transparent 65%);
+          pointer-events: none;
+          z-index: 0;
+        }
+        .bp-root::after {
+          content: '';
+          position: fixed;
+          bottom: -20%; right: -15%;
+          width: 55vw; height: 55vw;
+          background: radial-gradient(circle, rgba(59,130,246,0.06) 0%, transparent 65%);
+          pointer-events: none;
+          z-index: 0;
+        }
 
-      {/* ── Loading Skeletons ── */}
-      {loading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-14">
-          {[1, 2, 3].map((n) => (
-            <div
-              key={n}
-              className="border border-gray-100 rounded-2xl h-72 animate-pulse"
-              style={{
-                background: "linear-gradient(90deg,#f7f7f7 25%,#efefef 50%,#f7f7f7 75%)",
-                backgroundSize: "200% 100%",
-              }}
-            />
-          ))}
-        </div>
+        .bp-inner {
+          position: relative;
+          z-index: 1;
+          max-width: 1120px;
+          margin: 0 auto;
+        }
 
-      ) : filtered.length === 0 ? (
-        <p className="text-gray-400 text-center py-12 text-sm font-mono">
-          {blogs.length === 0 ? "No blog posts found." : "No posts in this category yet."}
-        </p>
+        /* ── Hero ── */
+        .bp-hero { margin-bottom: 4rem; }
 
-      ) : (
-        <>
-          {/* ── Featured Card ── */}
-          {featured && (
-            <div
-              className={`relative border rounded-2xl mb-6 cursor-pointer overflow-hidden bg-white transition-all duration-200
-                ${hovered === "featured" ? "border-purple-400 -translate-y-0.5 shadow-lg" : "border-gray-200"}`}
-              onMouseEnter={() => setHovered("featured")}
-              onMouseLeave={() => setHovered(null)}
-            >
-              {/* Left accent bar */}
-              <div
-                className={`absolute top-0 left-0 w-1 h-full rounded-l-2xl z-10 ${getColor(featured.category).dot}`}
-              />
+        .bp-eyebrow {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.5rem;
+          font-size: 0.72rem;
+          font-weight: 500;
+          letter-spacing: 0.18em;
+          text-transform: uppercase;
+          color: #a78bfa;
+          margin-bottom: 1.5rem;
+          opacity: 0;
+          transform: translateY(12px);
+          transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+        .bp-eyebrow::before {
+          content: '';
+          width: 28px; height: 1px;
+          background: #a78bfa;
+        }
 
-              <div className="flex items-stretch">
-                {/* Featured Image */}
-                {featured.image && (
-                  <div className="flex-shrink-0 w-[280px] min-h-[220px] overflow-hidden">
-                    <img
-                      src={featured.image}
-                      alt={featured.title}
-                      className="w-full h-full object-cover block"
-                      loading="lazy"
-                    />
-                  </div>
-                )}
+        .bp-h1 {
+          font-family: 'Syne', sans-serif;
+          font-size: clamp(2.8rem, 6vw, 4.5rem);
+          font-weight: 800;
+          line-height: 1.05;
+          letter-spacing: -0.03em;
+          color: var(--text-h, #f1f0ff);
+          margin: 0 0 1.25rem;
+          opacity: 0;
+          transform: translateY(18px);
+          transition: opacity 0.65s ease 0.1s, transform 0.65s ease 0.1s;
+        }
 
-                {/* Featured Content */}
-                <div className="flex-1 p-9">
-                  <span className={`inline-block text-[11px] font-semibold tracking-widest uppercase px-3 py-1 rounded-full mb-4
-                    ${getColor(featured.category).bg} ${getColor(featured.category).text}`}>
-                    {featured.tag}
-                  </span>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-3 leading-snug">
-                    {featured.title}
-                  </h3>
-                  <p className="text-sm text-gray-500 leading-relaxed mb-5">
-                    {featured.excerpt}
-                  </p>
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-xs text-gray-400 font-mono">{featured.date}</span>
-                    <span className="text-gray-300 text-xs">·</span>
-                    <span className="text-xs text-gray-400 font-mono">{featured.readTime}</span>
-                  </div>
-                </div>
+        .bp-h1 em {
+          font-style: normal;
+          background: linear-gradient(135deg, #8b5cf6 0%, #c4b5fd 50%, #60a5fa 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+        }
 
-                {/* Arrow */}
-                <div className="flex-shrink-0 text-gray-300 flex items-start pt-9 pr-7">
-                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                    <path d="M4 10h12M10 4l6 6-6 6" stroke="currentColor"
-                      strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </div>
-              </div>
+        .bp-sub {
+          font-size: 1rem;
+          color: var(--text, #9ca3af);
+          line-height: 1.75;
+          max-width: 480px;
+          opacity: 0;
+          transform: translateY(14px);
+          transition: opacity 0.65s ease 0.2s, transform 0.65s ease 0.2s;
+        }
+
+        /* loaded */
+        .bp-root.is-loaded .bp-eyebrow,
+        .bp-root.is-loaded .bp-h1,
+        .bp-root.is-loaded .bp-sub,
+        .bp-root.is-loaded .bp-filters {
+          opacity: 1;
+          transform: translateY(0);
+        }
+        .bp-root.is-loaded .bp-featured,
+        .bp-root.is-loaded .bp-card {
+          opacity: 1;
+          transform: translateY(0);
+        }
+
+        /* ── Filters ── */
+        .bp-filters {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 0.5rem;
+          margin-bottom: 2.5rem;
+          opacity: 0;
+          transform: translateY(10px);
+          transition: opacity 0.6s ease 0.25s, transform 0.6s ease 0.25s;
+        }
+
+        .bp-filter {
+          font-size: 0.7rem;
+          font-weight: 600;
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
+          padding: 0.4rem 1rem;
+          border-radius: 100px;
+          border: 1px solid rgba(255,255,255,0.1);
+          background: transparent;
+          color: var(--text, #9ca3af);
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+        .bp-filter:hover {
+          border-color: rgba(139,92,246,0.4);
+          color: #c4b5fd;
+        }
+        .bp-filter.active {
+          background: rgba(139,92,246,0.15);
+          border-color: rgba(139,92,246,0.4);
+          color: #c4b5fd;
+        }
+
+        /* ── Featured Card ── */
+        .bp-featured {
+          position: relative;
+          background: rgba(255,255,255,0.03);
+          border: 1px solid rgba(255,255,255,0.07);
+          border-radius: 20px;
+          overflow: hidden;
+          margin-bottom: 1.25rem;
+          cursor: pointer;
+          display: flex;
+          opacity: 0;
+          transform: translateY(24px);
+          transition:
+            opacity 0.6s ease 0.1s,
+            transform 0.6s ease 0.1s,
+            border-color 0.3s,
+            background 0.3s,
+            box-shadow 0.3s;
+        }
+
+        .bp-featured::before {
+          content: '';
+          position: absolute;
+          top: 0; left: 0; right: 0;
+          height: 1px;
+          background: var(--c, #8b5cf6);
+          opacity: 0.5;
+          transition: opacity 0.3s;
+        }
+
+        .bp-featured:hover {
+          background: rgba(255,255,255,0.055);
+          border-color: rgba(139,92,246,0.25);
+          box-shadow: 0 0 0 1px rgba(139,92,246,0.1), 0 24px 48px rgba(0,0,0,0.35);
+          transform: translateY(-4px) !important;
+        }
+        .bp-featured:hover::before { opacity: 1; }
+
+        .bp-featured-img {
+          flex-shrink: 0;
+          width: 260px;
+          min-height: 200px;
+          overflow: hidden;
+        }
+        .bp-featured-img img {
+          width: 100%; height: 100%;
+          object-fit: cover;
+          display: block;
+          transition: transform 0.4s ease;
+        }
+        .bp-featured:hover .bp-featured-img img {
+          transform: scale(1.04);
+        }
+
+        .bp-featured-placeholder {
+          flex-shrink: 0;
+          width: 260px;
+          min-height: 200px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: rgba(139,92,246,0.06);
+          font-size: 2rem;
+          opacity: 0.4;
+        }
+
+        .bp-featured-body {
+          flex: 1;
+          padding: 2.25rem 2.5rem;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+        }
+
+        .bp-featured-arrow {
+          flex-shrink: 0;
+          display: flex;
+          align-items: flex-start;
+          padding: 2.25rem 1.75rem 0 0;
+          color: rgba(255,255,255,0.2);
+          transition: color 0.2s;
+        }
+        .bp-featured:hover .bp-featured-arrow { color: #a78bfa; }
+
+        /* ── Tag Pill ── */
+        .bp-tag {
+          display: inline-block;
+          font-size: 0.68rem;
+          font-weight: 600;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+          padding: 0.28rem 0.8rem;
+          border-radius: 100px;
+          background: rgba(139,92,246,0.1);
+          color: #c4b5fd;
+          border: 1px solid rgba(139,92,246,0.2);
+          margin-bottom: 1rem;
+        }
+
+        .bp-ftitle {
+          font-family: 'Syne', sans-serif;
+          font-size: 1.4rem;
+          font-weight: 700;
+          letter-spacing: -0.02em;
+          color: var(--text-h, #f1f0ff);
+          margin: 0 0 0.75rem;
+          line-height: 1.25;
+        }
+
+        .bp-fexcerpt {
+          font-size: 0.875rem;
+          color: var(--text, #9ca3af);
+          line-height: 1.75;
+          margin-bottom: 1.5rem;
+        }
+
+        .bp-meta {
+          display: flex;
+          align-items: center;
+          gap: 0.4rem;
+          font-size: 0.75rem;
+          color: rgba(255,255,255,0.3);
+          font-family: 'DM Sans', monospace;
+        }
+        .bp-meta span { color: rgba(255,255,255,0.15); }
+
+        /* ── Grid ── */
+        .bp-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+          gap: 1.25rem;
+          margin-bottom: 4rem;
+        }
+
+        /* ── Card ── */
+        .bp-card {
+          position: relative;
+          background: rgba(255,255,255,0.03);
+          border: 1px solid rgba(255,255,255,0.07);
+          border-radius: 20px;
+          overflow: hidden;
+          cursor: pointer;
+          display: flex;
+          flex-direction: column;
+          opacity: 0;
+          transform: translateY(24px);
+          transition:
+            opacity 0.55s ease,
+            transform 0.55s ease,
+            border-color 0.3s,
+            background 0.3s,
+            box-shadow 0.3s;
+        }
+
+        .bp-card:nth-child(1) { transition-delay: 0.05s; }
+        .bp-card:nth-child(2) { transition-delay: 0.12s; }
+        .bp-card:nth-child(3) { transition-delay: 0.19s; }
+        .bp-card:nth-child(4) { transition-delay: 0.26s; }
+        .bp-card:nth-child(5) { transition-delay: 0.33s; }
+        .bp-card:nth-child(6) { transition-delay: 0.40s; }
+
+        .bp-card::before {
+          content: '';
+          position: absolute;
+          top: 0; left: 0; right: 0;
+          height: 1px;
+          background: var(--c, #8b5cf6);
+          opacity: 0.45;
+          transition: opacity 0.3s;
+          z-index: 1;
+        }
+
+        .bp-card:hover {
+          background: rgba(255,255,255,0.055);
+          border-color: rgba(139,92,246,0.25);
+          box-shadow: 0 0 0 1px rgba(139,92,246,0.1), 0 24px 48px rgba(0,0,0,0.35);
+          transform: translateY(-5px) !important;
+        }
+        .bp-card:hover::before { opacity: 1; }
+
+        .bp-card-img {
+          width: 100%; height: 180px;
+          overflow: hidden;
+          flex-shrink: 0;
+        }
+        .bp-card-img img {
+          width: 100%; height: 100%;
+          object-fit: cover;
+          display: block;
+          transition: transform 0.4s ease;
+        }
+        .bp-card:hover .bp-card-img img { transform: scale(1.05); }
+
+        .bp-card-placeholder {
+          width: 100%; height: 140px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: rgba(139,92,246,0.05);
+          font-size: 1.75rem;
+          opacity: 0.35;
+          flex-shrink: 0;
+        }
+
+        .bp-card-body {
+          padding: 1.5rem 1.75rem 1.5rem;
+          display: flex;
+          flex-direction: column;
+          flex: 1;
+        }
+
+        .bp-card-title {
+          font-family: 'Syne', sans-serif;
+          font-size: 1.05rem;
+          font-weight: 700;
+          letter-spacing: -0.01em;
+          color: var(--text-h, #f1f0ff);
+          margin: 0 0 0.6rem;
+          line-height: 1.3;
+        }
+
+        .bp-card-excerpt {
+          font-size: 0.83rem;
+          color: var(--text, #9ca3af);
+          line-height: 1.75;
+          flex: 1;
+          margin-bottom: 1.25rem;
+        }
+
+        .bp-card-footer {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding-top: 1rem;
+          border-top: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .bp-read {
+          font-size: 0.72rem;
+          font-weight: 600;
+          color: #a78bfa;
+          letter-spacing: 0.05em;
+          display: flex;
+          align-items: center;
+          gap: 0.3rem;
+          transition: gap 0.2s;
+        }
+        .bp-card:hover .bp-read { gap: 0.5rem; }
+
+        /* ── CTA ── */
+        .bp-cta {
+          display: flex;
+          align-items: center;
+          gap: 1.5rem;
+        }
+        .bp-cta-line {
+          flex: 1;
+          height: 1px;
+          background: rgba(255,255,255,0.07);
+        }
+        .bp-cta-btn {
+          font-size: 0.7rem;
+          font-weight: 600;
+          letter-spacing: 0.14em;
+          text-transform: uppercase;
+          padding: 0.65rem 1.75rem;
+          border-radius: 100px;
+          border: 1px solid rgba(255,255,255,0.15);
+          background: transparent;
+          color: var(--text-h, #e5e7eb);
+          cursor: pointer;
+          white-space: nowrap;
+          transition: all 0.25s ease;
+        }
+        .bp-cta-btn:hover {
+          background: rgba(139,92,246,0.15);
+          border-color: rgba(139,92,246,0.4);
+          color: #c4b5fd;
+        }
+
+        /* Empty / Loading */
+        .bp-empty {
+          text-align: center;
+          padding: 4rem 2rem;
+          color: var(--text, #6b7280);
+          font-size: 0.875rem;
+          margin-bottom: 3rem;
+        }
+
+        .bp-skeleton {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+          gap: 1.25rem;
+          margin-bottom: 3rem;
+        }
+        .bp-skel-item {
+          height: 280px;
+          border-radius: 20px;
+          background: rgba(255,255,255,0.04);
+          border: 1px solid rgba(255,255,255,0.06);
+          animation: bp-pulse 1.6s ease-in-out infinite;
+        }
+        @keyframes bp-pulse {
+          0%,100% { opacity: 1; }
+          50%      { opacity: 0.4; }
+        }
+
+        @media (max-width: 640px) {
+          .bp-featured { flex-direction: column; }
+          .bp-featured-img,
+          .bp-featured-placeholder { width: 100%; min-height: 180px; }
+          .bp-featured-arrow { display: none; }
+          .bp-featured-body { padding: 1.5rem; }
+        }
+      `}</style>
+
+      <div className={`bp-root${loaded ? " is-loaded" : ""}`}>
+        <div className="bp-inner">
+
+          {/* Hero */}
+          <div className="bp-hero">
+            <p className="bp-eyebrow">Writing &amp; Thoughts</p>
+            <h1 className="bp-h1">
+              From the<br /><em>Notebook</em>
+            </h1>
+            <p className="bp-sub">
+              Essays on engineering, design, and the craft of building software that people love.
+            </p>
+          </div>
+
+          {/* Filters */}
+          {!loading && blogs.length > 0 && (
+            <div className="bp-filters">
+              {categories.map((cat) => (
+                <button
+                  key={cat}
+                  className={`bp-filter${active === cat ? " active" : ""}`}
+                  onClick={() => setActive(cat)}
+                >
+                  {cat}
+                </button>
+              ))}
             </div>
           )}
 
-          {/* ── Blog Cards Grid ── */}
-          {rest.length > 0 && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-14">
+          {/* Loading */}
+          {loading && (
+            <div className="bp-skeleton">
+              {[1, 2, 3].map((n) => <div key={n} className="bp-skel-item" />)}
+            </div>
+          )}
+
+          {/* Empty */}
+          {!loading && filtered.length === 0 && (
+            <div className="bp-empty">
+              {blogs.length === 0 ? "No blog posts found." : "No posts in this category yet."}
+            </div>
+          )}
+
+          {/* Featured */}
+          {!loading && featured && (() => {
+            const col = getColor(featured.category);
+            return (
+              <div className="bp-featured" style={{ "--c": col.accent }}>
+                {featured.image
+                  ? <div className="bp-featured-img"><img src={featured.image} alt={featured.title} loading="lazy" /></div>
+                  : <div className="bp-featured-placeholder">✍</div>
+                }
+                <div className="bp-featured-body">
+                  <span className="bp-tag">{featured.tag}</span>
+                  <h3 className="bp-ftitle">{featured.title}</h3>
+                  <p className="bp-fexcerpt">{featured.excerpt}</p>
+                  <div className="bp-meta">
+                    {featured.date}
+                    <span>·</span>
+                    {featured.readTime}
+                  </div>
+                </div>
+                <div className="bp-featured-arrow">
+                  <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
+                    <path d="M4 10h12M10 4l6 6-6 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
+              </div>
+            );
+          })()}
+
+          {/* Grid */}
+          {!loading && rest.length > 0 && (
+            <div className="bp-grid">
               {rest.map((blog) => {
-                const colors    = getColor(blog.category);
-                const isHovered = hovered === blog.id;
+                const col = getColor(blog.category);
                 return (
-                  <div
-                    key={blog.id}
-                    className={`relative border rounded-2xl cursor-pointer overflow-hidden bg-white flex flex-col transition-all duration-200
-                      ${isHovered ? "border-purple-400 -translate-y-0.5 shadow-lg" : "border-gray-200"}`}
-                    onMouseEnter={() => setHovered(blog.id)}
-                    onMouseLeave={() => setHovered(null)}
-                  >
-                    {/* Card Image */}
-                    {blog.image ? (
-                      <div className="w-full h-44 overflow-hidden flex-shrink-0">
-                        <img
-                          src={blog.image}
-                          alt={blog.title}
-                          className="w-full h-full object-cover block transition-transform duration-300 hover:scale-105"
-                          loading="lazy"
-                        />
-                      </div>
-                    ) : (
-                      <div className={`w-full h-36 flex-shrink-0 flex items-center justify-center ${colors.bg}`}>
-                        <span className="text-3xl opacity-50">✍</span>
-                      </div>
-                    )}
-
-                    {/* Card Body */}
-                    <div className="p-6 flex flex-col flex-1 relative">
-                      {/* Dot indicator */}
-                      <div className={`absolute top-5 right-5 w-2 h-2 rounded-full ${colors.dot}`} />
-
-                      <span className={`inline-block text-[11px] font-semibold tracking-widest uppercase px-3 py-1 rounded-full mb-3
-                        ${colors.bg} ${colors.text}`}>
-                        {blog.tag}
-                      </span>
-
-                      <h4 className="text-base font-bold text-gray-900 mb-2 leading-snug">
-                        {blog.title}
-                      </h4>
-                      <p className="text-sm text-gray-500 leading-relaxed mb-4 flex-1">
-                        {blog.excerpt}
-                      </p>
-
-                      {/* Card Footer */}
-                      <div className="flex justify-between items-center border-t border-gray-100 pt-3 mt-auto">
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-xs text-gray-400 font-mono">{blog.date}</span>
-                          <span className="text-gray-300 text-xs">·</span>
-                          <span className="text-xs text-gray-400 font-mono">{blog.readTime}</span>
+                  <div key={blog.id} className="bp-card" style={{ "--c": col.accent }}>
+                    {blog.image
+                      ? <div className="bp-card-img"><img src={blog.image} alt={blog.title} loading="lazy" /></div>
+                      : <div className="bp-card-placeholder">✍</div>
+                    }
+                    <div className="bp-card-body">
+                      <span className="bp-tag">{blog.tag}</span>
+                      <h4 className="bp-card-title">{blog.title}</h4>
+                      <p className="bp-card-excerpt">{blog.excerpt}</p>
+                      <div className="bp-card-footer">
+                        <div className="bp-meta">
+                          {blog.date}
+                          <span>·</span>
+                          {blog.readTime}
                         </div>
-                        <span className={`text-xs font-semibold font-mono tracking-wide ${colors.text}`}>
-                          Read →
-                        </span>
+                        <span className="bp-read">Read →</span>
                       </div>
                     </div>
                   </div>
@@ -256,18 +631,18 @@ export default function HomeBlogs() {
               })}
             </div>
           )}
-        </>
-      )}
 
-      {/* ── Footer CTA ── */}
-      <div className="flex items-center gap-5">
-        <span className="flex-1 h-px bg-gray-200" />
-        <button className="px-7 py-3 rounded-full border border-gray-900 bg-transparent text-gray-900 text-xs font-semibold tracking-widest whitespace-nowrap transition-all duration-200 hover:bg-gray-900 hover:text-white font-mono">
-          View all posts
-        </button>
-        <span className="flex-1 h-px bg-gray-200" />
+          {/* CTA */}
+          {!loading && filtered.length > 0 && (
+            <div className="bp-cta">
+              <div className="bp-cta-line" />
+              <button className="bp-cta-btn">View all posts</button>
+              <div className="bp-cta-line" />
+            </div>
+          )}
+
+        </div>
       </div>
-
-    </section>
+    </>
   );
 }

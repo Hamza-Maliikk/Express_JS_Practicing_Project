@@ -1,46 +1,44 @@
 import { useState, useEffect } from "react";
-import { Send, Mail, MapPin, Phone, User, Briefcase } from "lucide-react";
+import { Send, Mail, MapPin, Phone } from "lucide-react";
 
 const CONTACT_API = "http://localhost:8000/api/contact";
 const DETAILS_API = "http://localhost:8000/api/details";
 
 export default function Contact() {
-  const [form, setForm]       = useState({ name: "", email: "", message: "" });
-  const [sent, setSent]       = useState(false);
+  const [form,    setForm]    = useState({ name: "", email: "", message: "" });
+  const [sent,    setSent]    = useState(false);
   const [details, setDetails] = useState([]);
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
-  const [error, setError]     = useState(null);
+  const [error,   setError]   = useState(null);
+  const [loaded,  setLoaded]  = useState(false);
 
   useEffect(() => {
     fetch(DETAILS_API)
       .then((r) => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); })
       .then((data) => {
-        // API returns: { _id, name, role, email, phone, location, ... }
         const item = Array.isArray(data) ? data[0] : data;
-
-        const mapped = [
-          { label: "Email",    value: item.email,    icon: Mail     },
-          { label: "Phone",    value: String(item.phone), icon: Phone },
-          { label: "Location", value: item.location, icon: MapPin   },
-        ].filter(d => d.value); // hide any empty fields
-
-        setDetails(mapped);
+        setDetails([
+          { label: "Email",    value: item.email,        icon: Mail,   href: `mailto:${item.email}` },
+          { label: "Phone",    value: String(item.phone),icon: Phone,  href: `tel:${item.phone}`    },
+          { label: "Location", value: item.location,     icon: MapPin, href: null                   },
+        ].filter((d) => d.value));
         setLoading(false);
       })
       .catch((err) => {
         console.error("Failed to load contact details:", err);
         setError("Could not load contact info.");
         setDetails([
-          { label: "Email",    value: "hello@example.com", icon: Mail    },
-          { label: "Phone",    value: "+92 300 0000000",   icon: Phone   },
-          { label: "Location", value: "Karachi, PK",       icon: MapPin  },
+          { label: "Email",    value: "hello@example.com", icon: Mail,  href: "mailto:hello@example.com" },
+          { label: "Phone",    value: "+92 300 0000000",   icon: Phone, href: "tel:+923000000000"        },
+          { label: "Location", value: "Karachi, PK",       icon: MapPin,href: null                       },
         ]);
         setLoading(false);
-      });
+      })
+      .finally(() => setTimeout(() => setLoaded(true), 100));
   }, []);
 
-  const handleChange = (e) => setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
+  const handleChange  = (e) => setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -54,9 +52,9 @@ export default function Contact() {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       setSent(true);
       setForm({ name: "", email: "", message: "" });
-      setTimeout(() => setSent(false), 4000);
+      setTimeout(() => setSent(false), 5000);
     } catch (err) {
-      console.error("Error sending contact message:", err);
+      console.error("Error sending:", err);
       alert("Failed to send message. Please try again.");
     } finally {
       setSending(false);
@@ -66,102 +64,430 @@ export default function Contact() {
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
-        .contact-page { font-family: 'Poppins', sans-serif; background: var(--bg); min-height: 100vh; padding: 5rem 1.5rem 4rem; transition: background 0.3s ease; }
-        .contact-hero { text-align: center; margin-bottom: 4rem; }
-        .contact-badge { display: inline-block; background: rgba(139, 92, 246, 0.15); border: 1px solid rgba(139, 92, 246, 0.3); color: #c4b5fd; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; padding: 0.35rem 1rem; border-radius: 100px; margin-bottom: 1.5rem; }
-        .contact-title { font-size: clamp(2rem, 5vw, 3rem); font-weight: 700; color: var(--text-h); letter-spacing: -0.03em; margin: 0 0 1rem; transition: color 0.3s ease; }
-        .contact-title span { background: linear-gradient(90deg, #8b5cf6, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .contact-subtitle { color: var(--text); font-size: 1rem; max-width: 480px; margin: 0 auto; line-height: 1.7; opacity: 0.8; transition: color 0.3s ease; }
-        .contact-wrap { max-width: 900px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1.4fr; gap: 2rem; align-items: start; }
-        .contact-info { display: flex; flex-direction: column; gap: 1.2rem; }
-        .contact-info-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; padding: 1.25rem 1.5rem; display: flex; align-items: center; gap: 1rem; transition: all 0.3s ease; box-shadow: var(--shadow); }
-        .contact-info-card:hover { border-color: rgba(139,92,246,0.3); transform: translateY(-2px); }
-        .contact-info-icon { width: 42px; height: 42px; border-radius: 10px; background: rgba(139, 92, 246, 0.12); display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: #a78bfa; }
-        .contact-info-label { font-size: 0.7rem; color: var(--text); text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; margin-bottom: 0.2rem; opacity: 0.7; }
-        .contact-info-value { font-size: 0.875rem; color: #8b5cf6; font-weight: 600; }
-        html.dark-mode .contact-info-value { color: #c4b5fd; }
-        .contact-info-loading { opacity: 0.45; font-style: italic; }
-        .contact-error-note { font-size: 0.72rem; color: #f87171; margin-top: 0.5rem; text-align: center; }
-        .contact-form-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; padding: 2rem; box-shadow: var(--shadow); transition: background 0.3s ease, border-color 0.3s ease; }
-        .contact-form { display: flex; flex-direction: column; gap: 1.1rem; }
-        .contact-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-        .contact-field { display: flex; flex-direction: column; gap: 0.4rem; }
-        .contact-label { font-size: 0.78rem; font-weight: 500; color: var(--text); letter-spacing: 0.04em; opacity: 0.8; }
-        .contact-input, .contact-textarea { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 0.75rem 1rem; color: var(--text-h); font-family: 'Poppins', sans-serif; font-size: 0.875rem; outline: none; transition: border-color 0.2s, box-shadow 0.2s; width: 100%; box-sizing: border-box; }
-        .contact-input:focus, .contact-textarea:focus { border-color: rgba(139,92,246,0.5); box-shadow: 0 0 0 3px rgba(139,92,246,0.1); }
-        .contact-textarea { resize: vertical; min-height: 130px; }
-        .contact-submit { display: flex; align-items: center; justify-content: center; gap: 0.5rem; background: linear-gradient(135deg, #8b5cf6, #6366f1); color: #fff; border: none; border-radius: 10px; padding: 0.85rem 2rem; font-family: 'Poppins', sans-serif; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: opacity 0.2s, transform 0.2s, box-shadow 0.2s; box-shadow: 0 4px 15px rgba(139,92,246,0.35); }
-        .contact-submit:hover:not(:disabled) { opacity: 0.9; transform: translateY(-2px); box-shadow: 0 8px 25px rgba(139,92,246,0.45); }
-        .contact-submit:disabled { opacity: 0.6; cursor: not-allowed; }
-        .contact-success { text-align: center; padding: 1.5rem; color: #86efac; font-size: 0.9rem; background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); border-radius: 10px; animation: fadeIn 0.3s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-        @media (max-width: 700px) { .contact-wrap { grid-template-columns: 1fr; } .contact-form-row { grid-template-columns: 1fr; } }
+        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap');
+
+        .cp-root {
+          font-family: 'DM Sans', sans-serif;
+          background: var(--bg, #0a0a0f);
+          min-height: 100vh;
+          padding: 6rem 1.5rem 6rem;
+          position: relative;
+          overflow-x: hidden;
+        }
+
+        /* Ambient glows */
+        .cp-root::before {
+          content: '';
+          position: fixed;
+          top: -30%; left: -20%;
+          width: 70vw; height: 70vw;
+          background: radial-gradient(circle, rgba(109,40,217,0.08) 0%, transparent 65%);
+          pointer-events: none;
+          z-index: 0;
+        }
+        .cp-root::after {
+          content: '';
+          position: fixed;
+          bottom: -20%; right: -15%;
+          width: 55vw; height: 55vw;
+          background: radial-gradient(circle, rgba(59,130,246,0.06) 0%, transparent 65%);
+          pointer-events: none;
+          z-index: 0;
+        }
+
+        .cp-inner {
+          position: relative;
+          z-index: 1;
+          max-width: 1000px;
+          margin: 0 auto;
+        }
+
+        /* ── Hero ── */
+        .cp-hero { margin-bottom: 4.5rem; }
+
+        .cp-eyebrow {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.5rem;
+          font-size: 0.72rem;
+          font-weight: 500;
+          letter-spacing: 0.18em;
+          text-transform: uppercase;
+          color: #a78bfa;
+          margin-bottom: 1.5rem;
+          opacity: 0;
+          transform: translateY(12px);
+          transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+        .cp-eyebrow::before {
+          content: '';
+          width: 28px; height: 1px;
+          background: #a78bfa;
+        }
+
+        .cp-h1 {
+          font-family: 'Syne', sans-serif;
+          font-size: clamp(2.8rem, 6vw, 4.5rem);
+          font-weight: 800;
+          line-height: 1.05;
+          letter-spacing: -0.03em;
+          color: var(--text-h, #f1f0ff);
+          margin: 0 0 1.25rem;
+          opacity: 0;
+          transform: translateY(18px);
+          transition: opacity 0.65s ease 0.1s, transform 0.65s ease 0.1s;
+        }
+
+        .cp-h1 em {
+          font-style: normal;
+          background: linear-gradient(135deg, #8b5cf6 0%, #c4b5fd 50%, #60a5fa 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+        }
+
+        .cp-sub {
+          font-size: 1rem;
+          color: var(--text, #9ca3af);
+          line-height: 1.75;
+          max-width: 460px;
+          opacity: 0;
+          transform: translateY(14px);
+          transition: opacity 0.65s ease 0.2s, transform 0.65s ease 0.2s;
+        }
+
+        /* loaded */
+        .cp-root.is-loaded .cp-eyebrow,
+        .cp-root.is-loaded .cp-h1,
+        .cp-root.is-loaded .cp-sub { opacity: 1; transform: translateY(0); }
+
+        .cp-root.is-loaded .cp-info-card { opacity: 1; transform: translateY(0); }
+        .cp-root.is-loaded .cp-form-wrap { opacity: 1; transform: translateY(0); }
+
+        /* ── Layout ── */
+        .cp-layout {
+          display: grid;
+          grid-template-columns: 1fr 1.5fr;
+          gap: 1.5rem;
+          align-items: start;
+        }
+
+        /* ── Info Cards ── */
+        .cp-info-col {
+          display: flex;
+          flex-direction: column;
+          gap: 1rem;
+        }
+
+        .cp-info-card {
+          position: relative;
+          background: rgba(255,255,255,0.03);
+          border: 1px solid rgba(255,255,255,0.07);
+          border-radius: 18px;
+          padding: 1.4rem 1.5rem;
+          display: flex;
+          align-items: center;
+          gap: 1.1rem;
+          overflow: hidden;
+          opacity: 0;
+          transform: translateY(20px);
+          transition:
+            opacity 0.55s ease,
+            transform 0.55s ease,
+            border-color 0.3s,
+            background 0.3s,
+            box-shadow 0.3s;
+        }
+
+        .cp-info-card:nth-child(1) { transition-delay: 0.05s; }
+        .cp-info-card:nth-child(2) { transition-delay: 0.12s; }
+        .cp-info-card:nth-child(3) { transition-delay: 0.19s; }
+
+        .cp-info-card::before {
+          content: '';
+          position: absolute;
+          top: 0; left: 0; right: 0;
+          height: 1px;
+          background: #8b5cf6;
+          opacity: 0.4;
+          transition: opacity 0.3s;
+        }
+
+        .cp-info-card:hover {
+          background: rgba(255,255,255,0.055);
+          border-color: rgba(139,92,246,0.25);
+          box-shadow: 0 0 0 1px rgba(139,92,246,0.1), 0 16px 36px rgba(0,0,0,0.3);
+          transform: translateY(-4px) !important;
+        }
+        .cp-info-card:hover::before { opacity: 1; }
+
+        .cp-icon-wrap {
+          width: 40px; height: 40px;
+          border-radius: 10px;
+          background: rgba(139,92,246,0.1);
+          border: 1px solid rgba(139,92,246,0.2);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+          color: #a78bfa;
+          transition: background 0.3s, border-color 0.3s;
+        }
+        .cp-info-card:hover .cp-icon-wrap {
+          background: rgba(139,92,246,0.18);
+          border-color: rgba(139,92,246,0.4);
+        }
+
+        .cp-info-label {
+          font-size: 0.68rem;
+          font-weight: 600;
+          letter-spacing: 0.14em;
+          text-transform: uppercase;
+          color: rgba(255,255,255,0.3);
+          margin-bottom: 0.25rem;
+        }
+
+        .cp-info-value {
+          font-size: 0.875rem;
+          font-weight: 500;
+          color: #c4b5fd;
+          text-decoration: none;
+          transition: color 0.2s;
+        }
+        .cp-info-value:hover { color: #fff; }
+
+        /* ── Form wrap ── */
+        .cp-form-wrap {
+          position: relative;
+          background: rgba(255,255,255,0.03);
+          border: 1px solid rgba(255,255,255,0.07);
+          border-radius: 20px;
+          padding: 2.25rem 2.25rem 2rem;
+          overflow: hidden;
+          opacity: 0;
+          transform: translateY(24px);
+          transition: opacity 0.65s ease 0.15s, transform 0.65s ease 0.15s;
+        }
+
+        .cp-form-wrap::before {
+          content: '';
+          position: absolute;
+          top: 0; left: 0; right: 0;
+          height: 1px;
+          background: linear-gradient(90deg, #8b5cf6, #60a5fa);
+          opacity: 0.5;
+        }
+
+        /* ── Form ── */
+        .cp-form {
+          display: flex;
+          flex-direction: column;
+          gap: 1.1rem;
+        }
+
+        .cp-row {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 1rem;
+        }
+
+        .cp-field {
+          display: flex;
+          flex-direction: column;
+          gap: 0.45rem;
+        }
+
+        .cp-label {
+          font-size: 0.72rem;
+          font-weight: 600;
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
+          color: rgba(255,255,255,0.35);
+        }
+
+        .cp-input, .cp-textarea {
+          background: rgba(255,255,255,0.04);
+          border: 1px solid rgba(255,255,255,0.08);
+          border-radius: 12px;
+          padding: 0.8rem 1rem;
+          color: var(--text-h, #f1f0ff);
+          font-family: 'DM Sans', sans-serif;
+          font-size: 0.875rem;
+          outline: none;
+          width: 100%;
+          box-sizing: border-box;
+          transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+        }
+
+        .cp-input::placeholder, .cp-textarea::placeholder {
+          color: rgba(255,255,255,0.2);
+        }
+
+        .cp-input:focus, .cp-textarea:focus {
+          border-color: rgba(139,92,246,0.5);
+          background: rgba(139,92,246,0.05);
+          box-shadow: 0 0 0 3px rgba(139,92,246,0.1);
+        }
+
+        .cp-textarea {
+          resize: vertical;
+          min-height: 140px;
+        }
+
+        /* ── Submit ── */
+        .cp-submit {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.5rem;
+          background: linear-gradient(135deg, #8b5cf6, #6366f1);
+          color: #fff;
+          border: none;
+          border-radius: 12px;
+          padding: 0.9rem 2rem;
+          font-family: 'DM Sans', sans-serif;
+          font-size: 0.875rem;
+          font-weight: 600;
+          cursor: pointer;
+          transition: opacity 0.2s, transform 0.2s, box-shadow 0.2s;
+          box-shadow: 0 4px 20px rgba(139,92,246,0.35);
+          letter-spacing: 0.02em;
+          margin-top: 0.25rem;
+        }
+        .cp-submit:hover:not(:disabled) {
+          opacity: 0.9;
+          transform: translateY(-2px);
+          box-shadow: 0 8px 30px rgba(139,92,246,0.5);
+        }
+        .cp-submit:disabled { opacity: 0.55; cursor: not-allowed; }
+
+        /* ── Success ── */
+        .cp-success {
+          text-align: center;
+          padding: 2rem 1.5rem;
+          color: #86efac;
+          font-size: 0.9rem;
+          background: rgba(34,197,94,0.06);
+          border: 1px solid rgba(34,197,94,0.18);
+          border-radius: 14px;
+          animation: cp-fade 0.4s ease;
+          line-height: 1.7;
+        }
+        .cp-success strong {
+          display: block;
+          font-family: 'Syne', sans-serif;
+          font-size: 1.1rem;
+          margin-bottom: 0.4rem;
+        }
+
+        @keyframes cp-fade {
+          from { opacity: 0; transform: translateY(10px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* error note */
+        .cp-error-note {
+          font-size: 0.72rem;
+          color: #f87171;
+          margin-top: 0.5rem;
+          opacity: 0.8;
+        }
+
+        @media (max-width: 700px) {
+          .cp-layout { grid-template-columns: 1fr; }
+          .cp-row    { grid-template-columns: 1fr; }
+        }
       `}</style>
 
-      <div className="contact-page">
-        <div className="contact-hero">
-          <div className="contact-badge">Get In Touch</div>
-          <h1 className="contact-title">Contact <span>Me</span></h1>
-          <p className="contact-subtitle">
-            Have a project in mind or just want to say hi? I'd love to hear from you.
-          </p>
-        </div>
+      <div className={`cp-root${loaded ? " is-loaded" : ""}`}>
+        <div className="cp-inner">
 
-        <div className="contact-wrap">
+          {/* Hero */}
+          <div className="cp-hero">
+            <p className="cp-eyebrow">Get In Touch</p>
+            <h1 className="cp-h1">
+              Contact<br /><em>Me</em>
+            </h1>
+            <p className="cp-sub">
+              Have a project in mind or just want to say hi? I'd love to hear from you.
+            </p>
+          </div>
 
-          {/* ── Info cards ── */}
-          <div className="contact-info">
-            {details.map(({ icon: Icon, label, value }) => (
-              <div key={label} className="contact-info-card">
-                <div className="contact-info-icon"><Icon size={18} /></div>
-                <div>
-                  <div className="contact-info-label">{label}</div>
-                  <div className={`contact-info-value ${loading ? "contact-info-loading" : ""}`}>
-                    {loading ? "Loading…"
-                      : label.toLowerCase() === "email"
-                        ? <a href={`mailto:${value}`} style={{ color: "inherit", textDecoration: "none" }}>{value}</a>
-                      : label.toLowerCase() === "phone"
-                        ? <a href={`tel:${value}`} style={{ color: "inherit", textDecoration: "none" }}>{value}</a>
-                      : value
+          {/* Layout */}
+          <div className="cp-layout">
+
+            {/* Info Cards */}
+            <div className="cp-info-col">
+              {details.map(({ icon: Icon, label, value, href }) => (
+                <div key={label} className="cp-info-card">
+                  <div className="cp-icon-wrap"><Icon size={17} /></div>
+                  <div>
+                    <div className="cp-info-label">{label}</div>
+                    {href
+                      ? <a href={href} className="cp-info-value">{loading ? "Loading…" : value}</a>
+                      : <span className="cp-info-value">{loading ? "Loading…" : value}</span>
                     }
                   </div>
                 </div>
-              </div>
-            ))}
-            {error && <p className="contact-error-note">⚠ {error} Showing fallback data.</p>}
-          </div>
+              ))}
+              {error && <p className="cp-error-note">⚠ {error}</p>}
+            </div>
 
-          {/* ── Contact form ── */}
-          <div className="contact-form-card">
-            {sent ? (
-              <div className="contact-success">
-                ✓ Message sent successfully! I'll get back to you soon.
-              </div>
-            ) : (
-              <form className="contact-form" onSubmit={handleSubmit}>
-                <div className="contact-form-row">
-                  <div className="contact-field">
-                    <label className="contact-label">Name</label>
-                    <input className="contact-input" type="text" name="name" value={form.name} onChange={handleChange} placeholder="Your name" required />
-                  </div>
-                  <div className="contact-field">
-                    <label className="contact-label">Email</label>
-                    <input className="contact-input" type="email" name="email" value={form.email} onChange={handleChange} placeholder="your@email.com" required />
-                  </div>
+            {/* Form */}
+            <div className="cp-form-wrap">
+              {sent ? (
+                <div className="cp-success">
+                  <strong>Message sent! ✓</strong>
+                  I'll get back to you soon.
                 </div>
-                <div className="contact-field">
-                  <label className="contact-label">Message</label>
-                  <textarea className="contact-textarea" name="message" value={form.message} onChange={handleChange} placeholder="Tell me about your project..." required />
-                </div>
-                <button type="submit" className="contact-submit" disabled={sending}>
-                  <Send size={16} />
-                  {sending ? "Sending..." : "Send Message"}
-                </button>
-              </form>
-            )}
-          </div>
+              ) : (
+                <form className="cp-form" onSubmit={handleSubmit}>
+                  <div className="cp-row">
+                    <div className="cp-field">
+                      <label className="cp-label">Name</label>
+                      <input
+                        className="cp-input"
+                        type="text"
+                        name="name"
+                        value={form.name}
+                        onChange={handleChange}
+                        placeholder="Your name"
+                        required
+                      />
+                    </div>
+                    <div className="cp-field">
+                      <label className="cp-label">Email</label>
+                      <input
+                        className="cp-input"
+                        type="email"
+                        name="email"
+                        value={form.email}
+                        onChange={handleChange}
+                        placeholder="your@email.com"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div className="cp-field">
+                    <label className="cp-label">Message</label>
+                    <textarea
+                      className="cp-textarea"
+                      name="message"
+                      value={form.message}
+                      onChange={handleChange}
+                      placeholder="Tell me about your project..."
+                      required
+                    />
+                  </div>
+                  <button type="submit" className="cp-submit" disabled={sending}>
+                    <Send size={15} />
+                    {sending ? "Sending…" : "Send Message"}
+                  </button>
+                </form>
+              )}
+            </div>
 
+          </div>
         </div>
       </div>
     </>
