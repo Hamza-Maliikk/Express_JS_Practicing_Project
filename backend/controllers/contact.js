@@ -1,5 +1,5 @@
-const Contact = require("../models/contact");
-const nodemailer = require("nodemailer");
+import Contact from "../models/contact.js";
+import nodemailer from "nodemailer";
 
 // Get all contact messages
 const getContact = async (req, res) => {
@@ -18,6 +18,7 @@ const AddContact = async (req, res) => {
   try {
     const newContact = new Contact({ name, email, message });
     await newContact.save();
+
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
@@ -32,13 +33,11 @@ const AddContact = async (req, res) => {
       subject: "New Contact Form Message",
       text: `Name: ${name}\nMessage: ${message} THANKYOU FOR CONTACTING ME! I WILL GET BACK TO YOU SOON!`,
     });
+
     res.status(201).json({ message: "Email sent successfully", contact: newContact });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
 };
 
-module.exports = {
-  getContact,
-  AddContact,
-};
+export { getContact, AddContact };

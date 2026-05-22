@@ -1,4 +1,4 @@
-const Project = require("../models/work");
+import Project from "../models/work.js";
 
 // GET all projects
 const getProjects = async (req, res) => {
@@ -26,7 +26,7 @@ const AddProject = async (req, res) => {
 const updateProject = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, description, technologies, link } = req.body; // technologies bhi include kiya
+    const { title, description, technologies, link } = req.body;
 
     const updatedProject = await Project.findByIdAndUpdate(
       id,
@@ -60,4 +60,4 @@ const deleteProject = async (req, res) => {
   }
 };
 
-module.exports = { getProjects, AddProject, updateProject, deleteProject };
+export { getProjects, AddProject, updateProject, deleteProject };

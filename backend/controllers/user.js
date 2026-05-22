@@ -1,7 +1,8 @@
-const bcrypt = require('bcrypt');
+import bcrypt from "bcrypt";
+import User from "../models/user.js";
+import jwt from "jsonwebtoken";
+
 const saltRounds = 10;
-const User = require("../models/user");
-const jwt = require("jsonwebtoken");
 const secret = process.env.JWT_SECRET || "dev_secret_change_me";
 
 const userData = async (req, res) => {
@@ -33,9 +34,7 @@ const addUser = async (req, res) => {
 
   try {
     const user = await User.create({ first_name, last_name, email, role });
-
     return res.status(201).json({
-      // 201 = Created
       _id: user._id,
       name: `${user.first_name} ${user.last_name}`,
       email: user.email,
@@ -57,31 +56,26 @@ const deleteUser = async (req, res) => {
 
 const registerUser = async (req, res) => {
   try {
-    const { first_name, last_name, email, password, role} =
-      req.body;
+    const { first_name, last_name, email, password, role } = req.body;
     if (!first_name || !last_name || !email || !password) {
       return res.status(400).json("All fields are required");
     }
     const existingUser = await User.find({ email });
     if (existingUser.length > 0) {
-      return res.status(400).json({message: "Email already exists"});
+      return res.status(400).json({ message: "Email already exists" });
     }
+
+    const salt = await bcrypt.genSalt(saltRounds);
+    const hash = await bcrypt.hash(password, salt);
+
     const user = await User.create({
       first_name,
       last_name,
       email,
-      password,
+      password: hash,
       role,
     });
-    bcrypt.genSalt(saltRounds, function(err, salt) {
-    bcrypt.hash(password, salt, function(err, hash) {
-      if (err) {   
-        return res.status(500).json({ error: "Error hashing password" });
-      } else {
-        user.password = hash;
-        user.save();
-      }});
-});
+
     return res.status(201).json({
       _id: user._id,
       name: `${user.first_name} ${user.last_name}`,
@@ -92,7 +86,7 @@ const registerUser = async (req, res) => {
     return res.status(400).json({ error: err.message });
   }
 };
-// Login User
+
 const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -100,15 +94,11 @@ const loginUser = async (req, res) => {
     if (!user) {
       return res.status(400).json({ message: "Invalid email or password" });
     }
-    const isMatch = await bcrypt.compare(password, user.password,) 
-    if(!isMatch) {
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
       return res.status(400).json({ message: "Invalid email or password" });
     }
-     const token = jwt.sign(
-      { userId: user._id },
-      secret,
-      { expiresIn: "1h" }
-    );
+    const token = jwt.sign({ userId: user._id }, secret, { expiresIn: "1h" });
     return res.status(200).json({
       _id: user._id,
       email: user.email,
@@ -118,13 +108,7 @@ const loginUser = async (req, res) => {
     });
   } catch (err) {
     return res.status(400).json({ error: err.message });
-  } 
+  }
 };
-module.exports = {
-    userData,
-  addUser,
-  deleteUser,
-  registerUser,
-  loginUser,
-  secret
-};
+
+export { userData, addUser, deleteUser, registerUser, loginUser, secret };

@@ -1,4 +1,4 @@
-const Education = require("../models/education");
+import Education from "../models/education.js";
 
 // GET - sab fetch karo
 const getEducation = async (req, res) => {
@@ -24,7 +24,6 @@ const AddEducation = async (req, res) => {
   }
 };
 
-
 // PUT - edit karo
 const updateEducation = async (req, res) => {
   try {
@@ -45,4 +44,4 @@ const deleteEducation = async (req, res) => {
   }
 };
 
-module.exports = { getEducation, AddEducation, updateEducation, deleteEducation };
+export { getEducation, AddEducation, updateEducation, deleteEducation };

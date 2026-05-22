@@ -1,5 +1,5 @@
-const jwt = require("jsonwebtoken");
-const { secret } = require("../controllers/user");
+import jwt from "jsonwebtoken";
+import { secret } from "../controllers/user.js";
 
 const authChecker = async (req, res, next) => {
   try {
@@ -19,6 +19,4 @@ const authChecker = async (req, res, next) => {
   }
 };
 
-module.exports = {
-  authChecker,
-};
+export { authChecker };

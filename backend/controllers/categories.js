@@ -1,5 +1,5 @@
-const Category = require("../models/categories");
-const Blog = require("../models/blog");
+import Category from "../models/categories.js";
+import Blog from "../models/blog.js";
 
 const normalizeCategoryName = (value = "") => value.trim().replace(/\s+/g, " ");
 
@@ -106,4 +106,4 @@ const deleteCategory = async (req, res) => {
   }
 };
 
-module.exports = { getCategories, AddCategory, updateCategory, deleteCategory };
+export default { getCategories, AddCategory, updateCategory, deleteCategory };
