@@ -1,7 +1,7 @@
 import { Eye, ArrowUpRight, Mail } from "lucide-react";
 import { useState, useEffect } from "react";
 
-const API = "http://localhost:8000/api/homepage";
+const API = import.meta.env.VITE_API_URL;
 
 // ── Image with fallback ──────────────────────────────────────────────────────
 function Avatar({ src, name, radius = 18 }) {
