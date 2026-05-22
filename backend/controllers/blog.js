@@ -1,7 +1,7 @@
-const Blog = require("../models/blog");
-const cloudinary = require("../cloudinary/cloudinary");
-const fs = require("fs");
-const Category = require("../models/categories");
+import Blog from "../models/blog.js";
+import cloudinary from "../cloudinary/cloudinary.js";
+import fs from "fs";
+import Category from "../models/categories.js";
 
 const normalizeCategoryName = (value = "") => value.trim().replace(/\s+/g, " ");
 
@@ -47,9 +47,7 @@ const AddBlog = async (req, res) => {
 
     if (req.file) {
       const result = await cloudinary.uploader.upload(req.file.path);
-
       imageUrl = result.secure_url;
-
       fs.unlinkSync(req.file.path);
     }
 
@@ -104,4 +102,4 @@ const deleteBlog = async (req, res) => {
   }
 };
 
-module.exports = { getBlogs, AddBlog, updateBlog, deleteBlog };
+export { getBlogs, AddBlog, updateBlog, deleteBlog };
