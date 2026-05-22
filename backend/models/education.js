@@ -1,5 +1,4 @@
-const mongoose = require("mongoose");
-
+import mongoose from "mongoose";
 const userSchema = new mongoose.Schema({
   degree: {
     type: String,
@@ -18,6 +17,6 @@ const userSchema = new mongoose.Schema({
     required: true
   }},{ timestamps: true });
 
-const Education = mongoose.model("education", userSchema);
+const Education = mongoose.model("Education", userSchema);
 
-module.exports = Education;
+export default Education;

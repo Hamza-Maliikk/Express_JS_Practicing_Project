@@ -1,5 +1,4 @@
-const mongoose = require("mongoose");   
-
+import mongoose from "mongoose";
 const keySchema = new mongoose.Schema({
     key: {
         type: String,
@@ -7,4 +6,4 @@ const keySchema = new mongoose.Schema({
     }
 });
 
-module.exports = mongoose.model("Key", keySchema);
+export default mongoose.model("Key", keySchema)

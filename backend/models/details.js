@@ -1,5 +1,4 @@
-const mongoose = require("mongoose");
-
+import mongoose from "mongoose";
 const detailSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -22,6 +21,6 @@ const detailSchema = new mongoose.Schema({
     required: true
   }},{ timestamps: true });
 
-const Details = mongoose.model("details", detailSchema);
+const Details = mongoose.model("Details", detailSchema);
 
-module.exports = Details;
+export default Details;

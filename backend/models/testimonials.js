@@ -1,5 +1,4 @@
-const mongoose = require('mongoose');
-
+import mongoose from "mongoose";
 const testimonialSchema = new mongoose.Schema({
     name: {
         type: String,
@@ -19,6 +18,6 @@ const testimonialSchema = new mongoose.Schema({
     },
 }, { timestamps: true });   
 
-const Testimonial = mongoose.model('testimonial', testimonialSchema);
+const Testimonial = mongoose.model('Testimonial', testimonialSchema);
 
-module.exports = Testimonial;
+export default Testimonial;

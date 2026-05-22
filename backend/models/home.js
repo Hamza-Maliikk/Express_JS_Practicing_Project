@@ -1,5 +1,4 @@
-const mongoose = require('mongoose');
-
+import mongoose from "mongoose";
 const homeSchema = new mongoose.Schema({
     role: {
         type: String,
@@ -19,6 +18,6 @@ const homeSchema = new mongoose.Schema({
     }
 }, { timestamps: true });   
 
-const Home = mongoose.model('home', homeSchema);
+const Home = mongoose.model('Home', homeSchema);
 
-module.exports = Home;
+export default Home;
