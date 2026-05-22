@@ -1,6 +1,7 @@
 {
   "name": "express_api",
   "version": "1.0.0",
+  "type": "module",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -10,9 +11,11 @@
   "engines": {
     "node": "18.x"
   },
-"pnpm": {
-    "onlyBuiltDependencies": ["bcrypt"]
-},
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "bcrypt"
+    ]
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
