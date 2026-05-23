@@ -14,6 +14,7 @@ const getContact = async (req, res) => {
 // Add a new contact message
 const AddContact = async (req, res) => {
   const { name, email, message } = req.body;
+  console.log("Received contact form data:", { name, email, message });
 
   try {
     const newContact = new Contact({ name, email, message });
@@ -29,7 +30,7 @@ const AddContact = async (req, res) => {
 
     await transporter.sendMail({
       from: process.env.EMAIL_USER,
-      to: "hamzamalik123450@getMaxListeners.com",
+      to: email,
       subject: "New Contact Form Message",
       text: `Name: ${name}\nMessage: ${message} THANKYOU FOR CONTACTING ME! I WILL GET BACK TO YOU SOON!`,
     });
