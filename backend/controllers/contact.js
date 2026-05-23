@@ -31,7 +31,7 @@ const AddContact = async (req, res) => {
       });
       await transporter.sendMail({
         from: process.env.EMAIL_USER,
-        to: "hamzamalik123450@gmail.com", // ✅ tumhara email
+        to: email,
         subject: "New Contact Form Submission",
         text: `Name: ${name}\nEmail: ${email}\nMessage: ${message}`,
       });
