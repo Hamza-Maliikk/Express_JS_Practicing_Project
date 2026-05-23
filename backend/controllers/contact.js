@@ -14,29 +14,35 @@ const getContact = async (req, res) => {
 // Add a new contact message
 const AddContact = async (req, res) => {
   const { name, email, message } = req.body;
-  console.log("Received contact form data:", { name, email, message });
 
   try {
+    // Step 1: Save to DB
     const newContact = new Contact({ name, email, message });
     await newContact.save();
 
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
+    // Step 2: Email alag try/catch mein
+    try {
+      const transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+          user: process.env.EMAIL_USER,
+          pass: process.env.EMAIL_PASS,
+        },
+      });
+      await transporter.sendMail({
+        from: process.env.EMAIL_USER,
+        to: "hamzamalik123450@gmail.com", // ✅ tumhara email
+        subject: "New Contact Form Submission",
+        text: `Name: ${name}\nEmail: ${email}\nMessage: ${message}`,
+      });
+    } catch (emailErr) {
+      console.error("Email failed:", emailErr.message); // fail ho toh bhi 400 nahi aayega
+    }
 
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: email,
-      subject: "New Contact Form Message",
-      text: `Name: ${name}\nMessage: ${message} THANKYOU FOR CONTACTING ME! I WILL GET BACK TO YOU SOON!`,
-    });
+    res.status(201).json({ message: "Message sent successfully", contact: newContact });
 
-    res.status(201).json({ message: "Email sent successfully", contact: newContact });
   } catch (error) {
+    console.error("CONTACT ERROR:", error.message);
     res.status(400).json({ message: error.message });
   }
 };
