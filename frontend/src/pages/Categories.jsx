@@ -17,7 +17,7 @@ const Categories = () => {
   const fetchCategories = async () => {
     setLoading(true);
     try {
-      const res = await axios.get("http://localhost:8000/api/categories");
+      const res = await axios.get(`${import.meta.env.VITE_URL_API}api/categories`);
       console.log("Categories fetched:", res.data);
       setCategories(res.data);
     } catch (err) {

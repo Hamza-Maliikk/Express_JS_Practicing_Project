@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 
-const API = "http://localhost:8000/api/save-key";   
+const API = `${import.meta.env.VITE_URL_API}api/save-key`;   
 
 const Adminsetting = () => {
   const [apiKey, setApiKey] = useState('')

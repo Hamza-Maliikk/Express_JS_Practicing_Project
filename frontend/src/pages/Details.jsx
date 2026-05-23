@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Mail, Phone, MapPin, Pencil, Trash2, Plus } from "lucide-react";
 
-const API = "http://localhost:8000/api/details";
+const API = `${import.meta.env.VITE_URL_API}api/details`;
 const emptyForm = { name: "", role: "", email: "", phone: "", location: "" };
 
 const InfoRow = ({ icon: Icon, label, value, purple }) => (

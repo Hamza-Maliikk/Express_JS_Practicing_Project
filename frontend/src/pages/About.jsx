@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { ArrowRight, Mail } from "lucide-react";
 
-const API_BASE = "http://localhost:8000/api/about";
+const API_BASE = `${import.meta.env.VITE_URL_API}api/about`;
 
 const getAbout = async () => {
   const response = await fetch(API_BASE);

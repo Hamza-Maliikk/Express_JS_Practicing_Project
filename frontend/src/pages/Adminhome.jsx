@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-const API = "http://localhost:8000/api/home";
+const API = `${import.meta.env.VITE_URL_API}api/home`;
 const emptyForm = { role: "", headline: "", description: "" };
 
 export default function Adminhome() {

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-const API = "http://localhost:8000";
+const API = `${import.meta.env.VITE_URL_API}api/projects`;
 
 export default function Work() {
   const [projects, setProjects]             = useState([]);

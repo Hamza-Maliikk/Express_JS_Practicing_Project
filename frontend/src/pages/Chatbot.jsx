@@ -2,8 +2,8 @@ import { Paperclip } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { io } from "socket.io-client";
 
-const socket = io("http://localhost:8000");
-const API = "http://localhost:8000/api/messages";
+const socket = io(`${import.meta.env.VITE_URL_API}`);
+const API = `${import.meta.env.VITE_URL_API}api/messages`;
 
 export default function ChatBot() {
   const [open, setOpen] = useState(false);

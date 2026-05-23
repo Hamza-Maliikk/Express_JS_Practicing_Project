@@ -1,8 +1,8 @@
 import React from 'react'
 import { io } from "socket.io-client";
 
-const API = "http://localhost:8000/api/messages";
-const socket = io("http://localhost:8000");
+const API = `${import.meta.env.VITE_URL_API}api/messages`;
+const socket = io(`${import.meta.env.VITE_URL_API}`);
 
 const Adminmessage = () => {
     const [messages, setMessages] = React.useState([]);

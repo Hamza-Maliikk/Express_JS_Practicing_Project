@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const API = "http://localhost:8000/api/testimonials";
+const API = `${import.meta.env.VITE_URL_API}api/testimonials`;
 
 const AdminTestimonials = () => {
   const [testimonials, setTestimonials] = useState([]);

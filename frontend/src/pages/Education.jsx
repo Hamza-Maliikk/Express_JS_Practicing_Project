@@ -13,7 +13,7 @@ const Education = () => {
 
 
   const fetchEducation = async () => {
-    const res = await axios.get("http://localhost:8000/api/education");
+    const res = await axios.get(`${import.meta.env.VITE_URL_API}api/education`);
     setEducations(res.data);
   };
   useEffect(() => {

@@ -4,7 +4,7 @@ import { useDispatch } from "react-redux";
 import { setToken } from "../redux/slices/loginSlice/check";
 import { useNavigate } from "react-router-dom";
 
-const API_BASE = "http://localhost:8000/api/login";
+const API_BASE = `${import.meta.env.VITE_URL_API}api/login`;
 
 export default function Login() {
   const [form, setForm] = useState({ email: "", password: "" });

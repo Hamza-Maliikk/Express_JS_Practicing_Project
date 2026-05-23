@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { Send, Mail, MapPin, Phone } from "lucide-react";
 
-const CONTACT_API = "http://localhost:8000/api/contact";
-const DETAILS_API = "http://localhost:8000/api/details";
+const CONTACT_API = `${import.meta.env.VITE_URL_API}api/contact`;
+const DETAILS_API = `${import.meta.env.VITE_URL_API}api/details`;
 
 export default function Contact() {
   const [form,    setForm]    = useState({ name: "", email: "", message: "" });

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
 export default function Projects() {
-  const API = "http://localhost:8000/api/projects";
+  const API = `${import.meta.env.VITE_URL_API}api/projects`;
   const [projects, setProjects] = useState([]);
   const [loaded, setLoaded] = useState(false);
 

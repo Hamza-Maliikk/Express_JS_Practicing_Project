@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-const API = "http://localhost:8000/api/blogs";
+const API = `${import.meta.env.VITE_URL_API}api/blogs`;
 
 const COLORS = [
   { accent: "#8b5cf6", glow: "rgba(139,92,246,0.3)" },

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 
-const API_BASE = "http://localhost:8000/dashboard";
+const API_BASE = `${import.meta.env.VITE_URL_API}api/dashboard`;
 
 function startOfToday() {
   const d = new Date();

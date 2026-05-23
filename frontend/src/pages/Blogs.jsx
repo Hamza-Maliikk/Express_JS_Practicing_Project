@@ -24,7 +24,7 @@ const Blog = () => {
 
   const fetchData = async () => {
     try {
-      const res = await axios.get("http://localhost:8000/api/blogs");
+      const res = await axios.get(`${import.meta.env.VITE_URL_API}api/blogs`);
       const payload = res.data;
 
       // Support both shapes:

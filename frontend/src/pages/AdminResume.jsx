@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-const API = "http://localhost:8000/api/resume";
+const API = `${import.meta.env.VITE_URL_API}api/resume`;
 
 export default function AdminResume() {
   const [resumes, setResumes] = useState([]);

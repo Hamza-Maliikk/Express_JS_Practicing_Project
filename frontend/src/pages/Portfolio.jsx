@@ -1,6 +1,6 @@
 import { useMemo, useState, useEffect } from "react";
 
-const API = "http://localhost:8000";
+const API = `${import.meta.env.VITE_URL_API}api`;
 
 const DEFAULT_ABOUT = "I am a full-stack web developer focused on building clean, reliable, and user-friendly applications.";
 
