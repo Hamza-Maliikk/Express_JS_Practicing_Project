@@ -28,8 +28,8 @@ const AddContact = async (req, res) => {
     });
 
     await transporter.sendMail({
-      from: "hamzamalik123450@gmail.com",
-      to: email,
+      from: process.env.EMAIL_USER,
+      to: "hamzamalik123450@getMaxListeners.com",
       subject: "New Contact Form Message",
       text: `Name: ${name}\nMessage: ${message} THANKYOU FOR CONTACTING ME! I WILL GET BACK TO YOU SOON!`,
     });
