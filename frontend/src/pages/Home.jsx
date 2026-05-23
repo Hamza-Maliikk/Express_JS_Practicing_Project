@@ -1,7 +1,9 @@
 import { Eye, ArrowUpRight, Mail } from "lucide-react";
 import { useState, useEffect } from "react";
 
-const API = `${import.meta.env.VITE_API_URL}/api/homepage`;
+const API = `https://expressjspracticingproject-production.up.railway.app/api/homepage`;
+console.log(API);
+
 
 // ── Image with fallback ──────────────────────────────────────────────────────
 function Avatar({ src, name, radius = 18 }) {
