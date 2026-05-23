@@ -29,7 +29,7 @@ const AddContact = async (req, res) => {
           pass: process.env.EMAIL_PASS,
         },
       });
-      await transporter.sendMail({
+      transporter.sendMail({
         from: process.env.EMAIL_USER,
         to: email,
         subject: "New Contact Form Submission",
