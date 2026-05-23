@@ -19,20 +19,20 @@ const AddContact = async (req, res) => {
     const newContact = new Contact({ name, email, message });
     await newContact.save();
 
-    // const transporter = nodemailer.createTransport({
-    //   service: "gmail",
-    //   auth: {
-    //     user: process.env.EMAIL_USER,
-    //     pass: process.env.EMAIL_PASS,
-    //   },
-    // });
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
 
-    // await transporter.sendMail({
-    //   from: "hamzamalik123450@gmail.com",
-    //   to: email,
-    //   subject: "New Contact Form Message",
-    //   text: `Name: ${name}\nMessage: ${message} THANKYOU FOR CONTACTING ME! I WILL GET BACK TO YOU SOON!`,
-    // });
+    await transporter.sendMail({
+      from: "hamzamalik123450@gmail.com",
+      to: email,
+      subject: "New Contact Form Message",
+      text: `Name: ${name}\nMessage: ${message} THANKYOU FOR CONTACTING ME! I WILL GET BACK TO YOU SOON!`,
+    });
 
     res.status(201).json({ message: "Email sent successfully", contact: newContact });
   } catch (error) {
